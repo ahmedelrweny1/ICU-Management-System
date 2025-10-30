@@ -16,6 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize menu toggle
     initializeMenuToggle();
+    
+    // Initialize notifications
+    initializeNotifications();
 });
 
 // ===================================
@@ -421,6 +424,153 @@ function animateNumber(element, start, end, duration) {
         }
         element.textContent = Math.round(current);
     }, 16);
+}
+
+// ===================================
+// Notifications System
+// ===================================
+function initializeNotifications() {
+    const notificationIcon = document.querySelector('.notification-icon');
+    if (!notificationIcon) return;
+    
+    // Update badge count
+    updateNotificationBadge();
+    
+    // Create notifications dropdown
+    const dropdown = createNotificationsDropdown();
+    notificationIcon.appendChild(dropdown);
+    
+    // Toggle dropdown on click
+    notificationIcon.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('show');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!notificationIcon.contains(e.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+}
+
+function updateNotificationBadge() {
+    const notifications = getNotifications();
+    const unreadCount = notifications.filter(n => n.unread).length;
+    const badge = document.querySelector('.notification-badge');
+    
+    if (badge) {
+        badge.textContent = unreadCount;
+        badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+    }
+}
+
+function createNotificationsDropdown() {
+    const dropdown = document.createElement('div');
+    dropdown.className = 'notifications-dropdown';
+    
+    // Get notifications (sample data for now)
+    const notifications = getNotifications();
+    
+    dropdown.innerHTML = `
+        <div class="notifications-header">
+            <h6>Notifications</h6>
+            <span class="mark-read" onclick="markAllAsRead()">Mark all as read</span>
+        </div>
+        <div class="notifications-body">
+            ${notifications.length > 0 ? 
+                notifications.map(notif => `
+                    <div class="notification-item-dropdown ${notif.unread ? 'unread' : ''}" onclick="handleNotificationClick('${notif.id}')">
+                        <div class="notification-icon-wrapper ${notif.type}">
+                            <i class="fas ${notif.icon}"></i>
+                        </div>
+                        <div class="notification-content">
+                            <p class="notification-title">${notif.title}</p>
+                            <p class="notification-text">${notif.text}</p>
+                            <p class="notification-time">${notif.time}</p>
+                        </div>
+                    </div>
+                `).join('') 
+                : 
+                `<div class="notifications-empty">
+                    <i class="fas fa-bell-slash"></i>
+                    <p>No notifications</p>
+                </div>`
+            }
+        </div>
+        ${notifications.length > 0 ? `
+            <div class="notifications-footer">
+                <a href="#" onclick="viewAllNotifications()">View all notifications</a>
+            </div>
+        ` : ''}
+    `;
+    
+    return dropdown;
+}
+
+function getNotifications() {
+    // Sample notifications - will be replaced with API call in ASP.NET MVC
+    return [
+        {
+            id: '1',
+            type: 'danger',
+            icon: 'fa-exclamation-circle',
+            title: 'Critical Patient Alert',
+            text: 'Patient John Doe (Room 101) vitals are critical',
+            time: '2 minutes ago',
+            unread: true
+        },
+        {
+            id: '2',
+            type: 'success',
+            icon: 'fa-check-circle',
+            title: 'Patient Discharged',
+            text: 'Jane Smith has been successfully discharged',
+            time: '1 hour ago',
+            unread: true
+        },
+        {
+            id: '3',
+            type: 'info',
+            icon: 'fa-user-md',
+            title: 'Shift Change',
+            text: 'Evening shift starts in 30 minutes',
+            time: '3 hours ago',
+            unread: false
+        },
+        {
+            id: '4',
+            type: 'warning',
+            icon: 'fa-bed',
+            title: 'Room Maintenance',
+            text: 'Room 105 requires cleaning',
+            time: '5 hours ago',
+            unread: false
+        }
+    ];
+}
+
+function handleNotificationClick(notificationId) {
+    console.log('Notification clicked:', notificationId);
+    // Mark as read and navigate to relevant page
+    // For ASP.NET MVC: await fetch(`/api/notifications/read/${notificationId}`)
+}
+
+function markAllAsRead() {
+    const unreadItems = document.querySelectorAll('.notification-item-dropdown.unread');
+    unreadItems.forEach(item => item.classList.remove('unread'));
+    
+    // Update badge
+    updateNotificationBadge();
+    
+    showToast('All notifications marked as read', 'success');
+    // For ASP.NET MVC: await fetch('/api/notifications/markallread', { method: 'POST' })
+}
+
+function viewAllNotifications() {
+    // Navigate to notifications page
+    // window.location.href = 'notifications.html';
+    showToast('Full notifications page coming soon', 'info');
 }
 
 // ===================================

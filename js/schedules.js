@@ -56,19 +56,22 @@ function displayWeeklySchedule(schedules, staff) {
         return `
             <tr>
                 <td><strong>${day}</strong><br><small>${formatDate(dateString)}</small></td>
-                <td>${renderShiftStaff(morningShift, staff)}</td>
-                <td>${renderShiftStaff(eveningShift, staff)}</td>
-                <td>${renderShiftStaff(nightShift, staff)}</td>
+                <td>${renderShiftStaff(morningShift, staff, dateString, 'Morning')}</td>
+                <td>${renderShiftStaff(eveningShift, staff, dateString, 'Evening')}</td>
+                <td>${renderShiftStaff(nightShift, staff, dateString, 'Night')}</td>
             </tr>
         `;
     }).join('');
 }
 
-function renderShiftStaff(shift, staff) {
+function renderShiftStaff(shift, staff, date, shiftType) {
     if (!shift || !shift.staff || shift.staff.length === 0) {
         return `
             <div class="shift-empty">
-                <span class="text-muted"><i class="fas fa-users-slash"></i> No staff assigned</span>
+                <span class="text-muted mb-2"><i class="fas fa-users-slash"></i> No staff assigned</span>
+                <button class="btn btn-sm btn-primary w-100" onclick="quickAddShift('${date}', '${shiftType}')">
+                    <i class="fas fa-plus"></i> Add Staff
+                </button>
             </div>
         `;
     }
@@ -269,9 +272,30 @@ function deleteShift(date, shiftType) {
     loadSchedules();
 }
 
+// Quick add shift (opens modal with pre-filled date and shift type)
+function quickAddShift(date, shiftType) {
+    // Reset form first
+    resetForm('addShiftForm');
+    
+    // Pre-fill the modal
+    document.getElementById('shiftDate').value = date;
+    document.getElementById('shiftType').value = shiftType;
+    
+    // Update modal title
+    const modalTitle = document.querySelector('#addShiftModal .modal-title');
+    if (modalTitle) {
+        modalTitle.textContent = 'Add Shift Assignment';
+    }
+    
+    // Open modal
+    const modal = new bootstrap.Modal(document.getElementById('addShiftModal'));
+    modal.show();
+}
+
 // Make functions globally accessible
 window.editShift = editShift;
 window.deleteShift = deleteShift;
+window.quickAddShift = quickAddShift;
 
 // Update saveShift to handle editing
 function saveShiftUpdated() {

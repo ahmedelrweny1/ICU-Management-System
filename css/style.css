@@ -1268,6 +1268,11 @@ body {
     text-align: center;
     background: var(--gray-50);
     border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 80px;
+    justify-content: center;
 }
 
 .shift-empty .text-muted {
@@ -1275,6 +1280,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 8px;
+    font-size: 13px;
 }
 
 .shift-assigned {

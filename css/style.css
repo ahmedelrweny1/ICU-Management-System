@@ -1236,12 +1236,19 @@ body {
 
 .staff-badge {
     display: inline-block;
-    padding: 4px 10px;
+    padding: 6px 12px;
     background: var(--primary);
     color: white;
     border-radius: 6px;
     font-size: 12px;
-    margin: 4px;
+    margin: 3px;
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.staff-badge:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 
 .staff-badge.doctor {
@@ -1250,6 +1257,41 @@ body {
 
 .staff-badge.nurse {
     background: var(--success);
+}
+
+.staff-badge.technician {
+    background: var(--warning);
+}
+
+.shift-empty {
+    padding: 12px;
+    text-align: center;
+    background: var(--gray-50);
+    border-radius: 8px;
+}
+
+.shift-empty .text-muted {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.shift-assigned {
+    padding: 12px;
+    background: var(--gray-50);
+    border-radius: 8px;
+}
+
+.shift-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--gray-200);
+}
+
+.shift-actions .btn {
+    flex: 1;
 }
 
 .week-nav {

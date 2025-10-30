@@ -1,6 +1,6 @@
 // ===================================
-// ICU Management System - Data Manager
-// Designed for easy ASP.NET MVC API integration
+// Shefaa - ICU Management System
+// Data Manager - Designed for easy ASP.NET MVC API integration
 // ===================================
 
 /* 

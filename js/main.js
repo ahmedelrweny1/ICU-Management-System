@@ -1,6 +1,6 @@
 // ===================================
-// ICU Management System - Main JavaScript
-// Global Functions and Utilities
+// Shefaa - ICU Management System
+// Main JavaScript - Global Functions and Utilities
 // ===================================
 
 // Check authentication on page load

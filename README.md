@@ -1,4 +1,4 @@
-# ICU Management System
+# Shefaa - ICU Management System
 
 A comprehensive Intensive Care Unit Management System built with pure front-end technologies (HTML, CSS, JavaScript) and designed for easy integration with **ASP.NET MVC**.
 
@@ -27,7 +27,7 @@ A comprehensive Intensive Care Unit Management System built with pure front-end 
 
 ## 🎯 Overview
 
-The ICU Management System is a modern, responsive web application designed to streamline the management of Intensive Care Unit operations. Built with clean, modular code that's ready for ASP.NET MVC integration.
+**Shefaa** (شفاء - meaning "healing" in Arabic) is a modern, responsive ICU Management System designed to streamline the management of Intensive Care Unit operations. Built with clean, modular code that's ready for ASP.NET MVC integration.
 
 ### Key Highlights
 

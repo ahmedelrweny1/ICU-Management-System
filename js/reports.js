@@ -90,13 +90,14 @@ function initializeReportCharts() {
                 datasets: [{
                     label: 'Number of Admissions',
                     data: [5, 8, 6, 9, 7, 10, 8],
-                    backgroundColor: '#4F46E5',
-                    borderRadius: 6
+                    backgroundColor: '#6366F1',
+                    borderRadius: 6,
+                    hoverBackgroundColor: '#818CF8'
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         display: false
@@ -107,6 +108,14 @@ function initializeReportCharts() {
                         beginAtZero: true,
                         ticks: {
                             stepSize: 2
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
                         }
                     }
                 }
@@ -138,16 +147,23 @@ function initializeReportCharts() {
                 labels: Object.keys(ageGroups),
                 datasets: [{
                     data: Object.values(ageGroups),
-                    backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#EF4444'],
-                    borderWidth: 0
+                    backgroundColor: ['#60A5FA', '#34D399', '#FBBF24', '#F87171'],
+                    borderWidth: 0,
+                    hoverOffset: 8
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
                     }
                 }
             }
@@ -164,15 +180,19 @@ function initializeReportCharts() {
                 datasets: [{
                     label: 'Occupancy Rate (%)',
                     data: [80, 75, 85, 70],
-                    borderColor: '#10B981',
-                    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                    borderColor: '#34D399',
+                    backgroundColor: 'rgba(52, 211, 153, 0.1)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#34D399'
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         display: false
@@ -181,7 +201,15 @@ function initializeReportCharts() {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100
+                        max: 100,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }
@@ -198,13 +226,14 @@ function initializeReportCharts() {
                 datasets: [{
                     label: 'Attendance Rate (%)',
                     data: [95, 92, 88, 90],
-                    backgroundColor: ['#3B82F6', '#10B981', '#F59E0B', '#6B7280'],
-                    borderRadius: 6
+                    backgroundColor: ['#60A5FA', '#34D399', '#FBBF24', '#9CA3AF'],
+                    borderRadius: 6,
+                    hoverBackgroundColor: ['#93C5FD', '#6EE7B7', '#FCD34D', '#D1D5DB']
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         display: false
@@ -213,7 +242,15 @@ function initializeReportCharts() {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100
+                        max: 100,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }

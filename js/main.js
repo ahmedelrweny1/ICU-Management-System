@@ -150,40 +150,124 @@ function showToast(message, type = 'success') {
         toastContainer.id = 'toastContainer';
         toastContainer.style.cssText = `
             position: fixed;
-            top: 20px;
+            top: 90px;
             right: 20px;
             z-index: 9999;
+            max-width: 400px;
         `;
         document.body.appendChild(toastContainer);
     }
     
     // Create toast element
     const toast = document.createElement('div');
+    const bgColor = type === 'success' ? '#34D399' : type === 'error' ? '#F87171' : type === 'warning' ? '#FBBF24' : '#60A5FA';
     toast.style.cssText = `
-        background: ${type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6'};
+        background: ${bgColor};
         color: white;
         padding: 16px 24px;
-        border-radius: 8px;
-        margin-bottom: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        animation: slideIn 0.3s ease;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        animation: slideIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         display: flex;
         align-items: center;
-        gap: 10px;
+        gap: 12px;
         min-width: 300px;
+        font-weight: 500;
+        cursor: pointer;
     `;
     
-    const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
-    toast.innerHTML = `<span style="font-size: 20px;">${icon}</span><span>${message}</span>`;
+    const icon = type === 'success' ? '<i class="fas fa-check-circle"></i>' : 
+                 type === 'error' ? '<i class="fas fa-times-circle"></i>' : 
+                 type === 'warning' ? '<i class="fas fa-exclamation-triangle"></i>' :
+                 '<i class="fas fa-info-circle"></i>';
+    toast.innerHTML = `<span style="font-size: 18px;">${icon}</span><span style="flex: 1;">${message}</span>`;
+    
+    // Close on click
+    toast.onclick = () => {
+        toast.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    };
     
     // Add to container
     toastContainer.appendChild(toast);
     
-    // Auto remove after 3 seconds
+    // Auto remove after 4 seconds
     setTimeout(() => {
         toast.style.animation = 'slideOut 0.3s ease';
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 4000);
+}
+
+// ===================================
+// Loading State Management
+// ===================================
+function showPageLoading() {
+    const loader = document.createElement('div');
+    loader.id = 'pageLoader';
+    loader.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        backdrop-filter: blur(4px);
+    `;
+    loader.innerHTML = `
+        <div style="text-align: center;">
+            <div class="spinner"></div>
+            <p style="margin-top: 20px; color: #6366F1; font-weight: 600;">Loading...</p>
+        </div>
+    `;
+    document.body.appendChild(loader);
+}
+
+function hidePageLoading() {
+    const loader = document.getElementById('pageLoader');
+    if (loader) {
+        loader.style.opacity = '0';
+        loader.style.transition = 'opacity 0.3s';
+        setTimeout(() => loader.remove(), 300);
+    }
+}
+
+// ===================================
+// Form Validation Helpers
+// ===================================
+function validateFormField(input, isValid) {
+    input.classList.remove('is-valid', 'is-invalid');
+    if (isValid === true) {
+        input.classList.add('is-valid');
+    } else if (isValid === false) {
+        input.classList.add('is-invalid');
+    }
+}
+
+function addRealTimeValidation(formId) {
+    const form = document.getElementById(formId);
+    if (!form) return;
+    
+    const inputs = form.querySelectorAll('input[required], select[required], textarea[required]');
+    inputs.forEach(input => {
+        input.addEventListener('blur', () => {
+            const isValid = input.checkValidity();
+            validateFormField(input, isValid);
+        });
+        
+        input.addEventListener('input', () => {
+            if (input.classList.contains('is-invalid')) {
+                const isValid = input.checkValidity();
+                if (isValid) {
+                    validateFormField(input, true);
+                }
+            }
+        });
+    });
 }
 
 // Add animation styles

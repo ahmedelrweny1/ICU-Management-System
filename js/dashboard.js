@@ -116,15 +116,19 @@ function initializeCharts() {
                 datasets: [{
                     label: 'Occupancy Rate (%)',
                     data: [85, 75, 90, 80, 95, 70, 85],
-                    borderColor: '#4F46E5',
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    borderColor: '#6366F1',
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
                     tension: 0.4,
-                    fill: true
+                    fill: true,
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#6366F1'
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
                         display: false
@@ -133,7 +137,15 @@ function initializeCharts() {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 100
+                        max: 100,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
                     }
                 }
             }
@@ -154,16 +166,23 @@ function initializeCharts() {
                 labels: ['Occupied', 'Available', 'Cleaning'],
                 datasets: [{
                     data: [occupied, available, cleaning],
-                    backgroundColor: ['#EF4444', '#10B981', '#F59E0B'],
-                    borderWidth: 0
+                    backgroundColor: ['#F87171', '#34D399', '#FBBF24'],
+                    borderWidth: 0,
+                    hoverOffset: 8
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 12
+                            }
+                        }
                     }
                 }
             }

@@ -4,7 +4,7 @@
 **Version:** 1.0  
 **Date:** October 7, 2024  
 **Prepared by:** Development Team  
-**Organization:** ICU Management Solutions
+**Organization:** Shefaa Healthcare Solutions
 
 ---
 
@@ -28,7 +28,7 @@
 This Software Requirements Specification (SRS) document provides a complete description of the ICU Department Management System. It describes the functional and non-functional requirements for the system designed to manage Intensive Care Unit operations in hospitals.
 
 ### 1.2 Scope
-The ICU Management System is a web-based application that provides:
+Shefaa ICU Management System is a web-based application that provides:
 - Real-time patient monitoring and management
 - Room and bed allocation tracking
 - Medical staff scheduling and attendance
@@ -66,7 +66,7 @@ This document is organized into sections describing:
 ## 2. Overall Description
 
 ### 2.1 Product Perspective
-The ICU Management System is a standalone web application that operates within hospital environments. It interfaces with:
+Shefaa is a standalone web application that operates within hospital environments. It interfaces with:
 - Web browsers (Chrome, Firefox, Safari, Edge)
 - LocalStorage for data persistence
 - Hospital network infrastructure
@@ -1307,7 +1307,7 @@ Global search and filtering capabilities across all modules.
 ### 9.2 File Structure
 
 ```
-ICU Management/
+Shefaa/
 │
 ├── index.html              # Login page
 ├── signup.html             # Registration page

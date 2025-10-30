@@ -131,7 +131,7 @@ A comprehensive Intensive Care Unit Management System built with pure front-end 
 1. **Clone or download** the project:
    ```bash
    git clone <repository-url>
-   cd "ICU Management"
+   cd "Shefaa"
    ```
 
 2. **Open with a web server**:
@@ -143,6 +143,7 @@ A comprehensive Intensive Care Unit Management System built with pure front-end 
 
    **Option B - Python Simple Server:**
    ```bash
+   cd "E:\Projects\Shefaa"
    python -m http.server 8000
    ```
    Then open: `http://localhost:8000`
@@ -162,7 +163,7 @@ A comprehensive Intensive Care Unit Management System built with pure front-end 
 ## 📁 File Structure
 
 ```
-ICU Management/
+Shefaa/
 │
 ├── index.html              # Login page
 ├── signup.html             # Registration page
@@ -450,13 +451,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 👥 Authors
 
 **Development Team**  
-ICU Management Solutions
+Shefaa Healthcare Solutions
 
 ---
 
 ## 📞 Support
 
-For support, email: support@icumanagement.com  
+For support, email: support@shefaa.com  
 Or create an issue in the repository.
 
 ---

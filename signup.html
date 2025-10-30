@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ICU Management System - Register</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card" style="max-width: 500px;">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h1 class="auth-title">Create Your Account</h1>
+                <p class="auth-subtitle">Already have an account? <a href="index.html">Log in</a></p>
+            </div>
+            
+            <form id="signupForm" class="auth-form">
+                <div class="form-group mb-3">
+                    <label for="fullName" class="form-label">Full Name</label>
+                    <input type="text" class="form-control" id="fullName" placeholder="Enter your full name" required>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="phone" class="form-label">Phone Number</label>
+                    <input type="tel" class="form-control" id="phone" placeholder="Enter your phone number" required>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label class="form-label">Role</label>
+                    <div class="role-selector">
+                        <input type="radio" class="btn-check" name="role" id="roleDoctor" value="doctor" autocomplete="off" checked>
+                        <label class="btn btn-outline-primary" for="roleDoctor">Doctor</label>
+                        
+                        <input type="radio" class="btn-check" name="role" id="rolePatient" value="patient" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="rolePatient">Patient</label>
+                        
+                        <input type="radio" class="btn-check" name="role" id="roleAdmin" value="admin" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="roleAdmin">Admin</label>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="signupPassword" class="form-label">Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" class="form-control" id="signupPassword" placeholder="Enter your password" required minlength="8">
+                        <button type="button" class="password-toggle" onclick="togglePassword('signupPassword', 'toggleIcon1')">
+                            <i class="fas fa-eye" id="toggleIcon1"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="form-group mb-3">
+                    <label for="confirmPassword" class="form-label">Confirm Password</label>
+                    <div class="password-input-wrapper">
+                        <input type="password" class="form-control" id="confirmPassword" placeholder="Confirm your password" required minlength="8">
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
+                            <i class="fas fa-eye" id="toggleIcon2"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-primary w-100 mb-3">Register</button>
+            </form>
+        </div>
+        
+        <div class="auth-copyright">
+            © 2023 ICU Management. All rights reserved.
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(inputId, iconId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = document.getElementById(iconId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        document.getElementById('signupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('fullName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const role = document.querySelector('input[name="role"]:checked').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validate password match
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            // Validate password strength
+            if (password.length < 8) {
+                alert('Password must be at least 8 characters long!');
+                return;
+            }
+            
+            // Get existing users
+            const users = JSON.parse(localStorage.getItem('users') || '[]');
+            
+            // Check if user already exists
+            if (users.find(u => u.email === email)) {
+                alert('Email already registered!');
+                return;
+            }
+            
+            // Create new user
+            const nameParts = fullName.split(' ');
+            const newUser = {
+                username: email.split('@')[0],
+                email: email,
+                password: password,
+                firstName: nameParts[0],
+                lastName: nameParts.slice(1).join(' ') || nameParts[0],
+                role: role,
+                phone: phone,
+                createdAt: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('users', JSON.stringify(users));
+            
+            alert('Registration successful! Please login.');
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>
+

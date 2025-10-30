@@ -47,6 +47,10 @@
         </nav>
         
         <div class="sidebar-footer">
+            <a href="profile.html" class="nav-item">
+                <i class="fas fa-user-circle"></i>
+                <span>My Profile</span>
+            </a>
             <a href="#" class="nav-item" onclick="logout()">
                 <i class="fas fa-sign-out-alt"></i>
                 <span>Logout</span>
@@ -58,9 +62,12 @@
     <div class="main-content">
         <!-- Top Navigation -->
         <nav class="top-navbar">
-            <button class="menu-toggle" id="menuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
+            <div class="navbar-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 class="page-title">Room Management</h1>
+            </div>
             
             <div class="top-navbar-right">
                 <div class="search-box">
@@ -68,13 +75,13 @@
                     <input type="text" placeholder="Search by Room/Patient..." id="roomSearch">
                 </div>
                 
-                <div class="notification-icon">
+                <div class="notification-icon" data-tooltip="Notifications">
                     <i class="fas fa-bell"></i>
                     <span class="notification-badge">3</span>
                 </div>
                 
-                <div class="user-profile">
-                    <img src="https://ui-avatars.com/api/?name=User&background=4F46E5&color=fff" alt="User">
+                <div class="user-profile" onclick="window.location.href='profile.html'">
+                    <img src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff" alt="User">
                     <span id="currentUserName">User</span>
                 </div>
             </div>

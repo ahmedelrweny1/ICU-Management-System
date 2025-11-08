@@ -17,7 +17,7 @@ namespace Shefaa.ICU.Web.Controllers
         // GET: Rooms
         public async Task<IActionResult> Index()
         {
-            var rooms = await _context.Rooms.Include(r => r.Patient).ToListAsync();
+            var rooms = await _context.Rooms.ToListAsync();
             return View(rooms);
         }
 

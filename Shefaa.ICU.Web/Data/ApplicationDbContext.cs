@@ -53,14 +53,16 @@ namespace Shefaa.ICU.Web.Data
 
         private void SeedData(ModelBuilder modelBuilder)
         {
-            // Seed Rooms
+            // Seed Rooms - start with all available
             modelBuilder.Entity<Room>().HasData(
-                new Room { Id = 101, Status = "Occupied", PatientId = "P12345" },
-                new Room { Id = 102, Status = "Occupied", PatientId = "P67890" },
-                new Room { Id = 103, Status = "Occupied", PatientId = "P11223" },
-                new Room { Id = 104, Status = "Occupied", PatientId = "P45678" },
+                new Room { Id = 101, Status = "Available", PatientId = null },
+                new Room { Id = 102, Status = "Available", PatientId = null },
+                new Room { Id = 103, Status = "Available", PatientId = null },
+                new Room { Id = 104, Status = "Available", PatientId = null },
                 new Room { Id = 105, Status = "Available", PatientId = null },
-                new Room { Id = 106, Status = "Available", PatientId = null }
+                new Room { Id = 106, Status = "Available", PatientId = null },
+                new Room { Id = 107, Status = "Available", PatientId = null },
+                new Room { Id = 108, Status = "Available", PatientId = null }
             );
         }
     }

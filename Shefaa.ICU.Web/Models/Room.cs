@@ -11,9 +11,6 @@ namespace Shefaa.ICU.Web.Models
         public string Status { get; set; } = "Available";
         
         public string? PatientId { get; set; }
-        
-        // Navigation property
-        public Patient? Patient { get; set; }
     }
 }
 

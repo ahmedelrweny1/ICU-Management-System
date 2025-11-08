@@ -55,6 +55,20 @@ namespace Shefaa.ICU.Web.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Rooms",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PatientId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rooms", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Schedules",
                 columns: table => new
                 {
@@ -135,42 +149,20 @@ namespace Shefaa.ICU.Web.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "Rooms",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Status = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PatientId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Rooms", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Rooms_Patients_PatientId",
-                        column: x => x.PatientId,
-                        principalTable: "Patients",
-                        principalColumn: "Id");
-                });
-
             migrationBuilder.InsertData(
                 table: "Rooms",
                 columns: new[] { "Id", "PatientId", "Status" },
                 values: new object[,]
                 {
-                    { 101, "P12345", "Occupied" },
-                    { 102, "P67890", "Occupied" },
-                    { 103, "P11223", "Occupied" },
-                    { 104, "P45678", "Occupied" },
+                    { 101, null, "Available" },
+                    { 102, null, "Available" },
+                    { 103, null, "Available" },
+                    { 104, null, "Available" },
                     { 105, null, "Available" },
-                    { 106, null, "Available" }
+                    { 106, null, "Available" },
+                    { 107, null, "Available" },
+                    { 108, null, "Available" }
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Rooms_PatientId",
-                table: "Rooms",
-                column: "PatientId");
         }
 
         /// <inheritdoc />

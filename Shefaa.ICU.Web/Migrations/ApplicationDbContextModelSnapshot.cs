@@ -103,7 +103,7 @@ namespace Shefaa.ICU.Web.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("PatientId")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -111,34 +111,28 @@ namespace Shefaa.ICU.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PatientId");
-
                     b.ToTable("Rooms");
 
                     b.HasData(
                         new
                         {
                             Id = 101,
-                            PatientId = "P12345",
-                            Status = "Occupied"
+                            Status = "Available"
                         },
                         new
                         {
                             Id = 102,
-                            PatientId = "P67890",
-                            Status = "Occupied"
+                            Status = "Available"
                         },
                         new
                         {
                             Id = 103,
-                            PatientId = "P11223",
-                            Status = "Occupied"
+                            Status = "Available"
                         },
                         new
                         {
                             Id = 104,
-                            PatientId = "P45678",
-                            Status = "Occupied"
+                            Status = "Available"
                         },
                         new
                         {
@@ -148,6 +142,16 @@ namespace Shefaa.ICU.Web.Migrations
                         new
                         {
                             Id = 106,
+                            Status = "Available"
+                        },
+                        new
+                        {
+                            Id = 107,
+                            Status = "Available"
+                        },
+                        new
+                        {
+                            Id = 108,
                             Status = "Available"
                         });
                 });
@@ -324,15 +328,6 @@ namespace Shefaa.ICU.Web.Migrations
                     b.Navigation("Notes");
 
                     b.Navigation("Vitals");
-                });
-
-            modelBuilder.Entity("Shefaa.ICU.Web.Models.Room", b =>
-                {
-                    b.HasOne("Shefaa.ICU.Web.Models.Patient", "Patient")
-                        .WithMany()
-                        .HasForeignKey("PatientId");
-
-                    b.Navigation("Patient");
                 });
 #pragma warning restore 612, 618
         }

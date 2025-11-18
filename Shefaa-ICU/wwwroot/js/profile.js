@@ -11,7 +11,8 @@ function loadProfileData() {
     const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
     
     if (!currentUser.userId) {
-        window.location.href = 'index.html';
+        const target = window.AppRoutes?.login || '/';
+        window.location.href = target;
         return;
     }
     

@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (!currentPatientId) {
         showToast('Patient not found', 'error');
-        setTimeout(() => window.location.href = 'patients.html', 2000);
+        setTimeout(() => redirectToPatients(), 2000);
         return;
     }
     
@@ -24,7 +24,7 @@ function loadPatientDetails() {
     
     if (!currentPatient) {
         showToast('Patient not found', 'error');
-        setTimeout(() => window.location.href = 'patients.html', 2000);
+        setTimeout(() => redirectToPatients(), 2000);
         return;
     }
     
@@ -214,6 +214,11 @@ function displayNotes() {
             <div class="note-text">${note.note}</div>
         </div>
     `).join('');
+}
+
+function redirectToPatients() {
+    const target = window.AppRoutes?.patients || '/Patients';
+    window.location.href = target;
 }
 
 function saveNote() {

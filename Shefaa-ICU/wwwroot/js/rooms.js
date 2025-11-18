@@ -212,7 +212,10 @@ function markRoomAvailable(roomId) {
 }
 
 function viewPatientDetail(patientId) {
-    window.location.href = `patient-detail.html?id=${patientId}`;
+    const target = window.AppRoutes?.patientDetails
+        ? window.AppRoutes.patientDetails(patientId)
+        : `/Patients/Details?id=${encodeURIComponent(patientId)}`;
+    window.location.href = target;
 }
 
 function addRoom() {

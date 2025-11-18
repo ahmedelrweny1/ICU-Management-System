@@ -3,31 +3,44 @@
 // Main JavaScript - Global Functions and Utilities
 // ===================================
 
+const AppRoutes = {
+    login: '/',
+    signup: '/Home/Signup',
+    dashboard: '/Dashboard',
+    patients: '/Patients',
+    patientDetails: (id) => `/Patients/Details?id=${encodeURIComponent(id || '')}`
+};
+
+window.AppRoutes = AppRoutes;
+
 // Check authentication on page load
 document.addEventListener('DOMContentLoaded', function() {
-    // Skip auth check for login and signup pages
-    const currentPage = window.location.pathname;
-    if (!currentPage.includes('index.html') && !currentPage.includes('signup.html')) {
+    const currentPath = (window.location.pathname || '/').toLowerCase();
+    if (!isAuthPage(currentPath)) {
         checkAuth();
     }
     
-    // Load current user name
     loadCurrentUser();
-    
-    // Initialize menu toggle
     initializeMenuToggle();
-    
-    // Initialize notifications
     initializeNotifications();
 });
 
 // ===================================
 // Authentication Functions
 // ===================================
+function isAuthPage(pathname) {
+    const normalized = pathname.replace(/\/+$/, '');
+    return normalized === '' ||
+        normalized === '/' ||
+        normalized === '/home' ||
+        normalized === '/home/index' ||
+        normalized === '/home/signup';
+}
+
 function checkAuth() {
     const currentUser = localStorage.getItem('currentUser');
     if (!currentUser) {
-        window.location.href = 'index.html';
+        window.location.href = AppRoutes.login;
     }
 }
 
@@ -50,7 +63,7 @@ function loadCurrentUser() {
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
         localStorage.removeItem('currentUser');
-        window.location.href = 'index.html';
+        window.location.href = AppRoutes.login;
     }
 }
 

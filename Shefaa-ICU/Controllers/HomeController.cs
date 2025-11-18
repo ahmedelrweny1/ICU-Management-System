@@ -1,9 +1,12 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Shefaa_ICU.Models;
+using Shefaa_ICU.ViewModels;
 
 namespace Shefaa_ICU.Controllers
 {
+    [AllowAnonymous]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -15,7 +18,12 @@ namespace Shefaa_ICU.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            return View(new LoginViewModel());
         }
 
         public IActionResult Privacy()
@@ -25,7 +33,12 @@ namespace Shefaa_ICU.Controllers
 
         public IActionResult Signup()
         {
-            return View();
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
+
+            return View(new RegisterViewModel());
         }
 
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]

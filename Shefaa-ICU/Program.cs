@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shefaa_ICU.Data;
+using Shefaa_ICU.Models;
 
 namespace Shefaa_ICU
 {
@@ -10,9 +13,20 @@ namespace Shefaa_ICU
             var builder = WebApplication.CreateBuilder(args);
 
             builder.Services.AddControllersWithViews();
+            builder.Services.AddScoped<IPasswordHasher<Staff>, PasswordHasher<Staff>>();
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/";
+                    options.LogoutPath = "/Account/Logout";
+                    options.AccessDeniedPath = "/";
+                });
+
+            builder.Services.AddAuthorization();
 
             var app = builder.Build();
 
@@ -27,6 +41,7 @@ namespace Shefaa_ICU
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapGet("/index.html", context =>

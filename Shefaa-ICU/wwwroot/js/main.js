@@ -38,14 +38,14 @@ function isAuthPage(pathname) {
 }
 
 function checkAuth() {
-    const currentUser = localStorage.getItem('currentUser');
-    if (!currentUser) {
+    const isAuthenticated = document.body.getAttribute('data-authenticated') === 'true';
+    if (!isAuthenticated) {
         window.location.href = AppRoutes.login;
     }
 }
 
 function loadCurrentUser() {
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    const currentUser = window.__currentUser || JSON.parse(localStorage.getItem('currentUser') || '{}');
     const userNameElements = document.querySelectorAll('#currentUserName');
     userNameElements.forEach(el => {
         if (currentUser.name) {
@@ -62,8 +62,12 @@ function loadCurrentUser() {
 
 function logout() {
     if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem('currentUser');
-        window.location.href = AppRoutes.login;
+        const logoutForm = document.getElementById('logoutForm');
+        if (logoutForm) {
+            logoutForm.submit();
+        } else {
+            window.location.href = AppRoutes.login;
+        }
     }
 }
 

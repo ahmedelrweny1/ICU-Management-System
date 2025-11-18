@@ -1,6 +1,15 @@
+@using System.Security.Claims
+@using System.Text.Json
 @{
     var pageTitle = ViewData["Title"] as string ?? "Shefaa (ICU Management System)";
     var bodyClass = ViewData["BodyClass"] as string ?? string.Empty;
+    var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+    var currentUserPayload = isAuthenticated ? new
+    {
+        name = User?.FindFirst(ClaimTypes.Name)?.Value ?? "User",
+        email = User?.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty,
+        role = User?.FindFirst(ClaimTypes.Role)?.Value ?? "Staff"
+    } : null;
 }
 
 <!DOCTYPE html>
@@ -14,7 +23,7 @@
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     @RenderSection("Styles", required: false)
 </head>
-<body class="@bodyClass">
+<body class="@bodyClass" data-authenticated="@(isAuthenticated.ToString().ToLower())">
     <div class="app-wrapper">
         <div class="sidebar" id="sidebar">
             @await Html.PartialAsync("_Sidebar")
@@ -29,6 +38,10 @@
         </div>
     </div>
 
+    <form id="logoutForm" asp-controller="Account" asp-action="Logout" method="post" class="d-none">
+        @Html.AntiForgeryToken()
+    </form>
+
     @RenderSection("Modals", required: false)
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
@@ -36,6 +49,19 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="~/js/data-manager.js" asp-append-version="true"></script>
     <script src="~/js/main.js" asp-append-version="true"></script>
+    @if (isAuthenticated && currentUserPayload is not null)
+    {
+        <script>
+            window.__currentUser = @Html.Raw(JsonSerializer.Serialize(currentUserPayload));
+            localStorage.setItem('currentUser', JSON.stringify(window.__currentUser));
+        </script>
+    }
+    else
+    {
+        <script>
+            localStorage.removeItem('currentUser');
+        </script>
+    }
     @RenderSection("Scripts", required: false)
 </body>
 </html>

@@ -52,11 +52,39 @@
     </div>
 </div>
 
-<div class="filter-tabs mb-4 delay-2" data-animate>
-    <button class="filter-btn active" onclick="filterStaff('all')">All Staff</button>
-    <button class="filter-btn" onclick="filterStaff('Doctor')">Doctors</button>
-    <button class="filter-btn" onclick="filterStaff('Nurse')">Nurses</button>
-    <button class="filter-btn" onclick="filterStaff('Technician')">Technicians</button>
+<div class="row g-3 filter-card-grid delay-2" data-animate>
+    <div class="col-xl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn active" onclick="filterStaff('all')">
+            <div class="filter-card-body">
+                <span>All Staff</span>
+                <small>Entire roster</small>
+            </div>
+        </button>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn variant-primary" onclick="filterStaff('Doctor')">
+            <div class="filter-card-body">
+                <span>Doctors</span>
+                <small>Consultants</small>
+            </div>
+        </button>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn variant-success" onclick="filterStaff('Nurse')">
+            <div class="filter-card-body">
+                <span>Nurses</span>
+                <small>Bedside care</small>
+            </div>
+        </button>
+    </div>
+    <div class="col-xl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn variant-info" onclick="filterStaff('Technician')">
+            <div class="filter-card-body">
+                <span>Technicians</span>
+                <small>Support</small>
+            </div>
+        </button>
+    </div>
 </div>
 
 <div class="card delay-3" data-animate>

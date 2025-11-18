@@ -23,64 +23,76 @@
 </div>
 
 @* Data: Totals need aggregated counts from Rooms, Patients, Staff, and Alerts *@
-<div class="stats-grid" data-animate>
-    <div class="stat-card bg-primary">
-        <div class="stat-icon">
-            <i class="fas fa-bed"></i>
-        </div>
-        <div class="stat-details">
-            <h3 id="totalRooms">0</h3>
-            <p>Total Rooms</p>
-        </div>
-    </div>
-
-    <div class="stat-card bg-success">
-        <div class="stat-icon">
-            <i class="fas fa-user-injured"></i>
-        </div>
-        <div class="stat-details">
-            <h3 id="totalPatients">0</h3>
-            <p>Current Patients</p>
+<div class="row g-3 stats-grid" data-animate>
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <div class="stat-card bg-primary h-100">
+            <div class="stat-icon">
+                <i class="fas fa-bed"></i>
+            </div>
+            <div class="stat-details">
+                <h3 id="totalRooms">0</h3>
+                <p>Total Rooms</p>
+            </div>
         </div>
     </div>
 
-    <div class="stat-card bg-info">
-        <div class="stat-icon">
-            <i class="fas fa-user-md"></i>
-        </div>
-        <div class="stat-details">
-            <h3 id="totalStaff">0</h3>
-            <p>Medical Staff</p>
-        </div>
-    </div>
-
-    <div class="stat-card bg-danger">
-        <div class="stat-icon">
-            <i class="fas fa-exclamation-triangle"></i>
-        </div>
-        <div class="stat-details">
-            <h3 id="criticalCases">0</h3>
-            <p>Critical Cases</p>
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <div class="stat-card bg-success h-100">
+            <div class="stat-icon">
+                <i class="fas fa-user-injured"></i>
+            </div>
+            <div class="stat-details">
+                <h3 id="totalPatients">0</h3>
+                <p>Current Patients</p>
+            </div>
         </div>
     </div>
 
-    <div class="stat-card bg-warning">
-        <div class="stat-icon">
-            <i class="fas fa-door-open"></i>
-        </div>
-        <div class="stat-details">
-            <h3 id="availableRooms">0</h3>
-            <p>Available Rooms</p>
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <div class="stat-card bg-info h-100">
+            <div class="stat-icon">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <div class="stat-details">
+                <h3 id="totalStaff">0</h3>
+                <p>Medical Staff</p>
+            </div>
         </div>
     </div>
 
-    <div class="stat-card bg-success">
-        <div class="stat-icon">
-            <i class="fas fa-user-check"></i>
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <div class="stat-card bg-danger h-100">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-details">
+                <h3 id="criticalCases">0</h3>
+                <p>Critical Cases</p>
+            </div>
         </div>
-        <div class="stat-details">
-            <h3 id="staffOnDuty">0</h3>
-            <p>Staff On Duty</p>
+    </div>
+
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <div class="stat-card bg-warning h-100">
+            <div class="stat-icon">
+                <i class="fas fa-door-open"></i>
+            </div>
+            <div class="stat-details">
+                <h3 id="availableRooms">0</h3>
+                <p>Available Rooms</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xxl-2 col-lg-4 col-sm-6">
+        <div class="stat-card bg-success h-100">
+            <div class="stat-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-details">
+                <h3 id="staffOnDuty">0</h3>
+                <p>Staff On Duty</p>
+            </div>
         </div>
     </div>
 </div>

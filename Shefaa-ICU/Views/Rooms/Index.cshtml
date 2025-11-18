@@ -25,20 +25,43 @@
     @* Data: addRoom should open modal with Room form *@
 </div>
 
-<div class="filter-tabs mb-4 delay-1" data-animate>
-    @* Data: counts need aggregation by status *@
-    <button class="filter-btn active" onclick="filterRooms('all')">
-        All Rooms <span class="badge" id="allRoomsCount">0</span>
-    </button>
-    <button class="filter-btn" onclick="filterRooms('Available')">
-        Available <span class="badge bg-success" id="availableCount">0</span>
-    </button>
-    <button class="filter-btn" onclick="filterRooms('Occupied')">
-        Occupied <span class="badge bg-danger" id="occupiedCount">0</span>
-    </button>
-    <button class="filter-btn" onclick="filterRooms('Cleaning')">
-        Cleaning <span class="badge bg-warning" id="cleaningCount">0</span>
-    </button>
+<div class="row g-3 filter-card-grid delay-1" data-animate>
+    <div class="col-xxl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn active" onclick="filterRooms('all')">
+            <div class="filter-card-body">
+                <span>All Rooms</span>
+                <small>Full inventory</small>
+            </div>
+            <span class="filter-card-count" id="allRoomsCount">0</span>
+        </button>
+    </div>
+    <div class="col-xxl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn variant-success" onclick="filterRooms('Available')">
+            <div class="filter-card-body">
+                <span>Available</span>
+                <small>Ready for admission</small>
+            </div>
+            <span class="filter-card-count" id="availableCount">0</span>
+        </button>
+    </div>
+    <div class="col-xxl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn variant-danger" onclick="filterRooms('Occupied')">
+            <div class="filter-card-body">
+                <span>Occupied</span>
+                <small>In use</small>
+            </div>
+            <span class="filter-card-count" id="occupiedCount">0</span>
+        </button>
+    </div>
+    <div class="col-xxl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn variant-warning" onclick="filterRooms('Cleaning')">
+            <div class="filter-card-body">
+                <span>Cleaning</span>
+                <small>Turnover in progress</small>
+            </div>
+            <span class="filter-card-count" id="cleaningCount">0</span>
+        </button>
+    </div>
 </div>
 
 <div class="rooms-grid delay-2" id="roomsGrid" data-animate>

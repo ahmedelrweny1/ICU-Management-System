@@ -254,6 +254,20 @@ body {
     border-left: 4px solid var(--secondary);
 }
 
+.btn-unstyled {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
+.sidebar-footer .btn-unstyled {
+    width: 100%;
+    text-align: left;
+}
+
 .sidebar-footer {
     padding: 20px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
@@ -666,9 +680,8 @@ body {
    7. Statistics Cards
    =================================== */
 .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+    --bs-gutter-x: 20px;
+    --bs-gutter-y: 20px;
     margin-bottom: 30px;
 }
 
@@ -812,48 +825,89 @@ body {
 }
 
 /* ===================================
-   9. Filter Tabs
+   9. Filter Cards
    =================================== */
-.filter-tabs {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
+.filter-card-grid {
+    --bs-gutter-x: 20px;
+    --bs-gutter-y: 20px;
+    margin-bottom: 30px;
 }
 
-.filter-btn {
-    padding: 10px 20px;
+.filter-card {
+    width: 100%;
+    border: 1px solid var(--gray-200);
+    border-radius: 16px;
+    padding: 18px 20px;
     background: white;
-    border: 2px solid #E5E7EB;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.3s;
+    box-shadow: var(--card-shadow);
     display: flex;
-    align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
-.filter-btn:hover {
-    border-color: var(--primary);
-    color: var(--primary);
+.filter-card:focus {
+    outline: none;
 }
 
-.filter-btn.active {
-    background: var(--primary);
-    border-color: var(--primary);
-    color: white;
+.filter-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(15, 23, 42, 0.12);
 }
 
-.filter-btn .badge {
-    padding: 2px 8px;
-    border-radius: 12px;
-    font-size: 12px;
+.filter-card-body span {
+    display: block;
+    font-size: 15px;
     font-weight: 600;
+    color: var(--dark);
 }
 
-.filter-btn.active .badge {
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+.filter-card-body small {
+    color: var(--gray-600);
+    font-size: 12px;
+}
+
+.filter-card-count {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.filter-card.variant-danger {
+    background: linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%);
+    border-color: transparent;
+    color: #7F1D1D;
+}
+
+.filter-card.variant-success {
+    background: linear-gradient(135deg, #DCFCE7 0%, #BBF7D0 100%);
+    border-color: transparent;
+    color: #065F46;
+}
+
+.filter-card.variant-warning {
+    background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 100%);
+    border-color: transparent;
+    color: #92400E;
+}
+
+.filter-card.variant-info {
+    background: linear-gradient(135deg, #DBEAFE 0%, #BFDBFE 100%);
+    border-color: transparent;
+    color: #1E3A8A;
+}
+
+.filter-card.variant-primary {
+    background: linear-gradient(135deg, #E0E7FF 0%, #C7D2FE 100%);
+    border-color: transparent;
+    color: #312E81;
+}
+
+.filter-card.filter-btn.active {
+    border-color: var(--primary);
+    box-shadow: 0 15px 30px rgba(99, 102, 241, 0.25);
 }
 
 /* ===================================
@@ -1695,10 +1749,6 @@ canvas {
         display: block;
     }
     
-    .stats-grid {
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    }
-    
     .search-box input {
         width: 150px;
     }
@@ -1716,10 +1766,6 @@ canvas {
     }
     
     .rooms-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .stats-grid {
         grid-template-columns: 1fr;
     }
     

@@ -25,20 +25,43 @@
     @* Data: buttons should trigger export and modal actions *@
 </div>
 
-<div class="filter-tabs mb-4 delay-1" data-animate>
-    @* Data: counts per status from Patients dataset *@
-    <button class="filter-btn active" onclick="filterPatients('all')">
-        All Patients <span class="badge" id="allCount">0</span>
-    </button>
-    <button class="filter-btn" onclick="filterPatients('Critical')">
-        Critical <span class="badge bg-danger" id="criticalCount">0</span>
-    </button>
-    <button class="filter-btn" onclick="filterPatients('Stable')">
-        Stable <span class="badge bg-success" id="stableCount">0</span>
-    </button>
-    <button class="filter-btn" onclick="filterPatients('Moderate')">
-        Moderate <span class="badge bg-warning" id="moderateCount">0</span>
-    </button>
+<div class="row g-3 filter-card-grid delay-1" data-animate>
+    <div class="col-xxl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn active" onclick="filterPatients('all')">
+            <div class="filter-card-body">
+                <span>All Patients</span>
+                <small>Overview</small>
+            </div>
+            <span class="filter-card-count" id="allCount">0</span>
+        </button>
+    </div>
+    <div class="col-xxl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn variant-danger" onclick="filterPatients('Critical')">
+            <div class="filter-card-body">
+                <span>Critical</span>
+                <small>Needs attention</small>
+            </div>
+            <span class="filter-card-count" id="criticalCount">0</span>
+        </button>
+    </div>
+    <div class="col-xxl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn variant-success" onclick="filterPatients('Stable')">
+            <div class="filter-card-body">
+                <span>Stable</span>
+                <small>Tracking well</small>
+            </div>
+            <span class="filter-card-count" id="stableCount">0</span>
+        </button>
+    </div>
+    <div class="col-xxl-2 col-md-3 col-sm-6">
+        <button type="button" class="filter-card filter-btn variant-warning" onclick="filterPatients('Moderate')">
+            <div class="filter-card-body">
+                <span>Moderate</span>
+                <small>Under observation</small>
+            </div>
+            <span class="filter-card-count" id="moderateCount">0</span>
+        </button>
+    </div>
 </div>
 
 <div class="card delay-2" data-animate>

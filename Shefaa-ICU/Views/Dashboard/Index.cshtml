@@ -4,13 +4,26 @@
     ViewData["ActivePage"] = "Dashboard";
 }
 
-<div class="page-header">
-    <h2>Dashboard Overview</h2>
-    <p class="text-muted">Snapshot of Shefaa ICU performance.</p>
+<div class="page-header" data-animate>
+    <div>
+        <p class="page-eyebrow">Operations Center</p>
+        <h2>Dashboard Overview</h2>
+        <p class="page-subtitle">Real-time pulse of rooms, patients, and staff readiness across Shefaa ICU.</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-soft btn-icon" asp-controller="Reports" asp-action="Index">
+            <i class="fas fa-chart-bar"></i>
+            View Reports
+        </a>
+        <a class="btn btn-primary btn-icon" asp-controller="Patients" asp-action="Index">
+            <i class="fas fa-user-plus"></i>
+            Add Patient
+        </a>
+    </div>
 </div>
 
 @* Data: Totals need aggregated counts from Rooms, Patients, Staff, and Alerts *@
-<div class="stats-grid">
+<div class="stats-grid" data-animate>
     <div class="stat-card bg-primary">
         <div class="stat-icon">
             <i class="fas fa-bed"></i>
@@ -72,7 +85,7 @@
     </div>
 </div>
 
-<div class="row mt-4">
+<div class="row mt-4 delay-1" data-animate>
     <div class="col-lg-8">
         <div class="card">
             <div class="card-header">
@@ -98,7 +111,7 @@
     </div>
 </div>
 
-<div class="row mt-4">
+<div class="row mt-4 delay-2" data-animate>
     <div class="col-lg-6">
         <div class="card">
             <div class="card-header">
@@ -126,7 +139,7 @@
     </div>
 </div>
 
-<div class="row mt-4">
+<div class="row mt-4 delay-3" data-animate>
     <div class="col-12">
         <div class="card">
             <div class="card-header">

@@ -6,18 +6,26 @@
     ViewData["SearchPlaceholder"] = "Search patients...";
 }
 
-<div class="page-header">
+<div class="page-header" data-animate>
     <div>
+        <p class="page-eyebrow">Patients</p>
         <h2>Patient Management</h2>
-        <p class="text-muted">Track admissions, assignments, and clinical progress.</p>
+        <p class="page-subtitle">Track admissions, assignments, and clinical progress while keeping critical information one click away.</p>
     </div>
-    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addPatientModal" onclick="openAddPatientModal()">
-        <i class="fas fa-plus"></i> Add New Patient
-    </button>
-    @* Data: button should open modal preloaded with rooms and default values *@
+    <div class="page-actions">
+        <button class="btn btn-soft btn-icon" type="button" onclick="exportCSV()">
+            <i class="fas fa-file-export"></i>
+            Export CSV
+        </button>
+        <button class="btn btn-primary btn-icon" type="button" data-bs-toggle="modal" data-bs-target="#addPatientModal" onclick="openAddPatientModal()">
+            <i class="fas fa-plus"></i>
+            Add New Patient
+        </button>
+    </div>
+    @* Data: buttons should trigger export and modal actions *@
 </div>
 
-<div class="filter-tabs mb-4">
+<div class="filter-tabs mb-4 delay-1" data-animate>
     @* Data: counts per status from Patients dataset *@
     <button class="filter-btn active" onclick="filterPatients('all')">
         All Patients <span class="badge" id="allCount">0</span>
@@ -33,7 +41,7 @@
     </button>
 </div>
 
-<div class="card">
+<div class="card delay-2" data-animate>
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover align-middle">

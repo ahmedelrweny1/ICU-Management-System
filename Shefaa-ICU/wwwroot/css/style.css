@@ -569,14 +569,97 @@ body {
 .page-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
 }
 
 .page-header h2 {
-    font-size: 28px;
+    font-size: 30px;
     font-weight: 700;
     color: var(--dark);
+    margin-bottom: 6px;
+}
+
+.page-header .page-eyebrow {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--gray-600);
+    font-weight: 600;
+}
+
+.page-header .page-subtitle {
+    margin: 0;
+    color: var(--gray-600);
+    max-width: 640px;
+}
+
+.page-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn-soft {
+    background: rgba(99, 102, 241, 0.08);
+    color: var(--primary-dark);
+    border: 1px solid rgba(99, 102, 241, 0.15);
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.btn-soft:hover {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 10px 20px rgba(99, 102, 241, 0.15);
+}
+
+.btn-icon {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-icon i {
+    font-size: 14px;
+}
+
+[data-animate] {
+[data-animate] {
+    opacity: 0;
+    animation: fadeSlide 0.55s ease forwards;
+    animation-delay: var(--animation-delay, 0.05s);
+}
+
+[data-animate].delay-1 { --animation-delay: 0.1s; }
+[data-animate].delay-2 { --animation-delay: 0.18s; }
+[data-animate].delay-3 { --animation-delay: 0.26s; }
+
+@keyframes fadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-animate] {
+        animation: none;
+        opacity: 1;
+    }
+    .card,
+    .stat-card {
+        transition: none;
+    }
 }
 
 /* ===================================
@@ -591,19 +674,34 @@ body {
 
 .stat-card {
     background: white;
-    border-radius: 12px;
+    border-radius: 14px;
     padding: 24px;
     display: flex;
     align-items: center;
     gap: 16px;
     box-shadow: var(--card-shadow);
-    transition: transform 0.3s, box-shadow 0.3s;
+    transition: transform 0.35s ease, box-shadow 0.35s ease;
     border: 1px solid var(--gray-200);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    background: linear-gradient(120deg, rgba(255,255,255,0.45), transparent 60%);
+    transition: opacity 0.3s;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12);
+}
+
+.stat-card:hover::after {
+    opacity: 1;
 }
 
 .stat-icon {
@@ -679,9 +777,17 @@ body {
    =================================== */
 .card {
     background: white;
-    border-radius: 12px;
+    border-radius: 14px;
     box-shadow: var(--card-shadow);
     border: 1px solid var(--gray-200);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 20px 35px rgba(15, 23, 42, 0.08);
 }
 
 .card-header {

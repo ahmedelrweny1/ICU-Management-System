@@ -5,7 +5,25 @@
     ViewData["HideSearch"] = true;
 }
 
-<div class="card profile-header-card mb-4">
+<div class="page-header" data-animate>
+    <div>
+        <p class="page-eyebrow">Account</p>
+        <h2>My Profile</h2>
+        <p class="page-subtitle">Review your contact details, manage security, and fine-tune notifications.</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-soft btn-icon" href="#security" data-bs-toggle="tab">
+            <i class="fas fa-shield-alt"></i>
+            Security
+        </a>
+        <button class="btn btn-primary btn-icon" type="button" onclick="changeAvatar()">
+            <i class="fas fa-camera"></i>
+            Update Avatar
+        </button>
+    </div>
+</div>
+
+<div class="card profile-header-card mb-4 delay-1" data-animate>
     <div class="profile-cover"></div>
     <div class="profile-header-content">
         <div class="profile-avatar-section">
@@ -36,7 +54,7 @@
     </div>
 </div>
 
-<ul class="nav nav-tabs mb-4" id="profileTabs">
+<ul class="nav nav-tabs mb-4 delay-2" id="profileTabs" data-animate>
     <li class="nav-item">
         <a class="nav-link active" data-bs-toggle="tab" href="#personalInfo">
             <i class="fas fa-user"></i> Personal Information
@@ -59,7 +77,7 @@
     </li>
 </ul>
 
-<div class="tab-content">
+<div class="tab-content delay-3" data-animate>
     <div class="tab-pane fade show active" id="personalInfo">
         <div class="card">
             <div class="card-header">

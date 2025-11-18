@@ -6,17 +6,25 @@
     ViewData["SearchPlaceholder"] = "Search by name or ID...";
 }
 
-<div class="page-header">
+<div class="page-header" data-animate>
     <div>
+        <p class="page-eyebrow">Team</p>
         <h2>Staff Management</h2>
-        <p class="text-muted">Manage clinicians, roles, and attendance.</p>
+        <p class="page-subtitle">Manage clinicians, roles, and attendance while keeping duty coverage balanced.</p>
     </div>
-    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addStaffModal">
-        <i class="fas fa-plus"></i> Add New Staff
-    </button>
+    <div class="page-actions">
+        <a class="btn btn-soft btn-icon" asp-controller="Schedules" asp-action="Index">
+            <i class="fas fa-calendar-check"></i>
+            View Rotas
+        </a>
+        <button class="btn btn-primary btn-icon" type="button" data-bs-toggle="modal" data-bs-target="#addStaffModal">
+            <i class="fas fa-plus"></i>
+            Add New Staff
+        </button>
+    </div>
 </div>
 
-<div class="row mb-4 g-3">
+<div class="row mb-4 g-3 delay-1" data-animate>
     @* Data: aggregated counts by role/status from Staff table *@
     <div class="col-md-3">
         <div class="stat-card bg-primary">
@@ -44,14 +52,14 @@
     </div>
 </div>
 
-<div class="filter-tabs mb-4">
+<div class="filter-tabs mb-4 delay-2" data-animate>
     <button class="filter-btn active" onclick="filterStaff('all')">All Staff</button>
     <button class="filter-btn" onclick="filterStaff('Doctor')">Doctors</button>
     <button class="filter-btn" onclick="filterStaff('Nurse')">Nurses</button>
     <button class="filter-btn" onclick="filterStaff('Technician')">Technicians</button>
 </div>
 
-<div class="card">
+<div class="card delay-3" data-animate>
     <div class="card-body">
         <div class="table-responsive">
             <table class="table table-hover">

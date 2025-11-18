@@ -6,13 +6,28 @@
     ViewData["TopbarExtras"] = "<button class=\"btn btn-sm btn-outline-primary me-3\" onclick=\"window.print()\" data-tooltip=\"Print Patient Record\"><i class=\"fas fa-print\"></i></button>";
 }
 
-<div class="page-header">
-    <a class="btn btn-outline-secondary btn-sm" asp-controller="Patients" asp-action="Index">
-        <i class="fas fa-arrow-left"></i> Back to Patients
-    </a>
+<div class="page-header" data-animate>
+    <div>
+        <a class="btn btn-outline-secondary btn-sm mb-2" asp-controller="Patients" asp-action="Index">
+            <i class="fas fa-arrow-left"></i> Back to Patients
+        </a>
+        <p class="page-eyebrow">Patient Overview</p>
+        <h2 id="patientName">Patient Details</h2>
+        <p class="page-subtitle">Unified timeline of vitals, medications, and bedside notes for this admission.</p>
+    </div>
+    <div class="page-actions">
+        <button class="btn btn-soft btn-icon" type="button" onclick="window.print()" data-tooltip="Print Patient Record">
+            <i class="fas fa-print"></i>
+            Print
+        </button>
+        <button class="btn btn-primary btn-icon" type="button" data-bs-toggle="modal" data-bs-target="#addNoteModal">
+            <i class="fas fa-plus"></i>
+            Add Clinical Note
+        </button>
+    </div>
 </div>
 
-<div class="card patient-header mb-4">
+<div class="card patient-header mb-4" data-animate>
     <div class="card-body">
         <div class="d-flex align-items-center">
             <img src="https://ui-avatars.com/api/?name=Patient&background=random&size=100"
@@ -35,7 +50,7 @@
     </div>
 </div>
 
-<ul class="nav nav-tabs mb-3" id="patientTabs">
+<ul class="nav nav-tabs mb-3 delay-1" id="patientTabs" data-animate>
     <li class="nav-item">
         <a class="nav-link active" data-bs-toggle="tab" href="#personalInfo">Personal Info</a>
     </li>
@@ -53,7 +68,7 @@
     </li>
 </ul>
 
-<div class="tab-content">
+<div class="tab-content delay-2" data-animate>
     <div class="tab-pane fade show active" id="personalInfo">
         <div class="card">
             <div class="card-body">

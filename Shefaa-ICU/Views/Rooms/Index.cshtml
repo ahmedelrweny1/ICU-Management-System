@@ -6,18 +6,26 @@
     ViewData["SearchPlaceholder"] = "Search by room or patient...";
 }
 
-<div class="page-header">
+<div class="page-header" data-animate>
     <div>
+        <p class="page-eyebrow">Rooms</p>
         <h2>Room Management</h2>
-        <p class="text-muted">Monitor availability and assignments.</p>
+        <p class="page-subtitle">Monitor availability, turn rooms faster, and keep isolation beds ready.</p>
     </div>
-    <button class="btn btn-primary" type="button" onclick="addRoom()">
-        <i class="fas fa-plus"></i> Add Room
-    </button>
+    <div class="page-actions">
+        <a class="btn btn-soft btn-icon" asp-controller="Reports" asp-action="Index">
+            <i class="fas fa-bed"></i>
+            Occupancy Report
+        </a>
+        <button class="btn btn-primary btn-icon" type="button" onclick="addRoom()">
+            <i class="fas fa-plus"></i>
+            Add Room
+        </button>
+    </div>
     @* Data: addRoom should open modal with Room form *@
 </div>
 
-<div class="filter-tabs mb-4">
+<div class="filter-tabs mb-4 delay-1" data-animate>
     @* Data: counts need aggregation by status *@
     <button class="filter-btn active" onclick="filterRooms('all')">
         All Rooms <span class="badge" id="allRoomsCount">0</span>
@@ -33,7 +41,7 @@
     </button>
 </div>
 
-<div class="rooms-grid" id="roomsGrid">
+<div class="rooms-grid delay-2" id="roomsGrid" data-animate>
     @* Data: cards per room with patient details *@
 </div>
 

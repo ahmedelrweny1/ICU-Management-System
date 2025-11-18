@@ -1,73 +1,32 @@
-# ICU Management System - Git Ignore File
-
-# Operating System Files
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Editor and IDE
-.vscode/
+# Visual Studio / Rider / VS Code
+.vs/
 .idea/
-*.swp
-*.swo
-*~
-.project
-.settings/
+.vscode/
 
-# Temporary Files
-*.tmp
-*.temp
-*.log
-*.cache
-
-# Node modules (if you add npm later)
-node_modules/
-
-# ASP.NET specific (for future backend)
+# Build output
 bin/
 obj/
+out/
+
+# User-specific files
 *.user
+*.rsuser
 *.suo
-*.userosscache
-*.sln.docstates
-.vs/
-*.publishsettings
+*.userprefs
 
-# Database files (when you add backend)
-*.mdf
-*.ldf
-*.sqlite
-*.db
+# Logs
+*.log
+logs/
 
-# Build results
-[Dd]ebug/
-[Rr]elease/
-[Bb]uild/
-[Oo]ut/
+# NuGet packages
+*.nupkg
+packages/
 
-# Package files
-*.zip
-*.rar
-*.7z
-*.tar.gz
+# Publish outputs
+wwwroot/lib/
 
-# Windows image file caches
+# System files
 Thumbs.db
-ehthumbs.db
-
-# Folder config file
 Desktop.ini
-
-# Recycle Bin used on file shares
-$RECYCLE.BIN/
-
-# Mac specific
-.DS_Store
-.AppleDouble
-.LSOverride
-
-# Keep these folders but ignore their contents (for now)
-# Uncomment when needed
-# /css/*.min.css
-# /js/*.min.js
+*.DS_Store
 

@@ -1,0 +1,76 @@
+﻿@{
+    ViewData["Title"] = "Shefaa - Login";
+    Layout = "_LayoutAuth";
+}
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <div class="auth-logo">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <h1 class="auth-title">Shefaa</h1>
+            <p class="auth-subtitle-brand">ICU Management System</p>
+            <p class="auth-subtitle">Welcome back! Please login to your account.</p>
+        </div>
+
+        <form id="loginForm" class="auth-form">
+            <div class="form-group mb-3">
+                <label for="username" class="form-label">Username or Email</label>
+                <input type="text" class="form-control" id="username" placeholder="Enter your username or email" required>
+            </div>
+
+            <div class="form-group mb-3">
+                <label for="password" class="form-label">Password</label>
+                <div class="password-input-wrapper">
+                    <input type="password" class="form-control" id="password" placeholder="Enter your password" required>
+                    <button type="button" class="password-toggle" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="toggleIcon"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-options mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="rememberMe">
+                    <label class="form-check-label" for="rememberMe">
+                        Remember Me
+                    </label>
+                </div>
+                <a asp-controller="Home" asp-action="Privacy" class="forgot-password">Forgot Password?</a>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 mb-3">Login</button>
+
+            <div class="auth-footer">
+                Don't have an account? <a asp-action="Signup">Register here</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="auth-copyright">
+        © 2025 Shefaa ICU Management. All rights reserved.
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            @* Data: authenticate against Staff accounts via backend *@
+        });
+    </script>
+}

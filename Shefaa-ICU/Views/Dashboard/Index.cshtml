@@ -1,0 +1,156 @@
+@{
+    ViewData["Title"] = "Dashboard";
+    ViewData["PageTitle"] = "Dashboard";
+    ViewData["ActivePage"] = "Dashboard";
+}
+
+<div class="page-header">
+    <h2>Dashboard Overview</h2>
+    <p class="text-muted">Snapshot of Shefaa ICU performance.</p>
+</div>
+
+@* Data: Totals need aggregated counts from Rooms, Patients, Staff, and Alerts *@
+<div class="stats-grid">
+    <div class="stat-card bg-primary">
+        <div class="stat-icon">
+            <i class="fas fa-bed"></i>
+        </div>
+        <div class="stat-details">
+            <h3 id="totalRooms">0</h3>
+            <p>Total Rooms</p>
+        </div>
+    </div>
+
+    <div class="stat-card bg-success">
+        <div class="stat-icon">
+            <i class="fas fa-user-injured"></i>
+        </div>
+        <div class="stat-details">
+            <h3 id="totalPatients">0</h3>
+            <p>Current Patients</p>
+        </div>
+    </div>
+
+    <div class="stat-card bg-info">
+        <div class="stat-icon">
+            <i class="fas fa-user-md"></i>
+        </div>
+        <div class="stat-details">
+            <h3 id="totalStaff">0</h3>
+            <p>Medical Staff</p>
+        </div>
+    </div>
+
+    <div class="stat-card bg-danger">
+        <div class="stat-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-details">
+            <h3 id="criticalCases">0</h3>
+            <p>Critical Cases</p>
+        </div>
+    </div>
+
+    <div class="stat-card bg-warning">
+        <div class="stat-icon">
+            <i class="fas fa-door-open"></i>
+        </div>
+        <div class="stat-details">
+            <h3 id="availableRooms">0</h3>
+            <p>Available Rooms</p>
+        </div>
+    </div>
+
+    <div class="stat-card bg-success">
+        <div class="stat-icon">
+            <i class="fas fa-user-check"></i>
+        </div>
+        <div class="stat-details">
+            <h3 id="staffOnDuty">0</h3>
+            <p>Staff On Duty</p>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Weekly Occupancy Rate</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="occupancyChart"></canvas>
+                @* Data: occupancy trend dataset from Patient/Room history *@
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Room Status</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="roomStatusChart"></canvas>
+                @* Data: aggregated room statuses *@
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Recent Activities</h5>
+            </div>
+            <div class="card-body">
+                <div class="activity-feed" id="activityFeed">
+                    @* Data: latest events from Activity logs *@
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-users"></i> Staff On Duty</h5>
+            </div>
+            <div class="card-body">
+                <div class="staff-list" id="staffOnDutyList">
+                    @* Data: staff roster for current shift *@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Current Shift Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="shift-info" id="currentShiftInfo">
+                    <div class="shift-detail">
+                        <strong>Shift:</strong> <span id="currentShift">Morning</span>
+                    </div>
+                    <div class="shift-detail">
+                        <strong>Time:</strong> <span id="shiftTime">08:00 AM - 04:00 PM</span>
+                    </div>
+                    <div class="shift-detail">
+                        <strong>Staff Count:</strong> <span id="shiftStaffCount">0</span>
+                    </div>
+                </div>
+                @* Data: shift metadata from Schedule module *@
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/dashboard.js" asp-append-version="true"></script>
+}
+

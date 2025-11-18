@@ -1,0 +1,45 @@
+@{
+    var pageTitle = ViewData["PageTitle"] as string ?? ViewData["Title"] as string ?? "Page";
+    var hideSearch = ViewData["HideSearch"] as bool? ?? false;
+    var searchInputId = ViewData["SearchInputId"] as string ?? "globalSearch";
+    var searchPlaceholder = ViewData["SearchPlaceholder"] as string ?? "Search...";
+    var topbarExtras = ViewData["TopbarExtras"] as string ?? string.Empty;
+}
+
+<nav class="top-navbar">
+    <div class="navbar-left">
+        <button class="menu-toggle" id="menuToggle" type="button">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="page-title">@pageTitle</h1>
+    </div>
+
+    <div class="top-navbar-right">
+        @if (!hideSearch)
+        {
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="@searchPlaceholder" id="@searchInputId">
+                @* Data: bind global search to backend endpoints *@
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(topbarExtras))
+        {
+            @Html.Raw(topbarExtras)
+        }
+
+        <div class="notification-icon" id="notificationIcon" data-tooltip="Notifications">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notificationBadge">3</span>
+            @* Data: notification count from backend *@
+        </div>
+
+        <a class="user-profile" id="userProfile" asp-controller="Profile" asp-action="Index">
+            <img src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff" alt="User">
+            <span id="currentUserName">User</span>
+            @* Data: current logged-in staff info *@
+        </a>
+    </div>
+</nav>
+

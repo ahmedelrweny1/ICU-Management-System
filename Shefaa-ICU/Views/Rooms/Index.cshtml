@@ -1,0 +1,71 @@
+@{
+    ViewData["Title"] = "Room Management";
+    ViewData["PageTitle"] = "Room Management";
+    ViewData["ActivePage"] = "Rooms";
+    ViewData["SearchInputId"] = "roomSearch";
+    ViewData["SearchPlaceholder"] = "Search by room or patient...";
+}
+
+<div class="page-header">
+    <div>
+        <h2>Room Management</h2>
+        <p class="text-muted">Monitor availability and assignments.</p>
+    </div>
+    <button class="btn btn-primary" type="button" onclick="addRoom()">
+        <i class="fas fa-plus"></i> Add Room
+    </button>
+    @* Data: addRoom should open modal with Room form *@
+</div>
+
+<div class="filter-tabs mb-4">
+    @* Data: counts need aggregation by status *@
+    <button class="filter-btn active" onclick="filterRooms('all')">
+        All Rooms <span class="badge" id="allRoomsCount">0</span>
+    </button>
+    <button class="filter-btn" onclick="filterRooms('Available')">
+        Available <span class="badge bg-success" id="availableCount">0</span>
+    </button>
+    <button class="filter-btn" onclick="filterRooms('Occupied')">
+        Occupied <span class="badge bg-danger" id="occupiedCount">0</span>
+    </button>
+    <button class="filter-btn" onclick="filterRooms('Cleaning')">
+        Cleaning <span class="badge bg-warning" id="cleaningCount">0</span>
+    </button>
+</div>
+
+<div class="rooms-grid" id="roomsGrid">
+    @* Data: cards per room with patient details *@
+</div>
+
+@section Modals {
+    <div class="modal fade" id="assignPatientModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Patient to Room <span id="assignRoomNumber"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="assignPatientForm">
+                        <div class="mb-3">
+                            <label class="form-label">Select Patient *</label>
+                            <select class="form-select" id="selectPatient" required>
+                                <option value="">Choose a patient...</option>
+                                @* Data: populate with unassigned patients *@
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmAssignPatient()">Assign</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script src="~/js/rooms.js" asp-append-version="true"></script>
+}
+

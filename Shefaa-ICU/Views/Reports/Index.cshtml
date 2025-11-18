@@ -1,0 +1,191 @@
+@{
+    ViewData["Title"] = "Reports & Analytics";
+    ViewData["PageTitle"] = "Reports & Analytics";
+    ViewData["ActivePage"] = "Reports";
+    ViewData["HideSearch"] = true;
+}
+
+<div class="page-header">
+    <div>
+        <h2>Reports & Analytics</h2>
+        <p class="text-muted">Review ICU performance indicators.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-outline-primary" type="button" onclick="exportPDF()">
+            <i class="fas fa-file-pdf"></i> PDF
+        </button>
+        <button class="btn btn-outline-success" type="button" onclick="exportCSV()">
+            <i class="fas fa-file-csv"></i> CSV
+        </button>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-filter"></i> Filters</h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-3">
+                <label class="form-label">Date Range</label>
+                <select class="form-select" id="dateRange">
+                    <option value="7">Last 7 Days</option>
+                    <option value="30" selected>Last 30 Days</option>
+                    <option value="90">Last 90 Days</option>
+                    <option value="365">Last Year</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Report Type</label>
+                <select class="form-select" id="reportType">
+                    <option value="patient">Patient Demographics</option>
+                    <option value="room">Room Occupancy</option>
+                    <option value="staff">Staff Performance</option>
+                    <option value="comprehensive">Comprehensive</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">From Date</label>
+                <input type="date" class="form-control" id="fromDate">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">To Date</label>
+                <input type="date" class="form-control" id="toDate">
+            </div>
+        </div>
+        @* Data: filters should trigger backend reporting endpoints *@
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-users"></i> Patient Demographics</h5>
+        <small>Report for: <span id="reportPeriod">Selected Range</span></small>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="report-stat">
+                    <h4 id="totalAdmissions">0</h4>
+                    <p>Total Admissions</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="report-stat">
+                    <h4 id="avgLengthStay">0 Days</h4>
+                    <p>Average Length of Stay</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="report-stat">
+                    <h4 id="ageRange">-</h4>
+                    <p>Age Range</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <h6>Admissions per Day</h6>
+                <canvas id="admissionsChart"></canvas>
+                @* Data: dataset from admissions history *@
+            </div>
+            <div class="col-lg-4">
+                <h6>Patient Age Groups</h6>
+                <canvas id="ageGroupChart"></canvas>
+                @* Data: distribution from patient demographics *@
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Patient Details</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Patient ID</th>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Condition</th>
+                        <th>Admission Date</th>
+                    </tr>
+                </thead>
+                <tbody id="patientReportTable">
+                    @* Data: patient list filtered by range *@
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-bed"></i> Room Occupancy</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="report-stat">
+                    <h4 id="occupancyRate">0%</h4>
+                    <p>Average Occupancy Rate</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="report-stat">
+                    <h4 id="totalBeds">0</h4>
+                    <p>Total ICU Beds</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="report-stat">
+                    <h4 id="avgTurnover">0 Days</h4>
+                    <p>Average Turnover Time</p>
+                </div>
+            </div>
+        </div>
+
+        <canvas id="occupancyTrendChart"></canvas>
+        @* Data: occupancy trend from Rooms history *@
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5><i class="fas fa-user-md"></i> Staff Performance</h5>
+    </div>
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="report-stat">
+                    <h4 id="avgAttendance">0%</h4>
+                    <p>Average Attendance Rate</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="report-stat">
+                    <h4 id="totalShifts">0</h4>
+                    <p>Total Shifts Covered</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="report-stat">
+                    <h4 id="staffUtilization">0%</h4>
+                    <p>Staff Utilization Rate</p>
+                </div>
+            </div>
+        </div>
+
+        <canvas id="staffAttendanceChart"></canvas>
+        @* Data: attendance metrics per staff *@
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/reports.js" asp-append-version="true"></script>
+}
+

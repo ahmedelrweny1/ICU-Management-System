@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Shefaa_ICU</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\css\style.css" />
+    <Content Remove="wwwroot\js\dashboard.js" />
+    <Content Remove="wwwroot\js\data-manager.js" />
+    <Content Remove="wwwroot\js\main.js" />
+    <Content Remove="wwwroot\js\patient-detail.js" />
+    <Content Remove="wwwroot\js\patients.js" />
+    <Content Remove="wwwroot\js\profile.js" />
+    <Content Remove="wwwroot\js\reports.js" />
+    <Content Remove="wwwroot\js\rooms.js" />
+    <Content Remove="wwwroot\js\schedules.js" />
+    <Content Remove="wwwroot\js\staff.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\css\style.css" />
+    <None Include="wwwroot\js\dashboard.js" />
+    <None Include="wwwroot\js\data-manager.js" />
+    <None Include="wwwroot\js\main.js" />
+    <None Include="wwwroot\js\patient-detail.js" />
+    <None Include="wwwroot\js\patients.js" />
+    <None Include="wwwroot\js\profile.js" />
+    <None Include="wwwroot\js\reports.js" />
+    <None Include="wwwroot\js\rooms.js" />
+    <None Include="wwwroot\js\schedules.js" />
+    <None Include="wwwroot\js\staff.js" />
+    <None Include="wwwroot\Ui\WhatsApp Image 2025-10-29 at 00.31.55_35b5ae3c.jpg" />
+    <None Include="wwwroot\Ui\WhatsApp Image 2025-10-29 at 00.31.55_ab49971f.jpg" />
+    <None Include="wwwroot\Ui\WhatsApp Image 2025-10-29 at 00.31.56_4c860b24.jpg" />
+    <None Include="wwwroot\Ui\WhatsApp Image 2025-10-29 at 00.31.56_4f24403a.jpg" />
+    <None Include="wwwroot\Ui\WhatsApp Image 2025-10-29 at 00.31.56_fbb0e3aa.jpg" />
+    <None Include="wwwroot\Ui\WhatsApp Image 2025-10-29 at 00.32.06_11725bcd.jpg" />
+    <None Include="wwwroot\Ui\WhatsApp Image 2025-10-29 at 00.35.28_0d17a5b6.jpg" />
+    <None Include="wwwroot\Ui\WhatsApp Image 2025-10-29 at 00.35.28_e6a2827b.jpg" />
+    <None Include="wwwroot\Ui\WhatsApp Image 2025-10-29 at 00.36.33_cea6eeb1.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>

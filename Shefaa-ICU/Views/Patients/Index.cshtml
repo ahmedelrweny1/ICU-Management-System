@@ -1,0 +1,156 @@
+@{
+    ViewData["Title"] = "Patient Management";
+    ViewData["PageTitle"] = "Patient Management";
+    ViewData["ActivePage"] = "Patients";
+    ViewData["SearchInputId"] = "patientSearch";
+    ViewData["SearchPlaceholder"] = "Search patients...";
+}
+
+<div class="page-header">
+    <div>
+        <h2>Patient Management</h2>
+        <p class="text-muted">Track admissions, assignments, and clinical progress.</p>
+    </div>
+    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#addPatientModal" onclick="openAddPatientModal()">
+        <i class="fas fa-plus"></i> Add New Patient
+    </button>
+    @* Data: button should open modal preloaded with rooms and default values *@
+</div>
+
+<div class="filter-tabs mb-4">
+    @* Data: counts per status from Patients dataset *@
+    <button class="filter-btn active" onclick="filterPatients('all')">
+        All Patients <span class="badge" id="allCount">0</span>
+    </button>
+    <button class="filter-btn" onclick="filterPatients('Critical')">
+        Critical <span class="badge bg-danger" id="criticalCount">0</span>
+    </button>
+    <button class="filter-btn" onclick="filterPatients('Stable')">
+        Stable <span class="badge bg-success" id="stableCount">0</span>
+    </button>
+    <button class="filter-btn" onclick="filterPatients('Moderate')">
+        Moderate <span class="badge bg-warning" id="moderateCount">0</span>
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Patient ID</th>
+                        <th>Status</th>
+                        <th>Room</th>
+                        <th>Admission Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="patientsTableBody">
+                    @* Data: patient rows from Patients table including related room *@
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Modals {
+    <div class="modal fade" id="addPatientModal" tabindex="-1" aria-labelledby="patientModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="patientModalTitle">Add New Patient</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @* Data: form should be bound to Patient view model *@
+                    <form id="addPatientForm">
+                        <input type="hidden" id="editPatientId" />
+                        <input type="hidden" id="editPatientOldRoom" />
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="patientName" required />
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Age *</label>
+                                <input type="number" class="form-control" id="patientAge" min="0" max="120" required />
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">Gender *</label>
+                                <select class="form-select" id="patientGender" required>
+                                    <option value="">Select</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Room *</label>
+                                <select class="form-select" id="patientRoom" required>
+                                    <option value="">Select Room</option>
+                                    @* Data: populate with available rooms *@
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Condition *</label>
+                                <select class="form-select" id="patientCondition" required>
+                                    <option value="">Select Condition</option>
+                                    <option value="Stable">Stable</option>
+                                    <option value="Moderate">Moderate</option>
+                                    <option value="Critical">Critical</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Admission Date</label>
+                                <input type="date" class="form-control" id="patientAdmissionDate" />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Emergency Contact</label>
+                                <input type="text" class="form-control" id="emergencyContact" placeholder="Name - Phone Number" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Chief Complaint</label>
+                            <textarea class="form-control" id="patientComplaint" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Medical History</label>
+                            <textarea class="form-control" id="patientHistory" rows="3"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Diagnosis</label>
+                            <textarea class="form-control" id="patientDiagnosis" rows="2"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Treatment Plan</label>
+                            <textarea class="form-control" id="patientTreatment" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="savePatientBtn">Save Patient</button>
+                    @* Data: submit should post to Patients endpoint *@
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script src="~/js/patients.js" asp-append-version="true"></script>
+}
+

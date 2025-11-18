@@ -1,0 +1,339 @@
+@{
+    ViewData["Title"] = "Patient Details";
+    ViewData["PageTitle"] = "Patient Details";
+    ViewData["ActivePage"] = "Patients";
+    ViewData["HideSearch"] = true;
+    ViewData["TopbarExtras"] = "<button class=\"btn btn-sm btn-outline-primary me-3\" onclick=\"window.print()\" data-tooltip=\"Print Patient Record\"><i class=\"fas fa-print\"></i></button>";
+}
+
+<div class="page-header">
+    <a class="btn btn-outline-secondary btn-sm" asp-controller="Patients" asp-action="Index">
+        <i class="fas fa-arrow-left"></i> Back to Patients
+    </a>
+</div>
+
+<div class="card patient-header mb-4">
+    <div class="card-body">
+        <div class="d-flex align-items-center">
+            <img src="https://ui-avatars.com/api/?name=Patient&background=random&size=100"
+                 alt="Patient" class="patient-avatar" id="patientAvatar">
+            <div class="ms-4 flex-grow-1">
+                <h3 id="patientHeaderName">Patient Name</h3>
+                <div class="patient-meta">
+                    <span><strong>ID:</strong> <span id="patientId">P12345</span></span>
+                    <span><strong>Age:</strong> <span id="patientAge">0</span> years</span>
+                    <span><strong>Gender:</strong> <span id="patientGender">-</span></span>
+                    <span><strong>Room:</strong> <span id="patientRoom">-</span></span>
+                    <span><strong>Days in ICU:</strong> <span id="daysInICU">0</span></span>
+                </div>
+                <div class="mt-2">
+                    <span class="badge" id="conditionBadge">Stable</span>
+                </div>
+            </div>
+        </div>
+        @* Data: bind summary from Patient entity and related Room *@
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-3" id="patientTabs">
+    <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#personalInfo">Personal Info</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#medicalHistory">Medical History</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#vitals">Vitals</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#medications">Medications</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#notes">Clinical Notes</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="personalInfo">
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Full Name</label>
+                        <p id="fullName">-</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="fw-bold">Date of Birth</label>
+                        <p id="dateOfBirth">-</p>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="fw-bold">Patient ID</label>
+                        <p id="patientIdInfo">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Room Number</label>
+                        <p id="roomNumber">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Status</label>
+                        <p><span class="badge" id="statusBadge">-</span></p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Admission Date</label>
+                        <p id="admissionDate">-</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="fw-bold">Assigned Physician</label>
+                        <p id="assignedPhysician">-</p>
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label class="fw-bold">Emergency Contact</label>
+                        <p id="emergencyContact">-</p>
+                    </div>
+                </div>
+            </div>
+            @* Data: populate from Patient + Staff *@
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="medicalHistory">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Chief Complaint</h5>
+            </div>
+            <div class="card-body">
+                <p id="chiefComplaint">-</p>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Medical History</h5>
+            </div>
+            <div class="card-body">
+                <p id="medicalHistoryText">-</p>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5>Current Diagnosis</h5>
+            </div>
+            <div class="card-body">
+                <p id="currentDiagnosis">-</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Treatment Plan</h5>
+            </div>
+            <div class="card-body">
+                <p id="treatmentPlan">-</p>
+            </div>
+        </div>
+        @* Data: clinical notes fields from Patient entity *@
+    </div>
+
+    <div class="tab-pane fade" id="vitals">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Vital Signs</h5>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#updateVitalsModal">
+                    <i class="fas fa-edit"></i> Update Vitals
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="vitals-grid">
+                    <div class="vital-card">
+                        <div class="vital-icon bg-danger">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <div class="vital-info">
+                            <h6>Blood Pressure</h6>
+                            <h3 id="bpValue">-/-</h3>
+                            <small>mmHg</small>
+                        </div>
+                    </div>
+                    <div class="vital-card">
+                        <div class="vital-icon bg-warning">
+                            <i class="fas fa-thermometer-half"></i>
+                        </div>
+                        <div class="vital-info">
+                            <h6>Temperature</h6>
+                            <h3 id="tempValue">-</h3>
+                            <small>°F</small>
+                        </div>
+                    </div>
+                    <div class="vital-card">
+                        <div class="vital-icon bg-info">
+                            <i class="fas fa-heart"></i>
+                        </div>
+                        <div class="vital-info">
+                            <h6>Pulse Rate</h6>
+                            <h3 id="pulseValue">-</h3>
+                            <small>bpm</small>
+                        </div>
+                    </div>
+                    <div class="vital-card">
+                        <div class="vital-icon bg-success">
+                            <i class="fas fa-lungs"></i>
+                        </div>
+                        <div class="vital-info">
+                            <h6>SpO2</h6>
+                            <h3 id="spo2Value">-</h3>
+                            <small>%</small>
+                        </div>
+                    </div>
+                </div>
+                @* Data: latest Vitals entries *@
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="medications">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Medication Schedule</h5>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addMedicationModal">
+                    <i class="fas fa-plus"></i> Add Medication
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Medication</th>
+                                <th>Dose</th>
+                                <th>Frequency</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="medicationsTable">
+                            @* Data: medication list with Staff reference *@
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-pane fade" id="notes">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Clinical Notes</h5>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addNoteModal">
+                    <i class="fas fa-plus"></i> Add Note
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="notes-timeline" id="notesTimeline">
+                    @* Data: chronological list from ClinicalNotes *@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Modals {
+    <div class="modal fade" id="updateVitalsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Update Vital Signs</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="updateVitalsForm">
+                        <div class="mb-3">
+                            <label class="form-label">Blood Pressure</label>
+                            <input type="text" class="form-control" id="bpInput" placeholder="120/80">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Temperature (°F)</label>
+                            <input type="text" class="form-control" id="tempInput" placeholder="98.6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Pulse Rate (bpm)</label>
+                            <input type="text" class="form-control" id="pulseInput" placeholder="72">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">SpO2 (%)</label>
+                            <input type="text" class="form-control" id="spo2Input" placeholder="98">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveVitals()">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addMedicationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Medication</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addMedicationForm">
+                        <div class="mb-3">
+                            <label class="form-label">Medication Name</label>
+                            <input type="text" class="form-control" id="medName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Dose</label>
+                            <input type="text" class="form-control" id="medDose" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Frequency</label>
+                            <input type="text" class="form-control" id="medFrequency" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Time</label>
+                            <input type="time" class="form-control" id="medTime" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveMedication()">Add Medication</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addNoteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Clinical Note</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addNoteForm">
+                        <div class="mb-3">
+                            <label class="form-label">Note</label>
+                            <textarea class="form-control" id="noteText" rows="5" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNote()">Add Note</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script src="~/js/patient-detail.js" asp-append-version="true"></script>
+}
+

@@ -29,6 +29,12 @@ namespace Shefaa_ICU
 
             app.UseAuthorization();
 
+            app.MapGet("/index.html", context =>
+            {
+                context.Response.Redirect("/", permanent: false);
+                return Task.CompletedTask;
+            });
+
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Home}/{action=Index}/{id?}");

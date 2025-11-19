@@ -90,9 +90,9 @@ function initializeReportCharts() {
                 datasets: [{
                     label: 'Number of Admissions',
                     data: [5, 8, 6, 9, 7, 10, 8],
-                    backgroundColor: '#6366F1',
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#6366F1',
                     borderRadius: 6,
-                    hoverBackgroundColor: '#818CF8'
+                    hoverBackgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--primary-light').trim() || '#818CF8'
                 }]
             },
             options: {
@@ -110,7 +110,7 @@ function initializeReportCharts() {
                             stepSize: 2
                         },
                         grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
+                            color: getComputedStyle(document.documentElement).getPropertyValue('--border-color').trim() || 'rgba(0, 0, 0, 0.05)'
                         }
                     },
                     x: {
@@ -147,7 +147,12 @@ function initializeReportCharts() {
                 labels: Object.keys(ageGroups),
                 datasets: [{
                     data: Object.values(ageGroups),
-                    backgroundColor: ['#60A5FA', '#34D399', '#FBBF24', '#F87171'],
+                    backgroundColor: [
+                        getComputedStyle(document.documentElement).getPropertyValue('--info').trim() || '#60A5FA',
+                        getComputedStyle(document.documentElement).getPropertyValue('--success').trim() || '#34D399',
+                        getComputedStyle(document.documentElement).getPropertyValue('--warning').trim() || '#FBBF24',
+                        getComputedStyle(document.documentElement).getPropertyValue('--danger').trim() || '#F87171'
+                    ],
                     borderWidth: 0,
                     hoverOffset: 8
                 }]
@@ -180,8 +185,8 @@ function initializeReportCharts() {
                 datasets: [{
                     label: 'Occupancy Rate (%)',
                     data: [80, 75, 85, 70],
-                    borderColor: '#34D399',
-                    backgroundColor: 'rgba(52, 211, 153, 0.1)',
+                    borderColor: getComputedStyle(document.documentElement).getPropertyValue('--success').trim() || '#34D399',
+                    backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--success').trim() + '1A' || 'rgba(52, 211, 153, 0.1)',
                     tension: 0.4,
                     fill: true,
                     borderWidth: 2,

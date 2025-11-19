@@ -181,7 +181,11 @@ function showToast(message, type = 'success') {
     
     // Create toast element
     const toast = document.createElement('div');
-    const bgColor = type === 'success' ? '#34D399' : type === 'error' ? '#F87171' : type === 'warning' ? '#FBBF24' : '#60A5FA';
+    const root = document.documentElement;
+    const bgColor = type === 'success' ? getComputedStyle(root).getPropertyValue('--success').trim() || '#34D399' : 
+                    type === 'error' ? getComputedStyle(root).getPropertyValue('--danger').trim() || '#F87171' : 
+                    type === 'warning' ? getComputedStyle(root).getPropertyValue('--warning').trim() || '#FBBF24' : 
+                    getComputedStyle(root).getPropertyValue('--info').trim() || '#60A5FA';
     toast.style.cssText = `
         background: ${bgColor};
         color: white;
@@ -232,17 +236,19 @@ function showPageLoading() {
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(255, 255, 255, 0.9);
+        background: rgba(0, 0, 0, 0.3);
         display: flex;
         align-items: center;
         justify-content: center;
         z-index: 10000;
         backdrop-filter: blur(4px);
     `;
+    const root = document.documentElement;
+    const primaryColor = getComputedStyle(root).getPropertyValue('--primary').trim() || '#6366F1';
     loader.innerHTML = `
         <div style="text-align: center;">
             <div class="spinner"></div>
-            <p style="margin-top: 20px; color: #6366F1; font-weight: 600;">Loading...</p>
+            <p style="margin-top: 20px; color: ${primaryColor}; font-weight: 600;">Loading...</p>
         </div>
     `;
     document.body.appendChild(loader);

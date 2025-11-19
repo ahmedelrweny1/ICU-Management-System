@@ -7,7 +7,7 @@
    1. CSS Variables & Global Styles
    =================================== */
 :root {
-    /* Softer, Eye-Comfortable Colors */
+    /* Softer, Eye-Comfortable Colors - Light Mode */
     --primary: #6366F1;
     --primary-dark: #4F46E5;
     --primary-light: #818CF8;
@@ -29,6 +29,49 @@
     --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     --sidebar-width: 260px;
     --navbar-height: 70px;
+    
+    /* Background and Text Colors */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F9FAFB;
+    --bg-tertiary: #F5F5F4;
+    --text-primary: #374151;
+    --text-secondary: #6B7280;
+    --text-tertiary: #9CA3AF;
+    --border-color: #E7E5E4;
+    --card-bg: #FFFFFF;
+}
+
+[data-theme="dark"] {
+    /* Dark Mode Colors */
+    --primary: #818CF8;
+    --primary-dark: #6366F1;
+    --primary-light: #A5B4FC;
+    --secondary: #A78BFA;
+    --success: #34D399;
+    --danger: #F87171;
+    --warning: #FBBF24;
+    --info: #60A5FA;
+    --dark: #F9FAFB;
+    --light: #1F2937;
+    --gray-50: #111827;
+    --gray-100: #1F2937;
+    --gray-200: #374151;
+    --gray-300: #4B5563;
+    --gray-600: #9CA3AF;
+    --gray-700: #D1D5DB;
+    --white: #1F2937;
+    --sidebar-bg: #0F172A;
+    --card-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
+    
+    /* Background and Text Colors - Dark Mode */
+    --bg-primary: #111827;
+    --bg-secondary: #1F2937;
+    --bg-tertiary: #374151;
+    --text-primary: #F9FAFB;
+    --text-secondary: #D1D5DB;
+    --text-tertiary: #9CA3AF;
+    --border-color: #374151;
+    --card-bg: #1F2937;
 }
 
 * {
@@ -39,10 +82,11 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
-    background-color: var(--gray-50);
-    color: var(--dark);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     overflow-x: hidden;
     line-height: 1.6;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ===================================
@@ -63,10 +107,12 @@ body {
 }
 
 .auth-card {
-    background: white;
+    background: var(--card-bg);
+    color: var(--text-primary);
     border-radius: 16px;
     padding: 40px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .auth-header {
@@ -93,8 +139,9 @@ body {
 .auth-title {
     font-size: 28px;
     font-weight: 700;
-    color: var(--dark);
+    color: var(--text-primary);
     margin-bottom: 10px;
+    transition: color 0.3s ease;
 }
 
 .auth-subtitle-brand {
@@ -279,7 +326,8 @@ body {
 .main-content {
     margin-left: var(--sidebar-width);
     min-height: 100vh;
-    background: var(--light);
+    background: var(--bg-primary);
+    transition: background-color 0.3s ease;
 }
 
 /* ===================================
@@ -287,8 +335,9 @@ body {
    =================================== */
 .top-navbar {
     height: var(--navbar-height);
-    background: white;
-    border-bottom: 1px solid var(--gray-200);
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -308,7 +357,8 @@ body {
 .page-title {
     font-size: 20px;
     font-weight: 600;
-    color: var(--dark);
+    color: var(--text-primary);
+    transition: color 0.3s ease;
     margin: 0;
 }
 
@@ -341,10 +391,13 @@ body {
 
 .search-box input {
     padding: 8px 12px 8px 38px;
-    border: 1px solid #E5E7EB;
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     width: 250px;
     font-size: 14px;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .search-box input:focus {
@@ -393,10 +446,12 @@ body {
     right: 0;
     width: 380px;
     max-height: 500px;
-    background: white;
+    background: var(--card-bg);
     border-radius: 12px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    border: 1px solid var(--gray-200);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
     display: none;
     flex-direction: column;
     z-index: 1000;
@@ -500,26 +555,30 @@ body {
 .notification-title {
     font-size: 14px;
     font-weight: 600;
-    color: var(--dark);
+    color: var(--text-primary);
     margin: 0 0 4px 0;
+    transition: color 0.3s ease;
 }
 
 .notification-text {
     font-size: 13px;
-    color: var(--gray-600);
+    color: var(--text-secondary);
     margin: 0 0 4px 0;
     line-height: 1.4;
+    transition: color 0.3s ease;
 }
 
 .notification-time {
     font-size: 12px;
-    color: var(--gray-600);
+    color: var(--text-tertiary);
+    transition: color 0.3s ease;
 }
 
 .notifications-footer {
     padding: 12px 20px;
-    border-top: 1px solid var(--gray-200);
+    border-top: 1px solid var(--border-color);
     text-align: center;
+    transition: border-color 0.3s ease;
 }
 
 .notifications-footer a {
@@ -536,13 +595,39 @@ body {
 .notifications-empty {
     padding: 40px 20px;
     text-align: center;
-    color: var(--gray-600);
+    color: var(--text-secondary);
+    transition: color 0.3s ease;
 }
 
 .notifications-empty i {
     font-size: 48px;
-    color: var(--gray-300);
+    color: var(--text-tertiary);
     margin-bottom: 12px;
+    transition: color 0.3s ease;
+}
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    margin-right: 10px;
+    font-size: 18px;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-tertiary);
+}
+
+.theme-toggle i {
+    transition: transform 0.3s ease;
 }
 
 .user-profile {
@@ -553,6 +638,7 @@ body {
     padding: 8px 12px;
     border-radius: 8px;
     transition: background 0.2s;
+    color: var(--text-primary);
 }
 
 .user-profile:hover {
@@ -578,6 +664,8 @@ body {
    =================================== */
 .page-content {
     padding: 30px;
+    background: var(--bg-primary);
+    transition: background-color 0.3s ease;
 }
 
 .page-header {
@@ -592,8 +680,9 @@ body {
 .page-header h2 {
     font-size: 30px;
     font-weight: 700;
-    color: var(--dark);
+    color: var(--text-primary);
     margin-bottom: 6px;
+    transition: color 0.3s ease;
 }
 
 .page-header .page-eyebrow {
@@ -686,7 +775,7 @@ body {
 }
 
 .stat-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: 14px;
     padding: 24px;
     display: flex;
@@ -776,24 +865,29 @@ body {
     font-size: 32px;
     font-weight: 700;
     margin: 0;
-    color: var(--dark);
+    color: var(--text-primary);
+    transition: color 0.3s ease;
 }
 
 .stat-details p {
     margin: 0;
-    color: #6B7280;
+    color: var(--text-secondary);
     font-size: 14px;
+    transition: color 0.3s ease;
 }
 
 /* ===================================
    8. Cards
    =================================== */
 .card {
-    background: white;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    border-color: var(--border-color);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     border-radius: 14px;
     box-shadow: var(--card-shadow);
-    border: 1px solid var(--gray-200);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid var(--border-color);
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
     position: relative;
     overflow: hidden;
 }
@@ -803,15 +897,21 @@ body {
     box-shadow: 0 20px 35px rgba(15, 23, 42, 0.08);
 }
 
+
 .card-header {
     padding: 20px 24px;
-    border-bottom: 1px solid #E5E7EB;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .card-header h5 {
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+    margin: 0;
     margin: 0;
     font-size: 18px;
     font-weight: 600;
@@ -838,7 +938,7 @@ body {
     border: 1px solid var(--gray-200);
     border-radius: 16px;
     padding: 18px 20px;
-    background: white;
+    background: var(--card-bg);
     box-shadow: var(--card-shadow);
     display: flex;
     justify-content: space-between;
@@ -927,16 +1027,19 @@ body {
     text-align: left;
     font-size: 12px;
     font-weight: 600;
-    color: #6B7280;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 2px solid #E5E7EB;
+    border-bottom: 2px solid var(--border-color);
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 .table tbody td {
     padding: 16px 12px;
-    border-bottom: 1px solid #E5E7EB;
+    border-bottom: 1px solid var(--border-color);
     font-size: 14px;
+    color: var(--text-primary);
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 .table tbody tr {
@@ -944,7 +1047,7 @@ body {
 }
 
 .table tbody tr:hover {
-    background: #F9FAFB;
+    background: var(--bg-secondary);
     cursor: pointer;
 }
 
@@ -1037,7 +1140,7 @@ body {
 }
 
 .btn-outline-primary {
-    background: white;
+    background: var(--card-bg);
     color: var(--primary);
     border: 1px solid var(--primary);
 }
@@ -1048,7 +1151,7 @@ body {
 }
 
 .btn-outline-secondary {
-    background: white;
+    background: var(--card-bg);
     color: #6B7280;
     border: 1px solid #E5E7EB;
 }
@@ -1068,7 +1171,7 @@ body {
 }
 
 .room-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: 12px;
     padding: 20px;
     border: 2px solid #E5E7EB;
@@ -1177,7 +1280,7 @@ body {
    14. Patient Detail Page
    =================================== */
 .patient-header {
-    background: white;
+    background: var(--card-bg);
 }
 
 .patient-avatar {
@@ -1358,7 +1461,7 @@ body {
    17. Schedule Cards
    =================================== */
 .shift-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: 12px;
     padding: 20px;
     border: 2px solid #E5E7EB;
@@ -2001,18 +2104,21 @@ html {
 /* Form Controls */
 .form-label {
     font-weight: 500;
-    color: var(--dark);
+    color: var(--text-primary);
     margin-bottom: 6px;
     font-size: 14px;
+    transition: color 0.3s ease;
 }
 
 .form-control,
 .form-select {
-    border: 1px solid var(--gray-300);
+    border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 10px 12px;
     font-size: 14px;
-    transition: all 0.2s ease;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
 }
 
 .form-control:hover,
@@ -2027,7 +2133,10 @@ html {
     outline: none;
 }
 
-.form-control::placeholder {
+.form-control::placeholder,
+.form-select::placeholder {
+    color: var(--text-tertiary);
+}
     color: var(--gray-600);
 }
 

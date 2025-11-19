@@ -24,6 +24,15 @@
     @RenderSection("Styles", required: false)
 </head>
 <body class="@bodyClass" data-authenticated="@(isAuthenticated.ToString().ToLower())">
+    <script>
+        // Apply theme immediately before page renders to prevent flash
+        (function() {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
     <div class="app-wrapper">
         <div class="sidebar" id="sidebar">
             @await Html.PartialAsync("_Sidebar")

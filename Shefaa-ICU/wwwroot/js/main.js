@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
         checkAuth();
     }
     
+    initializeTheme();
     loadCurrentUser();
     initializeMenuToggle();
     initializeNotifications();
@@ -617,4 +618,52 @@ function setData(key, value) {
         return false;
     }
 }
+
+// ===================================
+// Theme Management (Dark/Light Mode)
+// ===================================
+function initializeTheme() {
+    // Get saved theme or default to light
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    setTheme(savedTheme);
+    
+    // Initialize theme toggle button
+    const themeToggle = document.getElementById('themeToggle');
+    if (themeToggle) {
+        themeToggle.addEventListener('click', toggleTheme);
+        updateThemeIcon(savedTheme);
+    }
+}
+
+function setTheme(theme) {
+    const html = document.documentElement;
+    if (theme === 'dark') {
+        html.setAttribute('data-theme', 'dark');
+    } else {
+        html.removeAttribute('data-theme');
+    }
+    localStorage.setItem('theme', theme);
+    updateThemeIcon(theme);
+}
+
+function toggleTheme() {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+}
+
+function updateThemeIcon(theme) {
+    const themeIcon = document.getElementById('themeIcon');
+    if (themeIcon) {
+        if (theme === 'dark') {
+            themeIcon.className = 'fas fa-sun';
+        } else {
+            themeIcon.className = 'fas fa-moon';
+        }
+    }
+}
+
+// Make theme functions globally accessible
+window.setTheme = setTheme;
+window.toggleTheme = toggleTheme;
 

@@ -14,6 +14,13 @@ namespace Shefaa_ICU
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IPasswordHasher<Staff>, PasswordHasher<Staff>>();
+            
+            // Configure antiforgery to ignore JSON requests
+            builder.Services.AddAntiforgery(options =>
+            {
+                options.HeaderName = "X-CSRF-TOKEN";
+                options.SuppressXFrameOptionsHeader = false;
+            });
 
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

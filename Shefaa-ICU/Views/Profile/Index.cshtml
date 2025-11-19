@@ -1,3 +1,4 @@
+@model Shefaa_ICU.ViewModels.ProfileViewModel
 @{
     ViewData["Title"] = "My Profile";
     ViewData["PageTitle"] = "My Profile";
@@ -12,7 +13,7 @@
         <p class="page-subtitle">Review your contact details, manage security, and fine-tune notifications.</p>
     </div>
     <div class="page-actions">
-        <a class="btn btn-soft btn-icon" href="#security" data-bs-toggle="tab">
+        <a class="btn btn-soft btn-icon" href="#security" onclick="switchTab('security'); return false;">
             <i class="fas fa-shield-alt"></i>
             Security
         </a>
@@ -56,22 +57,22 @@
 
 <ul class="nav nav-tabs mb-4 delay-2" id="profileTabs" data-animate>
     <li class="nav-item">
-        <a class="nav-link active" data-bs-toggle="tab" href="#personalInfo">
+        <a class="nav-link active" href="#personalInfo" onclick="switchTab('personalInfo'); return false;">
             <i class="fas fa-user"></i> Personal Information
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#accountSettings">
+        <a class="nav-link" href="#accountSettings" onclick="switchTab('accountSettings'); return false;">
             <i class="fas fa-cog"></i> Account Settings
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#security">
+        <a class="nav-link" href="#security" onclick="switchTab('security'); return false;">
             <i class="fas fa-shield-alt"></i> Security
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" data-bs-toggle="tab" href="#notifications">
+        <a class="nav-link" href="#notifications" onclick="switchTab('notifications'); return false;">
             <i class="fas fa-bell"></i> Notifications
         </a>
     </li>
@@ -143,47 +144,49 @@
                 <h5><i class="fas fa-cog"></i> Account Settings</h5>
             </div>
             <div class="card-body">
-                <div class="settings-group">
-                    <h6>Language & Region</h6>
-                    <div class="row mb-4">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Language</label>
-                            <select class="form-select">
-                                <option value="en" selected>English</option>
-                                <option value="ar">Arabic</option>
-                                <option value="fr">French</option>
-                            </select>
+                <form id="accountSettingsForm">
+                    <div class="settings-group">
+                        <h6>Language & Region</h6>
+                        <div class="row mb-4">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Language</label>
+                                <select class="form-select" id="accountLanguage">
+                                    <option value="en" selected>English</option>
+                                    <option value="ar">Arabic</option>
+                                    <option value="fr">French</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Timezone</label>
+                                <select class="form-select" id="accountTimezone">
+                                    <option value="utc">UTC</option>
+                                    <option value="est">Eastern Time (EST)</option>
+                                    <option value="pst">Pacific Time (PST)</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">Timezone</label>
-                            <select class="form-select">
-                                <option value="utc">UTC</option>
-                                <option value="est">Eastern Time (EST)</option>
-                                <option value="pst">Pacific Time (PST)</option>
-                            </select>
+                    </div>
+
+                    <div class="settings-group">
+                        <h6>Privacy Settings</h6>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="profileVisibility" checked>
+                            <label class="form-check-label" for="profileVisibility">
+                                Make my profile visible to other staff members
+                            </label>
+                        </div>
+                        <div class="form-check form-switch mb-3">
+                            <input class="form-check-input" type="checkbox" id="showOnlineStatus" checked>
+                            <label class="form-check-label" for="showOnlineStatus">
+                                Show my online status
+                            </label>
                         </div>
                     </div>
-                </div>
 
-                <div class="settings-group">
-                    <h6>Privacy Settings</h6>
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" id="profileVisibility" checked>
-                        <label class="form-check-label" for="profileVisibility">
-                            Make my profile visible to other staff members
-                        </label>
-                    </div>
-                    <div class="form-check form-switch mb-3">
-                        <input class="form-check-input" type="checkbox" id="showOnlineStatus" checked>
-                        <label class="form-check-label" for="showOnlineStatus">
-                            Show my online status
-                        </label>
-                    </div>
-                </div>
-
-                <button class="btn btn-primary">
-                    <i class="fas fa-save"></i> Save Preferences
-                </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Preferences
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -276,7 +279,7 @@
                     </div>
                 </div>
 
-                <button class="btn btn-primary mt-3">
+                <button type="button" class="btn btn-primary mt-3" id="saveNotificationSettingsBtn">
                     <i class="fas fa-save"></i> Save Notification Settings
                 </button>
             </div>
@@ -284,7 +287,32 @@
     </div>
 </div>
 
+@Html.AntiForgeryToken()
+
 @section Scripts {
+    <script>
+        // Pass profile data to JavaScript
+        @if (Model != null)
+        {
+            <text>
+            window.__profileData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+                name = Model.Name,
+                role = Model.Role,
+                email = Model.Email ?? "",
+                phoneNumber = Model.PhoneNumber ?? "",
+                specialty = Model.Specialty ?? "",
+                daysActive = Model.DaysActive,
+                lastLogin = Model.LastLogin
+            }));
+            </text>
+        }
+        else
+        {
+            <text>
+            console.error('Profile data not available');
+            </text>
+        }
+    </script>
     <script src="~/js/profile.js" asp-append-version="true"></script>
 }
 

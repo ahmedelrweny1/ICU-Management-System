@@ -1,46 +1,23 @@
-// ===================================
-// Dashboard Page JavaScript
-// ===================================
+let occupancyChart = null;
+let roomStatusChart = null;
 
 document.addEventListener('DOMContentLoaded', function() {
-    loadDashboardData();
-    initializeCharts();
+    const data = window.dashboardData || {};
+    
+    updateStatistics(data);
+    loadActivityFeed(data.recentActivities || []);
+    loadStaffOnDuty(data.staffOnDutyList || []);
+    loadCurrentShift(data.currentShift);
+    initializeCharts(data);
 });
 
-function loadDashboardData() {
-    const rooms = DataManager.getRooms();
-    const patients = DataManager.getPatients();
-    const staff = DataManager.getStaff();
-    const activities = DataManager.getActivities();
-    
-    // Update statistics with animation
-    updateStatistics(rooms, patients, staff);
-    
-    // Load activity feed
-    loadActivityFeed(activities);
-    
-    // Load staff on duty
-    loadStaffOnDuty(staff);
-    
-    // Load current shift info
-    loadCurrentShift();
-}
-
-function updateStatistics(rooms, patients, staff) {
-    const totalRooms = rooms.length;
-    const totalPatients = patients.length;
-    const totalStaff = staff.length;
-    const criticalCases = patients.filter(p => p.condition === 'Critical').length;
-    const availableRooms = rooms.filter(r => r.status === 'Available').length;
-    const staffOnDuty = staff.filter(s => s.status === 'On Duty').length;
-    
-    // Animate numbers
-    animateNumber(document.getElementById('totalRooms'), 0, totalRooms, 1000);
-    animateNumber(document.getElementById('totalPatients'), 0, totalPatients, 1000);
-    animateNumber(document.getElementById('totalStaff'), 0, totalStaff, 1000);
-    animateNumber(document.getElementById('criticalCases'), 0, criticalCases, 1000);
-    animateNumber(document.getElementById('availableRooms'), 0, availableRooms, 1000);
-    animateNumber(document.getElementById('staffOnDuty'), 0, staffOnDuty, 1000);
+function updateStatistics(data) {
+    animateNumber(document.getElementById('totalRooms'), 0, data.totalRooms || 0, 1000);
+    animateNumber(document.getElementById('totalPatients'), 0, data.totalPatients || 0, 1000);
+    animateNumber(document.getElementById('totalStaff'), 0, data.totalStaff || 0, 1000);
+    animateNumber(document.getElementById('criticalCases'), 0, data.criticalCases || 0, 1000);
+    animateNumber(document.getElementById('availableRooms'), 0, data.availableRooms || 0, 1000);
+    animateNumber(document.getElementById('staffOnDuty'), 0, data.staffOnDuty || 0, 1000);
 }
 
 function loadActivityFeed(activities) {
@@ -52,10 +29,10 @@ function loadActivityFeed(activities) {
         return;
     }
     
-    feedContainer.innerHTML = activities.slice(0, 10).map(activity => `
+    feedContainer.innerHTML = activities.map(activity => `
         <div class="activity-item">
-            <div class="activity-time">${activity.time}</div>
-            <div class="activity-text">${activity.text}</div>
+            <div class="activity-time">${activity.time || ''}</div>
+            <div class="activity-text">${activity.text || ''}</div>
         </div>
     `).join('');
 }
@@ -64,66 +41,66 @@ function loadStaffOnDuty(staff) {
     const staffContainer = document.getElementById('staffOnDutyList');
     if (!staffContainer) return;
     
-    const onDutyStaff = staff.filter(s => s.status === 'On Duty');
-    
-    if (onDutyStaff.length === 0) {
+    if (staff.length === 0) {
         staffContainer.innerHTML = '<p class="text-muted">No staff currently on duty</p>';
         return;
     }
     
-    staffContainer.innerHTML = onDutyStaff.map(member => `
+    staffContainer.innerHTML = staff.map(member => `
         <div class="staff-item">
-            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(member.name)}&background=random" alt="${member.name}">
+            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || 'Staff')}&background=random" alt="${member.name || 'Staff'}">
             <div class="staff-info">
-                <h6>${member.name}</h6>
-                <p>${member.role} - ${member.specialty}</p>
+                <h6>${member.name || 'Unknown'}</h6>
+                <p>${member.role || ''}${member.specialty ? ' - ' + member.specialty : ''}</p>
             </div>
         </div>
     `).join('');
 }
 
-function loadCurrentShift() {
-    const currentHour = new Date().getHours();
-    let shiftName, shiftTime;
+function loadCurrentShift(shiftInfo) {
+    if (!shiftInfo) return;
     
-    if (currentHour >= 8 && currentHour < 16) {
-        shiftName = 'Morning Shift';
-        shiftTime = '08:00 AM - 04:00 PM';
-    } else if (currentHour >= 16 && currentHour < 24) {
-        shiftName = 'Evening Shift';
-        shiftTime = '04:00 PM - 12:00 AM';
-    } else {
-        shiftName = 'Night Shift';
-        shiftTime = '12:00 AM - 08:00 AM';
-    }
+    const currentShiftEl = document.getElementById('currentShift');
+    const shiftTimeEl = document.getElementById('shiftTime');
+    const shiftStaffCountEl = document.getElementById('shiftStaffCount');
     
-    const staff = DataManager.getStaff();
-    const onDutyCount = staff.filter(s => s.status === 'On Duty').length;
-    
-    document.getElementById('currentShift').textContent = shiftName;
-    document.getElementById('shiftTime').textContent = shiftTime;
-    document.getElementById('shiftStaffCount').textContent = onDutyCount;
+    if (currentShiftEl) currentShiftEl.textContent = shiftInfo.shiftName || 'Morning Shift';
+    if (shiftTimeEl) shiftTimeEl.textContent = shiftInfo.shiftTime || '08:00 AM - 04:00 PM';
+    if (shiftStaffCountEl) shiftStaffCountEl.textContent = shiftInfo.staffCount || 0;
 }
 
-function initializeCharts() {
-    // Occupancy Chart
+function initializeCharts(data) {
+    const root = document.documentElement;
+    const primaryColor = getComputedStyle(root).getPropertyValue('--primary').trim() || '#6366F1';
+    const successColor = getComputedStyle(root).getPropertyValue('--success').trim() || '#34D399';
+    const dangerColor = getComputedStyle(root).getPropertyValue('--danger').trim() || '#F87171';
+    const warningColor = getComputedStyle(root).getPropertyValue('--warning').trim() || '#FBBF24';
+    const borderColor = getComputedStyle(root).getPropertyValue('--border-color').trim() || 'rgba(0, 0, 0, 0.05)';
+    
     const occupancyCtx = document.getElementById('occupancyChart');
     if (occupancyCtx) {
-        new Chart(occupancyCtx, {
+        if (occupancyChart) {
+            occupancyChart.destroy();
+        }
+        
+        const labels = data.weeklyOccupancy?.map(w => w.day) || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const occupancyData = data.weeklyOccupancy?.map(w => w.occupancyRate) || [0, 0, 0, 0, 0, 0, 0];
+        
+        occupancyChart = new Chart(occupancyCtx, {
             type: 'line',
             data: {
-                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                labels: labels,
                 datasets: [{
                     label: 'Occupancy Rate (%)',
-                    data: [85, 75, 90, 80, 95, 70, 85],
-                    borderColor: '#6366F1',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    data: occupancyData,
+                    borderColor: primaryColor,
+                    backgroundColor: primaryColor + '1A',
                     tension: 0.4,
                     fill: true,
                     borderWidth: 2,
                     pointRadius: 4,
                     pointHoverRadius: 6,
-                    pointBackgroundColor: '#6366F1'
+                    pointBackgroundColor: primaryColor
                 }]
             },
             options: {
@@ -139,12 +116,18 @@ function initializeCharts() {
                         beginAtZero: true,
                         max: 100,
                         grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
+                            color: borderColor
+                        },
+                        ticks: {
+                            color: getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#6B7280'
                         }
                     },
                     x: {
                         grid: {
                             display: false
+                        },
+                        ticks: {
+                            color: getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#6B7280'
                         }
                     }
                 }
@@ -152,21 +135,23 @@ function initializeCharts() {
         });
     }
     
-    // Room Status Chart
     const roomStatusCtx = document.getElementById('roomStatusChart');
     if (roomStatusCtx) {
-        const rooms = DataManager.getRooms();
-        const occupied = rooms.filter(r => r.status === 'Occupied').length;
-        const available = rooms.filter(r => r.status === 'Available').length;
-        const cleaning = rooms.filter(r => r.status === 'Cleaning').length;
+        if (roomStatusChart) {
+            roomStatusChart.destroy();
+        }
         
-        new Chart(roomStatusCtx, {
+        const occupied = data.occupiedRooms || 0;
+        const available = data.availableRooms || 0;
+        const cleaning = data.cleaningRooms || 0;
+        
+        roomStatusChart = new Chart(roomStatusCtx, {
             type: 'doughnut',
             data: {
                 labels: ['Occupied', 'Available', 'Cleaning'],
                 datasets: [{
                     data: [occupied, available, cleaning],
-                    backgroundColor: ['#F87171', '#34D399', '#FBBF24'],
+                    backgroundColor: [dangerColor, successColor, warningColor],
                     borderWidth: 0,
                     hoverOffset: 8
                 }]
@@ -181,12 +166,37 @@ function initializeCharts() {
                             padding: 15,
                             font: {
                                 size: 12
-                            }
+                            },
+                            color: getComputedStyle(root).getPropertyValue('--text-primary').trim() || '#374151'
                         }
                     }
                 }
             }
         });
     }
+}
+
+function animateNumber(element, start, end, duration) {
+    if (!element) return;
+    
+    const startTime = performance.now();
+    const startValue = start;
+    const endValue = end;
+    
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        
+        const current = Math.floor(startValue + (endValue - startValue) * progress);
+        element.textContent = current;
+        
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        } else {
+            element.textContent = endValue;
+        }
+    }
+    
+    requestAnimationFrame(update);
 }
 

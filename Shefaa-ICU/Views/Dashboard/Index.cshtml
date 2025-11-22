@@ -1,3 +1,4 @@
+@model Shefaa_ICU.ViewModels.DashboardViewModel
 @{
     ViewData["Title"] = "Dashboard";
     ViewData["PageTitle"] = "Dashboard";
@@ -22,7 +23,6 @@
     </div>
 </div>
 
-@* Data: Totals need aggregated counts from Rooms, Patients, Staff, and Alerts *@
 <div class="row g-3 stats-grid" data-animate>
     <div class="col-xxl-2 col-lg-4 col-sm-6">
         <div class="stat-card bg-primary h-100">
@@ -105,7 +105,6 @@
             </div>
             <div class="card-body">
                 <canvas id="occupancyChart"></canvas>
-                @* Data: occupancy trend dataset from Patient/Room history *@
             </div>
         </div>
     </div>
@@ -117,7 +116,6 @@
             </div>
             <div class="card-body">
                 <canvas id="roomStatusChart"></canvas>
-                @* Data: aggregated room statuses *@
             </div>
         </div>
     </div>
@@ -131,7 +129,6 @@
             </div>
             <div class="card-body">
                 <div class="activity-feed" id="activityFeed">
-                    @* Data: latest events from Activity logs *@
                 </div>
             </div>
         </div>
@@ -144,7 +141,6 @@
             </div>
             <div class="card-body">
                 <div class="staff-list" id="staffOnDutyList">
-                    @* Data: staff roster for current shift *@
                 </div>
             </div>
         </div>
@@ -169,13 +165,15 @@
                         <strong>Staff Count:</strong> <span id="shiftStaffCount">0</span>
                     </div>
                 </div>
-                @* Data: shift metadata from Schedule module *@
             </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
+    <script>
+        window.dashboardData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+    </script>
     <script src="~/js/dashboard.js" asp-append-version="true"></script>
 }
 

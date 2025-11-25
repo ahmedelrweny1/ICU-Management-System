@@ -31,8 +31,8 @@ function loadActivityFeed(activities) {
         return;
     }
     
-    feedContainer.innerHTML = activities.map(activity => `
-        <div class="activity-item">
+    feedContainer.innerHTML = activities.map((activity, index) => `
+        <div class="activity-item" style="animation-delay: ${index * 100}ms">
             <div class="activity-time">${activity.time || ''}</div>
             <div class="activity-text">${activity.text || ''}</div>
         </div>
@@ -48,8 +48,8 @@ function loadStaffOnDuty(staff) {
         return;
     }
     
-    staffContainer.innerHTML = staff.map(member => `
-        <div class="staff-item">
+    staffContainer.innerHTML = staff.map((member, index) => `
+        <div class="staff-item" style="animation-delay: ${index * 100}ms">
             <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || 'Staff')}&background=random" alt="${member.name || 'Staff'}">
             <div class="staff-info">
                 <h6>${member.name || 'Unknown'}</h6>
@@ -80,13 +80,13 @@ function renderVitalsAlerts(alerts) {
         return;
     }
 
-    container.innerHTML = alerts.map(alert => `
-        <div class="list-group-item d-flex justify-content-between align-items-center">
+    container.innerHTML = alerts.map((alert, index) => `
+        <div class="list-group-item d-flex justify-content-between align-items-center" style="animation-delay: ${index * 100}ms">
             <div>
                 <div class="fw-semibold">${alert.patientName}</div>
                 <small class="text-muted">${alert.metric} • ${alert.recordedAt}</small>
             </div>
-            <span class="badge bg-${alert.severity || 'warning'}">${alert.value}</span>
+            <span class="badge bg-${alert.severity || 'warning'} pulse-animation">${alert.value}</span>
         </div>
     `).join('');
 }

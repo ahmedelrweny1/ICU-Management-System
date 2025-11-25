@@ -1147,7 +1147,7 @@ body {
 .stat-card:hover {
     transform: translateY(-6px) scale(1.02);
     box-shadow: 
-        0 16px 50px rgba(0, 0, 0, 0.3),
+        0 16px 30px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(129, 140, 248, 0.3),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
     border-color: rgba(129, 140, 248, 0.4);
@@ -2097,8 +2097,18 @@ body {
     align-items: center;
     gap: 12px;
     padding: 12px;
-    background: #F9FAFB;
+    background: var(--bg-secondary);
     border-radius: 8px;
+    margin-bottom: 8px;
+    transition: all 0.3s ease;
+    animation: fadeSlideRight 0.5s ease forwards;
+    opacity: 0;
+}
+
+.staff-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    border-left: 3px solid var(--primary);
 }
 
 .staff-item img {
@@ -2111,13 +2121,13 @@ body {
     margin: 0;
     font-size: 14px;
     font-weight: 600;
-    color: var(--dark);
+    color: var(--text-primary);
 }
 
 .staff-info p {
     margin: 0;
     font-size: 12px;
-    color: #6B7280;
+    color: var(--text-secondary);
 }
 
 /* ===================================
@@ -2130,24 +2140,27 @@ body {
 
 .activity-item {
     padding: 12px;
-    border-left: 3px solid #E5E7EB;
+    border-left: 3px solid var(--border-color);
     margin-bottom: 12px;
+    animation: fadeSlideLeft 0.5s ease forwards;
+    opacity: 0;
 }
 
 .activity-item:hover {
-    background: #F9FAFB;
+    background: var(--bg-secondary);
     border-radius: 8px;
+    border-left: 3px solid var(--primary);
 }
 
 .activity-time {
     font-size: 12px;
-    color: #9CA3AF;
+    color: var(--text-tertiary);
     margin-bottom: 4px;
 }
 
 .activity-text {
     font-size: 14px;
-    color: var(--dark);
+    color: var(--text-primary);
 }
 
 /* ===================================
@@ -2788,6 +2801,28 @@ canvas {
     }
 }
 
+@keyframes fadeSlideLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeSlideRight {
+    from {
+        opacity: 0;
+        transform: translateX(15px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
 @keyframes pulse {
     0%, 100% {
         transform: scale(1);
@@ -2795,6 +2830,10 @@ canvas {
     50% {
         transform: scale(1.05);
     }
+}
+
+.pulse-animation {
+    animation: pulse 2s infinite;
 }
 
 .card,
@@ -2898,6 +2937,26 @@ html {
 /* ===================================
    25. Modal Overrides
    =================================== */
+
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    margin-bottom: 8px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    animation: fadeIn 0.5s ease forwards;
+    opacity: 0;
+}
+
+.list-group-item:hover {
+    background: var(--bg-tertiary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
 .modal-content {
     border-radius: 20px;
     border: 1px solid rgba(148, 163, 184, 0.2);

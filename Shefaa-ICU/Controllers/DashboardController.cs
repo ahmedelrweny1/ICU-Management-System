@@ -29,8 +29,10 @@ namespace Shefaa_ICU.Controllers
                 ViewBag.DbConnectionString = _context.Database.GetConnectionString();
                 ViewBag.DbProviderName = _context.Database.ProviderName;
                 
-                // Print to console for server-side debugging
-                Console.WriteLine("Starting to fetch dashboard data...");
+            // Print to console for server-side debugging
+            Console.WriteLine("Starting to fetch dashboard data...");
+            Console.WriteLine($"Database provider: {_context.Database.ProviderName}");
+            Console.WriteLine($"Connection string: {_context.Database.GetConnectionString()}");
 
                 // Get basic statistics from database with debug info
                 try {
@@ -140,58 +142,88 @@ namespace Shefaa_ICU.Controllers
             // Recent activities from database
             var activities = new List<ActivityItem>();
             
-            // Get recent clinical notes
-            var recentNotes = _context.ClinicalNotes
-                .Include(c => c.Patient)
-                .Include(c => c.Staff)
-                .OrderByDescending(c => c.Timestamp)
-                .Take(5)
-                .ToList();
-                
-            foreach (var note in recentNotes)
+            try
             {
-                activities.Add(new ActivityItem
+                // Get recent clinical notes
+                Console.WriteLine("Fetching recent clinical notes...");
+                var recentNotes = _context.ClinicalNotes
+                    .Include(c => c.Patient)
+                    .Include(c => c.Staff)
+                    .OrderByDescending(c => c.Timestamp)
+                    .Take(5)
+                    .ToList();
+                    
+                Console.WriteLine($"Found {recentNotes.Count} recent clinical notes");
+                
+                foreach (var note in recentNotes)
                 {
-                    Time = note.Timestamp.ToString("HH:mm"),
-                    Text = $"{note.Staff?.Name ?? "Staff"} added a note for {note.Patient?.Name ?? "Patient"}",
-                    Type = "patient"
-                });
+                    activities.Add(new ActivityItem
+                    {
+                        Time = note.Timestamp.ToString("HH:mm"),
+                        Text = $"{note.Staff?.Name ?? "Staff"} added a note for {note.Patient?.Name ?? "Patient"}",
+                        Type = "patient"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching clinical notes: {ex.Message}");
             }
             
-            // Get recent medications
-            var recentMedications = _context.Medications
-                .Include(m => m.Patient)
-                .Include(m => m.Staff)
-                .Where(m => m.AdministeredAt != null)
-                .OrderByDescending(m => m.AdministeredAt)
-                .Take(3)
-                .ToList();
-                
-            foreach (var med in recentMedications)
+            try
             {
-                activities.Add(new ActivityItem
+                // Get recent medications
+                Console.WriteLine("Fetching recent medications...");
+                var recentMedications = _context.Medications
+                    .Include(m => m.Patient)
+                    .Include(m => m.Staff)
+                    .Where(m => m.AdministeredAt != null)
+                    .OrderByDescending(m => m.AdministeredAt)
+                    .Take(3)
+                    .ToList();
+                    
+                Console.WriteLine($"Found {recentMedications.Count} recent medications");
+                
+                foreach (var med in recentMedications)
                 {
-                    Time = med.AdministeredAt?.ToString("HH:mm") ?? "",
-                    Text = $"{med.Name} given to {med.Patient?.Name ?? "Patient"}",
-                    Type = "medication"
-                });
+                    activities.Add(new ActivityItem
+                    {
+                        Time = med.AdministeredAt?.ToString("HH:mm") ?? "",
+                        Text = $"{med.Name} given to {med.Patient?.Name ?? "Patient"}",
+                        Type = "medication"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching medications: {ex.Message}");
             }
             
-            // Get recent check-ins
-            var recentCheckIns = _context.AttendanceLogs
-                .Include(a => a.Staff)
-                .OrderByDescending(a => a.CheckInTime)
-                .Take(2)
-                .ToList();
-                
-            foreach (var checkIn in recentCheckIns)
+            try
             {
-                activities.Add(new ActivityItem
+                // Get recent check-ins
+                Console.WriteLine("Fetching recent check-ins...");
+                var recentCheckIns = _context.AttendanceLogs
+                    .Include(a => a.Staff)
+                    .OrderByDescending(a => a.CheckInTime)
+                    .Take(2)
+                    .ToList();
+                    
+                Console.WriteLine($"Found {recentCheckIns.Count} recent check-ins");
+                
+                foreach (var checkIn in recentCheckIns)
                 {
-                    Time = checkIn.CheckInTime.ToString("HH:mm"),
-                    Text = $"{checkIn.Staff?.Name ?? "Staff"} checked in",
-                    Type = "staff"
-                });
+                    activities.Add(new ActivityItem
+                    {
+                        Time = checkIn.CheckInTime.ToString("HH:mm"),
+                        Text = $"{checkIn.Staff?.Name ?? "Staff"} checked in",
+                        Type = "staff"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching check-ins: {ex.Message}");
             }
             
             // Sort activities by time and take most recent
@@ -199,23 +231,43 @@ namespace Shefaa_ICU.Controllers
                 .OrderByDescending(a => a.Time)
                 .Take(10)
                 .ToList();
+                
+            Console.WriteLine($"Total activities collected: {activities.Count}");
+            Console.WriteLine($"Final activities in viewModel: {viewModel.RecentActivities.Count}");
             
             // Staff on duty from database
-            var staffOnDutyList = _context.AttendanceLogs
-                .Include(a => a.Staff)
-                .Where(a => a.CheckInTime.Date == today && 
-                          a.Status == AttendanceStatus.OnDuty && 
-                          a.CheckOutTime == null)
-                .Select(a => new StaffOnDutyItem
-                {
-                    Id = a.Staff.ID,
-                    Name = a.Staff.Name,
-                    Role = a.Staff.Role,
-                    Specialty = a.Staff.Specialty
-                })
-                .ToList();
+            try
+            {
+                Console.WriteLine("Fetching staff on duty...");
+                var staffOnDutyList = _context.AttendanceLogs
+                    .Include(a => a.Staff)
+                    .Where(a => a.CheckInTime.Date == today && 
+                              a.Status == AttendanceStatus.OnDuty && 
+                              a.CheckOutTime == null)
+                    .Select(a => new StaffOnDutyItem
+                    {
+                        Id = a.Staff != null ? a.Staff.ID : 0,
+                        Name = a.Staff != null ? a.Staff.Name : "Unknown",
+                        Role = a.Staff != null ? a.Staff.Role : "",
+                        Specialty = a.Staff != null ? a.Staff.Specialty : null
+                    })
+                    .ToList();
+                    
+                Console.WriteLine($"Found {staffOnDutyList.Count} staff on duty");
                 
-            viewModel.StaffOnDutyList = staffOnDutyList;
+                // Debug output for each staff member
+                foreach (var staff in staffOnDutyList)
+                {
+                    Console.WriteLine($"Staff on duty: {staff.Name}, {staff.Role}, {staff.Specialty}");
+                }
+                
+                viewModel.StaffOnDutyList = staffOnDutyList;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching staff on duty: {ex.Message}");
+                viewModel.StaffOnDutyList = new List<StaffOnDutyItem>();
+            }
 
             // Vitals trend data from database
             var recentVitals = _context.Vitals

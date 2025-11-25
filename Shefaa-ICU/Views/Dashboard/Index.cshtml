@@ -270,9 +270,9 @@
         // Get the actual model data
         const modelData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
         
-        // Create a merged data object that uses actual database values for statistics
-        // but hardcoded data for sections that aren't working
-        const mergedData = {
+        // Create a data object that uses actual database values
+        // Use the model data directly and only fall back to hardcoded data if needed
+        const dashboardData = {
             // Use actual database values for counts
             totalRooms: modelData.totalRooms || 10,
             totalPatients: modelData.totalPatients || 10,
@@ -283,38 +283,43 @@
             cleaningRooms: modelData.cleaningRooms || 0,
             staffOnDuty: modelData.staffOnDuty || 0,
             
-            // Use model data for charts if available
-            weeklyOccupancy: modelData.weeklyOccupancy && modelData.weeklyOccupancy.length > 0 
-                ? modelData.weeklyOccupancy 
-                : hardcodedData.weeklyOccupancy,
-                
-            // Override sections that aren't working with hardcoded data
-            recentActivities: hardcodedData.recentActivities,
-            staffOnDutyList: hardcodedData.staffOnDutyList,
-            
-            // Use model data for the rest if available
-            currentShift: modelData.currentShift || hardcodedData.currentShift,
-            vitalsTrend: modelData.vitalsTrend && modelData.vitalsTrend.length > 0 
-                ? modelData.vitalsTrend 
-                : hardcodedData.vitalsTrend,
-            vitalAlerts: modelData.vitalAlerts && modelData.vitalAlerts.length > 0 
-                ? modelData.vitalAlerts 
-                : hardcodedData.vitalAlerts
+            // Use model data for all sections
+            weeklyOccupancy: modelData.weeklyOccupancy || [],
+            recentActivities: modelData.recentActivities || [],
+            staffOnDutyList: modelData.staffOnDutyList || [],
+            currentShift: modelData.currentShift || { shiftName: "", shiftTime: "", staffCount: 0 },
+            vitalsTrend: modelData.vitalsTrend || [],
+            vitalAlerts: modelData.vitalAlerts || []
         };
         
-        // Use merged data to ensure all sections display correctly
-        window.dashboardData = mergedData;
+        // Use dashboard data directly from the model
+        window.dashboardData = dashboardData;
         
         // Keep original data for debugging
         window.modelData = modelData;
         window.hardcodedData = hardcodedData;
         
-        // Log the actual counts from the database for verification
+        // Log detailed data for debugging
         console.log("Actual database counts:", {
             totalRooms: modelData.totalRooms,
             totalPatients: modelData.totalPatients,
             totalStaff: modelData.totalStaff
         });
+        
+        // Log activities and staff data specifically
+        console.log("Recent Activities from database:", modelData.recentActivities);
+        console.log("Staff on duty from database:", modelData.staffOnDutyList);
+        
+        // Check if we need to fall back to hardcoded data
+        if (!modelData.recentActivities || modelData.recentActivities.length === 0) {
+            console.log("WARNING: No recent activities found in database, using hardcoded data");
+            dashboardData.recentActivities = hardcodedData.recentActivities;
+        }
+        
+        if (!modelData.staffOnDutyList || modelData.staffOnDutyList.length === 0) {
+            console.log("WARNING: No staff on duty found in database, using hardcoded data");
+            dashboardData.staffOnDutyList = hardcodedData.staffOnDutyList;
+        }
     </script>
     <script src="~/js/dashboard.js" asp-append-version="true"></script>
 }

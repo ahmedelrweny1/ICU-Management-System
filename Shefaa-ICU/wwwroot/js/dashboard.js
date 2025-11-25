@@ -6,6 +6,20 @@ document.addEventListener('DOMContentLoaded', function() {
     // Get dashboard data from the model
     const data = window.dashboardData || {};
     
+    // Debug data received in JavaScript
+    console.log("Dashboard data in JavaScript:", data);
+    console.log("totalRooms:", data.totalRooms);
+    console.log("totalPatients:", data.totalPatients);
+    console.log("totalStaff:", data.totalStaff);
+    console.log("criticalCases:", data.criticalCases);
+    console.log("availableRooms:", data.availableRooms);
+    console.log("occupiedRooms:", data.occupiedRooms);
+    console.log("cleaningRooms:", data.cleaningRooms);
+    console.log("staffOnDuty:", data.staffOnDuty);
+    console.log("weeklyOccupancy:", data.weeklyOccupancy);
+    console.log("recentActivities:", data.recentActivities);
+    console.log("staffOnDutyList:", data.staffOnDutyList);
+    
     // Update all dashboard components
     updateStatistics(data);
     loadActivityFeed(data.recentActivities || []);

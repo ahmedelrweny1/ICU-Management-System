@@ -32,6 +32,19 @@
     --info-dark: #2563EB;     /* Darker blue for hover */
     --info-light: #93C5FD;    /* Lighter blue for backgrounds */
     
+    /* Font Colors - Light Mode */
+    --font-primary: #111827;      /* Headings, important text */
+    --font-secondary: #374151;    /* Body text, paragraphs */
+    --font-tertiary: #6B7280;     /* Less important text, captions */
+    --font-muted: #9CA3AF;        /* Placeholder, disabled text */
+    --font-inverse: #FFFFFF;      /* Text on dark backgrounds */
+    --font-link: #4F6BED;         /* Link text */
+    --font-link-hover: #3D56BE;   /* Link text on hover */
+    --font-success: #059669;      /* Success text */
+    --font-danger: #DC2626;       /* Error text */
+    --font-warning: #D97706;      /* Warning text */
+    --font-info: #2563EB;         /* Info text */
+    
     /* Neutral Colors */
     --dark: #1F2937;          /* Almost black - text */
     --light: #F9FAFB;         /* Almost white - backgrounds */
@@ -57,9 +70,9 @@
     --bg-primary: #FFFFFF;    /* Main background */
     --bg-secondary: #F9FAFB;  /* Secondary background */
     --bg-tertiary: #F3F4F6;   /* Tertiary background */
-    --text-primary: #1F2937;  /* Main text */
-    --text-secondary: #4B5563; /* Secondary text */
-    --text-tertiary: #6B7280; /* Tertiary text */
+    --text-primary: var(--font-primary);  /* Main text */
+    --text-secondary: var(--font-secondary); /* Secondary text */
+    --text-tertiary: var(--font-tertiary); /* Tertiary text */
     --border-color: #E5E7EB;  /* Border color */
     --card-bg: #FFFFFF;       /* Card background */
     
@@ -97,6 +110,19 @@
     --info: #60A5FA;          /* Lighter blue for dark mode */
     --info-dark: #3B82F6;     /* Mid blue for hover in dark mode */
     --info-light: #93C5FD;    /* Very light blue for backgrounds */
+    
+    /* Font Colors - Dark Mode */
+    --font-primary: #F9FAFB;      /* Headings, important text */
+    --font-secondary: #E5E7EB;    /* Body text, paragraphs */
+    --font-tertiary: #D1D5DB;     /* Less important text, captions */
+    --font-muted: #9CA3AF;        /* Placeholder, disabled text */
+    --font-inverse: #111827;      /* Text on light backgrounds */
+    --font-link: #818CF8;         /* Link text */
+    --font-link-hover: #A5B4FC;   /* Link text on hover */
+    --font-success: #34D399;      /* Success text */
+    --font-danger: #F87171;       /* Error text */
+    --font-warning: #FBBF24;      /* Warning text */
+    --font-info: #60A5FA;         /* Info text */
     
     /* Neutral Colors - Dark Mode */
     --dark: #F9FAFB;          /* Light color for dark mode (inverted) */
@@ -138,9 +164,9 @@
     --bg-primary: #0F172A;
     --bg-secondary: #1E293B;
     --bg-tertiary: #334155;
-    --text-primary: #F1F5F9;
-    --text-secondary: #CBD5E1;
-    --text-tertiary: #94A3B8;
+    --text-primary: var(--font-primary);
+    --text-secondary: var(--font-secondary);
+    --text-tertiary: var(--font-tertiary);
     --border-color: #334155;
     --card-bg: #1E293B;
 }
@@ -154,7 +180,7 @@
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
     background-color: var(--bg-primary);
-    color: var(--text-primary);
+    color: var(--font-secondary);
     overflow-x: hidden;
     line-height: 1.6;
     transition: background-color 0.3s ease, color 0.3s ease;
@@ -677,7 +703,7 @@ body {
 .page-title {
     font-size: 20px;
     font-weight: 600;
-    color: var(--text-primary);
+    color: var(--font-primary);
     transition: color 0.3s ease;
     margin: 0;
 }
@@ -687,7 +713,7 @@ body {
     background: none;
     border: none;
     font-size: 24px;
-    color: var(--dark);
+    color: var(--font-primary);
     cursor: pointer;
 }
 
@@ -1084,7 +1110,7 @@ body {
 
 .btn-soft {
     background: rgba(99, 102, 241, 0.08);
-    color: var(--primary-dark);
+    color: var(--font-link);
     border: 1px solid rgba(99, 102, 241, 0.15);
     border-radius: 10px;
     padding: 10px 18px;

@@ -95,7 +95,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #0F172A 0%, #1E293B 50%, #334155 100%);
+    background: linear-gradient(135deg, #E2E8F0 0%, #F1F5F9 50%, #F8FAFC 100%);
     position: relative;
     overflow: hidden;
 }
@@ -140,13 +140,13 @@ body {
 }
 
 .auth-card {
-    background: rgba(30, 41, 59, 0.95);
+    background: var(--card-bg);
     backdrop-filter: blur(20px);
     color: var(--text-primary);
     border-radius: 20px;
     padding: 45px;
     box-shadow: 
-        0 20px 60px rgba(0, 0, 0, 0.4),
+        0 20px 60px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(255, 255, 255, 0.05);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid rgba(148, 163, 184, 0.1);
@@ -1090,7 +1090,7 @@ body {
 }
 
 .stat-card {
-    background: rgba(30, 41, 59, 0.8);
+    background: var(--card-bg);
     backdrop-filter: blur(10px);
     border-radius: 16px;
     padding: 28px;
@@ -1098,7 +1098,7 @@ body {
     align-items: center;
     gap: 18px;
     box-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.2),
+        0 4px 20px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(255, 255, 255, 0.05);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border: 1px solid rgba(148, 163, 184, 0.15);
@@ -1286,14 +1286,14 @@ body {
    8. Cards
    =================================== */
 .card {
-    background: rgba(30, 41, 59, 0.8);
+    background: var(--card-bg);
     backdrop-filter: blur(10px);
     color: var(--text-primary);
     border-color: rgba(148, 163, 184, 0.15);
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     border-radius: 16px;
     box-shadow: 
-        0 4px 20px rgba(0, 0, 0, 0.2),
+        0 4px 20px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(148, 163, 184, 0.15);
     position: relative;
@@ -1378,10 +1378,10 @@ body {
     border: 2px solid rgba(148, 163, 184, 0.2);
     border-radius: 16px;
     padding: 20px 24px;
-    background: rgba(30, 41, 59, 0.8);
+    background: var(--card-bg);
     backdrop-filter: blur(10px);
     box-shadow: 
-        0 4px 15px rgba(0, 0, 0, 0.2),
+        0 4px 15px rgba(0, 0, 0, 0.1),
         0 0 0 1px rgba(255, 255, 255, 0.05);
     display: flex;
     justify-content: space-between;
@@ -1450,7 +1450,7 @@ body {
     display: block;
     font-size: 16px;
     font-weight: 600;
-    color: #E2E8F0;
+    color: var(--text-primary);
     margin-bottom: 4px;
     transition: color 0.3s ease;
 }
@@ -1533,11 +1533,11 @@ body {
     text-align: left;
     font-size: 12px;
     font-weight: 600;
-    color: #94A3B8;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.8px;
     border-bottom: 2px solid rgba(148, 163, 184, 0.2);
-    background: rgba(15, 23, 42, 0.5);
+    background: var(--bg-secondary);
     transition: all 0.3s ease;
     position: relative;
 }
@@ -1562,8 +1562,8 @@ body {
     padding: 18px 14px;
     border-bottom: 1px solid rgba(148, 163, 184, 0.15);
     font-size: 14px;
-    color: #E2E8F0;
-    background: rgba(30, 41, 59, 0.5);
+    color: var(--text-primary);
+    background: var(--card-bg);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -1802,7 +1802,7 @@ body {
 }
 
 .room-card {
-    background: rgba(30, 41, 59, 0.8);
+    background: var(--card-bg);
     backdrop-filter: blur(10px);
     border-radius: 16px;
     padding: 24px;
@@ -2154,7 +2154,7 @@ body {
    17. Schedule Cards
    =================================== */
 .shift-card {
-    background: rgba(30, 41, 59, 0.8);
+    background: var(--card-bg);
     backdrop-filter: blur(10px);
     border-radius: 16px;
     padding: 24px;
@@ -2747,14 +2747,14 @@ canvas {
 }
 
 ::-webkit-scrollbar-track {
-    background: rgba(15, 23, 42, 0.5);
+    background: var(--bg-tertiary);
     border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb {
     background: linear-gradient(180deg, #6366F1, #8B5CF6);
     border-radius: 5px;
-    border: 2px solid rgba(15, 23, 42, 0.5);
+    border: 2px solid var(--bg-tertiary);
     transition: all 0.3s ease;
 }
 
@@ -2901,12 +2901,12 @@ html {
 .modal-content {
     border-radius: 20px;
     border: 1px solid rgba(148, 163, 184, 0.2);
-    background: rgba(30, 41, 59, 0.95);
+    background: var(--card-bg);
     backdrop-filter: blur(20px);
     box-shadow: 
-        0 20px 60px rgba(0, 0, 0, 0.5),
+        0 20px 60px rgba(0, 0, 0, 0.2),
         0 0 0 1px rgba(255, 255, 255, 0.05);
-    color: #F9FAFB;
+    color: var(--text-primary);
     animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -2924,12 +2924,12 @@ html {
 .modal-header {
     border-bottom: 1px solid rgba(148, 163, 184, 0.2);
     padding: 24px 28px;
-    background: rgba(15, 23, 42, 0.5);
+    background: var(--bg-secondary);
     border-radius: 20px 20px 0 0;
 }
 
 .modal-header .modal-title {
-    color: #F9FAFB;
+    color: var(--text-primary);
     font-weight: 600;
     font-size: 20px;
 }
@@ -2947,7 +2947,7 @@ html {
 
 .modal-body {
     padding: 28px;
-    color: #E2E8F0;
+    color: var(--text-primary);
 }
 
 .modal-footer {
@@ -2960,7 +2960,7 @@ html {
 /* Form Controls */
 .form-label {
     font-weight: 600;
-    color: #E2E8F0;
+    color: var(--text-primary);
     margin-bottom: 8px;
     font-size: 14px;
     transition: color 0.3s ease;
@@ -2973,8 +2973,8 @@ html {
     border-radius: 10px;
     padding: 12px 16px;
     font-size: 14px;
-    background: rgba(15, 23, 42, 0.6);
-    color: #F9FAFB;
+    background: var(--bg-secondary);
+    color: var(--text-primary);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     backdrop-filter: blur(10px);
 }
@@ -2982,7 +2982,7 @@ html {
 .form-control:hover,
 .form-select:hover {
     border-color: rgba(129, 140, 248, 0.4);
-    background: rgba(15, 23, 42, 0.8);
+    background: var(--bg-tertiary);
     transform: translateY(-1px);
 }
 
@@ -2993,7 +2993,7 @@ html {
         0 0 0 4px rgba(129, 140, 248, 0.15),
         0 4px 12px rgba(99, 102, 241, 0.2);
     outline: none;
-    background: rgba(15, 23, 42, 0.9);
+    background: var(--bg-secondary);
     transform: translateY(-2px);
 }
 

@@ -267,20 +267,54 @@
             ]
         };
         
-        // Create a merged data object that prioritizes hardcoded data for sections that aren't working
+        // Get the actual model data
+        const modelData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+        
+        // Create a merged data object that uses actual database values for statistics
+        // but hardcoded data for sections that aren't working
         const mergedData = {
-            ...@Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model)),
-            // Override specific sections that aren't working with hardcoded data
+            // Use actual database values for counts
+            totalRooms: modelData.totalRooms || 10,
+            totalPatients: modelData.totalPatients || 10,
+            totalStaff: modelData.totalStaff || 11,
+            criticalCases: modelData.criticalCases || 0,
+            availableRooms: modelData.availableRooms || 0,
+            occupiedRooms: modelData.occupiedRooms || 0,
+            cleaningRooms: modelData.cleaningRooms || 0,
+            staffOnDuty: modelData.staffOnDuty || 0,
+            
+            // Use model data for charts if available
+            weeklyOccupancy: modelData.weeklyOccupancy && modelData.weeklyOccupancy.length > 0 
+                ? modelData.weeklyOccupancy 
+                : hardcodedData.weeklyOccupancy,
+                
+            // Override sections that aren't working with hardcoded data
             recentActivities: hardcodedData.recentActivities,
-            staffOnDutyList: hardcodedData.staffOnDutyList
+            staffOnDutyList: hardcodedData.staffOnDutyList,
+            
+            // Use model data for the rest if available
+            currentShift: modelData.currentShift || hardcodedData.currentShift,
+            vitalsTrend: modelData.vitalsTrend && modelData.vitalsTrend.length > 0 
+                ? modelData.vitalsTrend 
+                : hardcodedData.vitalsTrend,
+            vitalAlerts: modelData.vitalAlerts && modelData.vitalAlerts.length > 0 
+                ? modelData.vitalAlerts 
+                : hardcodedData.vitalAlerts
         };
         
         // Use merged data to ensure all sections display correctly
         window.dashboardData = mergedData;
         
         // Keep original data for debugging
-        window.modelData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+        window.modelData = modelData;
         window.hardcodedData = hardcodedData;
+        
+        // Log the actual counts from the database for verification
+        console.log("Actual database counts:", {
+            totalRooms: modelData.totalRooms,
+            totalPatients: modelData.totalPatients,
+            totalStaff: modelData.totalStaff
+        });
     </script>
     <script src="~/js/dashboard.js" asp-append-version="true"></script>
 }

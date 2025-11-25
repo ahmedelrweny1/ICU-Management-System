@@ -197,6 +197,11 @@
 @section Scripts {
     <script>
         window.dashboardData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+        
+        // Debug information
+        console.log("Debug info:", "@ViewBag.Debug");
+        console.log("DB Error:", "@ViewBag.DbError");
+        console.log("Model serialized:", @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model)));
     </script>
     <script src="~/js/dashboard.js" asp-append-version="true"></script>
 }

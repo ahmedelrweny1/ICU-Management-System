@@ -5,6 +5,9 @@ let vitalsChart = null;
 document.addEventListener('DOMContentLoaded', function() {
     const data = window.dashboardData || {};
     
+    // Debug: Log the data received
+    console.log("Dashboard data received:", data);
+    
     updateStatistics(data);
     loadActivityFeed(data.recentActivities || []);
     loadStaffOnDuty(data.staffOnDutyList || []);

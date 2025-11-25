@@ -22,18 +22,32 @@ namespace Shefaa_ICU.Controllers
         {
             try
             {
+                // Add debug information
+                ViewBag.Debug = "Dashboard controller executed";
+                
                 var viewModel = new DashboardViewModel();
 
-                viewModel.TotalRooms = await _context.Rooms.CountAsync();
-                viewModel.TotalPatients = await _context.Patients
-                    .Where(p => p.DischargeDate == null)
-                    .CountAsync();
-                viewModel.TotalStaff = await _context.Staff
-                    .Where(s => s.Status == StaffStatus.Active)
-                    .CountAsync();
-                viewModel.CriticalCases = await _context.Patients
-                    .Where(p => p.DischargeDate == null && p.Condition == "Critical")
-                    .CountAsync();
+                // Set some default values for testing
+                viewModel.TotalRooms = 10;
+                viewModel.TotalPatients = 8;
+                viewModel.TotalStaff = 12;
+                viewModel.CriticalCases = 3;
+                
+                // Try to get actual values from database
+                try {
+                    viewModel.TotalRooms = await _context.Rooms.CountAsync();
+                    viewModel.TotalPatients = await _context.Patients
+                        .Where(p => p.DischargeDate == null)
+                        .CountAsync();
+                    viewModel.TotalStaff = await _context.Staff
+                        .Where(s => s.Status == StaffStatus.Active)
+                        .CountAsync();
+                    viewModel.CriticalCases = await _context.Patients
+                        .Where(p => p.DischargeDate == null && p.Condition == "Critical")
+                        .CountAsync();
+                } catch (Exception dbEx) {
+                    ViewBag.DbError = dbEx.Message;
+                }
 
                 viewModel.AvailableRooms = await _context.Rooms
                     .Where(r => r.Status == RoomStatus.Available)

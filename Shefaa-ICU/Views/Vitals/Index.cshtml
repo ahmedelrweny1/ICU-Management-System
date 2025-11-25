@@ -1,0 +1,113 @@
+@model Shefaa_ICU.ViewModels.VitalsListViewModel
+@{
+    ViewData["Title"] = "Vitals";
+    ViewData["PageTitle"] = "Vitals Monitoring";
+    ViewData["ActivePage"] = "Vitals";
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-stethoscope me-2"></i>Record Vitals</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.PatientId" class="form-label"></label>
+                        <select asp-for="Form.PatientId" class="form-select" asp-items="@(new SelectList(Model.Patients, nameof(SimpleLookupItem.Id), nameof(SimpleLookupItem.Name)))">
+                            <option value="">Select patient...</option>
+                        </select>
+                        <span asp-validation-for="Form.PatientId" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.BP" class="form-label"></label>
+                        <input asp-for="Form.BP" class="form-control" placeholder="120/80" />
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label asp-for="Form.Temperature" class="form-label"></label>
+                            <input asp-for="Form.Temperature" class="form-control" placeholder="°C" />
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="Form.Pulse" class="form-label"></label>
+                            <input asp-for="Form.Pulse" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-2">
+                        <div class="col-6">
+                            <label asp-for="Form.SpO2" class="form-label"></label>
+                            <input asp-for="Form.SpO2" class="form-control" />
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="Form.RespiratoryRate" class="form-label"></label>
+                            <input asp-for="Form.RespiratoryRate" class="form-control" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                        <i class="fas fa-save me-1"></i> Save
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Recent Vitals</h5>
+                <span class="badge bg-primary">@($"{Model.Entries.Count} entries")</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Recorded</th>
+                            <th>BP</th>
+                            <th>Temp</th>
+                            <th>Pulse</th>
+                            <th>SpO₂</th>
+                            <th>RR</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Entries.Any())
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">No vitals recorded.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var entry in Model.Entries)
+                            {
+                                <tr>
+                                    <td class="fw-semibold">@entry.PatientName</td>
+                                    <td>@entry.RecordedAt.ToLocalTime().ToString("MMM dd, HH:mm")</td>
+                                    <td>@entry.BpDisplay</td>
+                                    <td>@entry.Temperature?.ToString("0.0")</td>
+                                    <td>@entry.Pulse</td>
+                                    <td>
+                                        <span class="badge @(entry.SpO2.HasValue && entry.SpO2 < 92 ? "bg-danger" : "bg-success")">
+                                            @entry.SpO2
+                                        </span>
+                                    </td>
+                                    <td>@entry.RespiratoryRate</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

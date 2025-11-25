@@ -1,0 +1,144 @@
+@model Shefaa_ICU.ViewModels.MedicationListViewModel
+@{
+    ViewData["Title"] = "Medications";
+    ViewData["PageTitle"] = "Medication Orders";
+    ViewData["ActivePage"] = "Medications";
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-prescription-bottle-alt me-2"></i>New Medication Order</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <div class="mb-3">
+                        <label asp-for="Form.PatientId" class="form-label"></label>
+                        <select asp-for="Form.PatientId" class="form-select" asp-items="@(new SelectList(Model.Patients, nameof(SimpleLookupItem.Id), nameof(SimpleLookupItem.Name)))">
+                            <option value="">Select patient...</option>
+                        </select>
+                        <span class="text-danger" asp-validation-for="Form.PatientId"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.Name" class="form-label"></label>
+                        <input asp-for="Form.Name" class="form-control" />
+                        <span class="text-danger" asp-validation-for="Form.Name"></span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label asp-for="Form.Dose" class="form-label"></label>
+                            <input asp-for="Form.Dose" class="form-control" />
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="Form.Frequency" class="form-label"></label>
+                            <input asp-for="Form.Frequency" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 mt-3">
+                        <label asp-for="Form.ScheduledTime" class="form-label"></label>
+                        <input asp-for="Form.ScheduledTime" class="form-control" type="datetime-local" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Form.AdministeredBy" class="form-label"></label>
+                        <select asp-for="Form.AdministeredBy" class="form-select" asp-items="@(new SelectList(Model.Staff, nameof(SimpleLookupItem.Id), nameof(SimpleLookupItem.Name)))">
+                            <option value="">Unassigned</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-plus-circle me-1"></i> Save Medication
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h5 class="mb-0"><i class="fas fa-pills me-2"></i>Active Medication Orders</h5>
+                <span class="badge bg-primary">@($"{Model.Medications.Count} total")</span>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Medication</th>
+                            <th>Schedule</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!Model.Medications.Any())
+                        {
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-4">
+                                    No medications recorded yet.
+                                </td>
+                            </tr>
+                        }
+                        else
+                        {
+                            foreach (var med in Model.Medications)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">@med.PatientName</div>
+                                        <small class="text-muted">Requested @med.RequestedAt</small>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">@med.MedicationName</div>
+                                        <small class="text-muted">@med.Dose @med.Frequency</small>
+                                    </td>
+                                    <td>
+                                        @if (med.ScheduledTime.HasValue)
+                                        {
+                                            <span>@med.ScheduledTime.Value.ToString("MMM dd, HH:mm")</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not scheduled</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-@(med.Status == "Given" ? "success" : med.Status == "Cancelled" ? "secondary" : "warning")">
+                                            @med.Status
+                                        </span>
+                                        @if (!string.IsNullOrEmpty(med.AdministeredBy))
+                                        {
+                                            <div class="small text-muted">By @med.AdministeredBy</div>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group">
+                                            <form asp-action="MarkGiven" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@med.Id" />
+                                                <button type="submit" class="btn btn-sm btn-success" @(med.Status == "Given" ? "disabled" : null)>Given</button>
+                                            </form>
+                                            <form asp-action="Cancel" method="post" class="d-inline ms-2">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@med.Id" />
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary" @(med.Status == "Cancelled" ? "disabled" : null)>Cancel</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+

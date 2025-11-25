@@ -150,6 +150,62 @@ namespace Shefaa_ICU.Controllers
 
                 viewModel.StaffOnDutyList = staffOnDuty;
 
+                var recentVitals = await _context.Vitals
+                    .Include(v => v.Patient)
+                    .OrderByDescending(v => v.RecordedAt)
+                    .Take(10)
+                    .ToListAsync();
+
+                viewModel.VitalsTrend = recentVitals
+                    .OrderBy(v => v.RecordedAt)
+                    .Select(v => new VitalsTrendPoint
+                    {
+                        Label = v.RecordedAt.ToString("HH:mm"),
+                        Pulse = v.Pulse ?? 0,
+                        SpO2 = v.SpO2 ?? 0
+                    })
+                    .ToList();
+
+                viewModel.VitalAlerts = recentVitals
+                    .Where(v =>
+                        (v.SpO2.HasValue && v.SpO2 < 92) ||
+                        (v.Pulse.HasValue && (v.Pulse < 50 || v.Pulse > 110)) ||
+                        (v.Temperature.HasValue && v.Temperature > 38.5))
+                    .Select(v =>
+                    {
+                        string metric;
+                        string value;
+                        string severity = "warning";
+
+                        if (v.SpO2.HasValue && v.SpO2 < 92)
+                        {
+                            metric = "SpO₂";
+                            value = $"{v.SpO2}%";
+                            severity = "danger";
+                        }
+                        else if (v.Pulse.HasValue && (v.Pulse < 50 || v.Pulse > 110))
+                        {
+                            metric = "Pulse";
+                            value = $"{v.Pulse} bpm";
+                        }
+                        else
+                        {
+                            metric = "Temp";
+                            value = $"{v.Temperature:0.0}°C";
+                        }
+
+                        return new VitalAlertItem
+                        {
+                            PatientName = v.Patient?.Name ?? "Unknown",
+                            Metric = metric,
+                            Value = value,
+                            Severity = severity,
+                            RecordedAt = v.RecordedAt.ToString("HH:mm")
+                        };
+                    })
+                    .Take(4)
+                    .ToList();
+
                 var currentHour = DateTime.Now.Hour;
                 string shiftName, shiftTime;
                 

@@ -1,5 +1,6 @@
 let occupancyChart = null;
 let roomStatusChart = null;
+let vitalsChart = null;
 
 document.addEventListener('DOMContentLoaded', function() {
     const data = window.dashboardData || {};
@@ -8,6 +9,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadActivityFeed(data.recentActivities || []);
     loadStaffOnDuty(data.staffOnDutyList || []);
     loadCurrentShift(data.currentShift);
+    renderVitalsAlerts(data.vitalAlerts || []);
     initializeCharts(data);
 });
 
@@ -67,6 +69,26 @@ function loadCurrentShift(shiftInfo) {
     if (currentShiftEl) currentShiftEl.textContent = shiftInfo.shiftName || 'Morning Shift';
     if (shiftTimeEl) shiftTimeEl.textContent = shiftInfo.shiftTime || '08:00 AM - 04:00 PM';
     if (shiftStaffCountEl) shiftStaffCountEl.textContent = shiftInfo.staffCount || 0;
+}
+
+function renderVitalsAlerts(alerts) {
+    const container = document.getElementById('vitalsAlertsList');
+    if (!container) return;
+
+    if (!alerts.length) {
+        container.innerHTML = '<div class="text-muted small">No critical vitals.</div>';
+        return;
+    }
+
+    container.innerHTML = alerts.map(alert => `
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+                <div class="fw-semibold">${alert.patientName}</div>
+                <small class="text-muted">${alert.metric} • ${alert.recordedAt}</small>
+            </div>
+            <span class="badge bg-${alert.severity || 'warning'}">${alert.value}</span>
+        </div>
+    `).join('');
 }
 
 function initializeCharts(data) {
@@ -168,6 +190,64 @@ function initializeCharts(data) {
                                 size: 12
                             },
                             color: getComputedStyle(root).getPropertyValue('--text-primary').trim() || '#374151'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    const vitalsCtx = document.getElementById('vitalsChart');
+    if (vitalsCtx) {
+        if (vitalsChart) {
+            vitalsChart.destroy();
+        }
+
+        const trend = data.vitalsTrend || [];
+        vitalsChart = new Chart(vitalsCtx, {
+            type: 'line',
+            data: {
+                labels: trend.map(item => item.label),
+                datasets: [
+                    {
+                        label: 'Pulse',
+                        data: trend.map(item => item.pulse),
+                        borderColor: primaryColor,
+                        backgroundColor: primaryColor + '1A',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: false
+                    },
+                    {
+                        label: 'SpO₂',
+                        data: trend.map(item => item.spO2),
+                        borderColor: successColor,
+                        backgroundColor: successColor + '1A',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        grid: {
+                            color: borderColor
+                        },
+                        ticks: {
+                            color: getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#6B7280'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#6B7280'
                         }
                     }
                 }

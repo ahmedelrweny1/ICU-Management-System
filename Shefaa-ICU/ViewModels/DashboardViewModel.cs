@@ -14,6 +14,8 @@ namespace Shefaa_ICU.ViewModels
         public List<ActivityItem> RecentActivities { get; set; } = new();
         public List<StaffOnDutyItem> StaffOnDutyList { get; set; } = new();
         public ShiftInfo CurrentShift { get; set; } = new();
+        public List<VitalsTrendPoint> VitalsTrend { get; set; } = new();
+        public List<VitalAlertItem> VitalAlerts { get; set; } = new();
     }
 
     public class WeeklyOccupancyData

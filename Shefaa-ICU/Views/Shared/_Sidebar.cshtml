@@ -19,6 +19,14 @@
         <i class="fas fa-bed"></i>
         <span>Rooms</span>
     </a>
+    <a class="nav-item @(ViewData["ActivePage"] as string == "Medications" ? "active" : string.Empty)" asp-controller="Medications" asp-action="Index">
+        <i class="fas fa-pills"></i>
+        <span>Medications</span>
+    </a>
+    <a class="nav-item @(ViewData["ActivePage"] as string == "Vitals" ? "active" : string.Empty)" asp-controller="Vitals" asp-action="Index">
+        <i class="fas fa-heartbeat"></i>
+        <span>Vitals</span>
+    </a>
     <a class="nav-item @(ViewData["ActivePage"] as string == "Staff" ? "active" : string.Empty)" asp-controller="Staff" asp-action="Index">
         <i class="fas fa-user-md"></i>
         <span>Staff</span>

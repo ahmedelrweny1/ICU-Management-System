@@ -3,11 +3,10 @@ let roomStatusChart = null;
 let vitalsChart = null;
 
 document.addEventListener('DOMContentLoaded', function() {
+    // Get dashboard data from the model
     const data = window.dashboardData || {};
     
-    // Debug: Log the data received
-    console.log("Dashboard data received:", data);
-    
+    // Update all dashboard components
     updateStatistics(data);
     loadActivityFeed(data.recentActivities || []);
     loadStaffOnDuty(data.staffOnDutyList || []);

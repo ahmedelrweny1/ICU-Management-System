@@ -196,70 +196,8 @@
 
 @section Scripts {
     <script>
-        // Directly set dashboard data in case serialization is failing
-        window.dashboardData = {
-            totalRooms: 25,
-            totalPatients: 18,
-            totalStaff: 32,
-            criticalCases: 7,
-            availableRooms: 12,
-            occupiedRooms: 10,
-            cleaningRooms: 3,
-            staffOnDuty: 15,
-            weeklyOccupancy: [
-                { day: "Mon", occupancyRate: 65.5 },
-                { day: "Tue", occupancyRate: 70.2 },
-                { day: "Wed", occupancyRate: 68.0 },
-                { day: "Thu", occupancyRate: 75.5 },
-                { day: "Fri", occupancyRate: 82.3 },
-                { day: "Sat", occupancyRate: 60.8 },
-                { day: "Sun", occupancyRate: 55.0 }
-            ],
-            recentActivities: [
-                { time: "08:30", text: "Dr. Smith added a note for Patient Ahmed", type: "patient" },
-                { time: "09:15", text: "Paracetamol administered to Patient Fatima by Nurse Johnson", type: "medication" },
-                { time: "10:00", text: "Dr. Wilson checked in", type: "staff" },
-                { time: "11:30", text: "Antibiotics administered to Patient Omar by Nurse Williams", type: "medication" },
-                { time: "12:45", text: "Dr. Brown added a note for Patient Sara", type: "patient" },
-                { time: "13:20", text: "Nurse Davis checked in", type: "staff" },
-                { time: "14:00", text: "Insulin administered to Patient Khalid by Nurse Miller", type: "medication" }
-            ],
-            staffOnDutyList: [
-                { id: 1, name: "Dr. Sarah Johnson", role: "Doctor", specialty: "Cardiology" },
-                { id: 2, name: "Nurse Michael Brown", role: "Nurse", specialty: "Critical Care" },
-                { id: 3, name: "Dr. Ahmed Hassan", role: "Doctor", specialty: "Pulmonology" },
-                { id: 4, name: "Nurse Emily Wilson", role: "Nurse", specialty: "Emergency" },
-                { id: 5, name: "Dr. James Taylor", role: "Doctor", specialty: "Neurology" }
-            ],
-            currentShift: {
-                shiftName: "Morning Shift",
-                shiftTime: "08:00 AM - 04:00 PM",
-                staffCount: 12
-            },
-            vitalsTrend: [
-                { label: "08:00", pulse: 72, spO2: 98 },
-                { label: "09:00", pulse: 75, spO2: 97 },
-                { label: "10:00", pulse: 78, spO2: 96 },
-                { label: "11:00", pulse: 80, spO2: 95 },
-                { label: "12:00", pulse: 76, spO2: 96 },
-                { label: "13:00", pulse: 74, spO2: 97 },
-                { label: "14:00", pulse: 73, spO2: 98 }
-            ],
-            vitalAlerts: [
-                { patientName: "Ahmed Mohamed", metric: "SpO₂", value: "88%", severity: "danger", recordedAt: "10:15" },
-                { patientName: "Sara Ali", metric: "Pulse", value: "115 bpm", severity: "warning", recordedAt: "11:30" },
-                { patientName: "Khalid Omar", metric: "Temp", value: "39.2°C", severity: "warning", recordedAt: "12:45" }
-            ]
-        };
-        
-        // Also keep the original serialized data for comparison
-        window.originalData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
-        
-        // Debug information
-        console.log("Debug info:", "@ViewBag.Debug");
-        console.log("DB Error:", "@ViewBag.DbError");
-        console.log("Original model data:", window.originalData);
-        console.log("Using hardcoded data:", window.dashboardData);
+        // Simple approach - pass the model directly to JavaScript
+        window.dashboardData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
     </script>
     <script src="~/js/dashboard.js" asp-append-version="true"></script>
 }

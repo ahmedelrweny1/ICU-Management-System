@@ -42,7 +42,9 @@ function loadActivityFeed(activities) {
     const feedContainer = document.getElementById('activityFeed');
     if (!feedContainer) return;
     
-    if (activities.length === 0) {
+    console.log("Loading activity feed with:", activities);
+    
+    if (!activities || activities.length === 0) {
         feedContainer.innerHTML = '<p class="text-muted">No recent activities</p>';
         return;
     }
@@ -59,7 +61,9 @@ function loadStaffOnDuty(staff) {
     const staffContainer = document.getElementById('staffOnDutyList');
     if (!staffContainer) return;
     
-    if (staff.length === 0) {
+    console.log("Loading staff on duty with:", staff);
+    
+    if (!staff || staff.length === 0) {
         staffContainer.innerHTML = '<p class="text-muted">No staff currently on duty</p>';
         return;
     }

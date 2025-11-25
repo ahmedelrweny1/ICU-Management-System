@@ -138,12 +138,16 @@ function renderVitalsAlerts(alerts) {
 }
 
 function initializeCharts(data) {
+    // Get colors from CSS variables to ensure theme compatibility
     const root = document.documentElement;
-    const primaryColor = getComputedStyle(root).getPropertyValue('--primary').trim() || '#6366F1';
-    const successColor = getComputedStyle(root).getPropertyValue('--success').trim() || '#34D399';
-    const dangerColor = getComputedStyle(root).getPropertyValue('--danger').trim() || '#F87171';
-    const warningColor = getComputedStyle(root).getPropertyValue('--warning').trim() || '#FBBF24';
-    const borderColor = getComputedStyle(root).getPropertyValue('--border-color').trim() || 'rgba(0, 0, 0, 0.05)';
+    const primaryColor = getComputedStyle(root).getPropertyValue('--primary').trim() || '#4F6BED';
+    const successColor = getComputedStyle(root).getPropertyValue('--success').trim() || '#10B981';
+    const dangerColor = getComputedStyle(root).getPropertyValue('--danger').trim() || '#EF4444';
+    const warningColor = getComputedStyle(root).getPropertyValue('--warning').trim() || '#F59E0B';
+    const infoColor = getComputedStyle(root).getPropertyValue('--info').trim() || '#3B82F6';
+    const secondaryColor = getComputedStyle(root).getPropertyValue('--secondary').trim() || '#8B5CF6';
+    const borderColor = getComputedStyle(root).getPropertyValue('--border-color').trim() || '#E5E7EB';
+    const textColor = getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#4B5563';
     
     const occupancyCtx = document.getElementById('occupancyChart');
     if (occupancyCtx) {
@@ -187,7 +191,7 @@ function initializeCharts(data) {
                             color: borderColor
                         },
                         ticks: {
-                            color: getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#6B7280'
+                            color: textColor
                         }
                     },
                     x: {
@@ -195,7 +199,7 @@ function initializeCharts(data) {
                             display: false
                         },
                         ticks: {
-                            color: getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#6B7280'
+                            color: textColor
                         }
                     }
                 }
@@ -300,7 +304,7 @@ function initializeCharts(data) {
                             color: borderColor
                         },
                         ticks: {
-                            color: getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#6B7280'
+                            color: textColor
                         }
                     },
                     x: {
@@ -308,7 +312,7 @@ function initializeCharts(data) {
                             display: false
                         },
                         ticks: {
-                            color: getComputedStyle(root).getPropertyValue('--text-secondary').trim() || '#6B7280'
+                            color: textColor
                         }
                     }
                 }

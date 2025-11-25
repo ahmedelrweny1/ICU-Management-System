@@ -27,6 +27,54 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ===================================
+// Theme Management
+// ===================================
+function initializeTheme() {
+    const themeToggle = document.getElementById('themeToggle');
+    const themeIcon = document.getElementById('themeIcon');
+    
+    if (themeToggle) {
+        // Set initial icon based on current theme
+        updateThemeIcon();
+        
+        // Add event listener for theme toggle
+        themeToggle.addEventListener('click', toggleTheme);
+    }
+}
+
+function updateThemeIcon() {
+    const themeIcon = document.getElementById('themeIcon');
+    if (!themeIcon) return;
+    
+    const currentTheme = document.body.getAttribute('data-theme');
+    
+    if (currentTheme === 'dark') {
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+    } else {
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+    }
+}
+
+function toggleTheme() {
+    const currentTheme = document.body.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    // Update body attribute
+    document.body.setAttribute('data-theme', newTheme);
+    
+    // Save preference to localStorage
+    localStorage.setItem('theme', newTheme);
+    
+    // Update the icon
+    updateThemeIcon();
+    
+    // Dispatch event for components to react to theme change
+    document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: newTheme } }));
+}
+
+// ===================================
 // Authentication Functions
 // ===================================
 function isAuthPage(pathname) {

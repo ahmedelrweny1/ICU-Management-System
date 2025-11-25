@@ -23,8 +23,13 @@
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     @RenderSection("Styles", required: false)
 </head>
-<body class="@bodyClass" data-authenticated="@(isAuthenticated.ToString().ToLower())">
-    <!-- Theme initialization removed -->
+<body class="@bodyClass" data-authenticated="@(isAuthenticated.ToString().ToLower())" data-theme="light">
+    <!-- Theme initialization script -->
+    <script>
+        // Check for saved theme preference or use default (light)
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+    </script>
     <div class="app-wrapper">
         <div class="sidebar" id="sidebar">
             @await Html.PartialAsync("_Sidebar")

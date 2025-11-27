@@ -5,61 +5,22 @@
     ViewData["ActivePage"] = "Vitals";
 }
 
-<div class="row g-4">
-    <div class="col-lg-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-stethoscope me-2"></i>Record Vitals</h5>
-            </div>
-            <div class="card-body">
-                <form asp-action="Create" method="post">
-                    @Html.AntiForgeryToken()
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                    <div class="mb-3">
-                        <label asp-for="Form.PatientId" class="form-label"></label>
-                        <select asp-for="Form.PatientId" class="form-select" asp-items="@(new SelectList(Model.Patients, nameof(SimpleLookupItem.Id), nameof(SimpleLookupItem.Name)))">
-                            <option value="">Select patient...</option>
-                        </select>
-                        <span asp-validation-for="Form.PatientId" class="text-danger"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Form.BP" class="form-label"></label>
-                        <input asp-for="Form.BP" class="form-control" placeholder="120/80" />
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <label asp-for="Form.Temperature" class="form-label"></label>
-                            <input asp-for="Form.Temperature" class="form-control" placeholder="°C" />
-                        </div>
-                        <div class="col-6">
-                            <label asp-for="Form.Pulse" class="form-label"></label>
-                            <input asp-for="Form.Pulse" class="form-control" />
-                        </div>
-                    </div>
-
-                    <div class="row g-3 mt-2">
-                        <div class="col-6">
-                            <label asp-for="Form.SpO2" class="form-label"></label>
-                            <input asp-for="Form.SpO2" class="form-control" />
-                        </div>
-                        <div class="col-6">
-                            <label asp-for="Form.RespiratoryRate" class="form-label"></label>
-                            <input asp-for="Form.RespiratoryRate" class="form-control" />
-                        </div>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 mt-3">
-                        <i class="fas fa-save me-1"></i> Save
-                    </button>
-                </form>
-            </div>
-        </div>
+<div class="page-header" data-animate>
+    <div>
+        <p class="page-eyebrow">Monitoring</p>
+        <h2>Vitals Monitoring</h2>
+        <p class="page-subtitle">Record and track patient vital signs in real-time.</p>
     </div>
+    <div class="page-actions">
+        <button class="btn btn-primary btn-icon" type="button" data-bs-toggle="modal" data-bs-target="#addVitalsModal">
+            <i class="fas fa-plus"></i>
+            Record Vitals
+        </button>
+    </div>
+</div>
 
-    <div class="col-lg-8">
+<div class="row g-4">
+    <div class="col-12">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Recent Vitals</h5>
@@ -110,4 +71,98 @@
         </div>
     </div>
 </div>
+
+@section Modals {
+    <div class="modal fade" id="addVitalsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-stethoscope me-2"></i>Record Vitals</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addVitalsForm" asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <div class="mb-3">
+                            <label for="PatientId" class="form-label">Patient <span class="text-danger">*</span></label>
+                            <select name="PatientId" id="vitalsPatientId" class="form-select" required>
+                                <option value="">Select patient...</option>
+                                @if (Model.Patients != null && Model.Patients.Any())
+                                {
+                                    @foreach (var patient in Model.Patients)
+                                    {
+                                        <option value="@patient.Id">@patient.Name</option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="" disabled>No active patients available</option>
+                                }
+                            </select>
+                            <span class="text-danger" asp-validation-for="Form.PatientId"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="BP" class="form-label">Blood Pressure</label>
+                            <input name="BP" id="vitalsBP" class="form-control" placeholder="120/80" />
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label for="Temperature" class="form-label">Temperature (°C)</label>
+                                <input name="Temperature" id="vitalsTemperature" type="number" step="0.1" class="form-control" placeholder="36.5" />
+                            </div>
+                            <div class="col-6">
+                                <label for="Pulse" class="form-label">Pulse (bpm)</label>
+                                <input name="Pulse" id="vitalsPulse" type="number" class="form-control" placeholder="72" />
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-6">
+                                <label for="SpO2" class="form-label">SpO₂ (%)</label>
+                                <input name="SpO2" id="vitalsSpO2" type="number" class="form-control" placeholder="98" />
+                            </div>
+                            <div class="col-6">
+                                <label for="RespiratoryRate" class="form-label">Respiratory Rate (bpm)</label>
+                                <input name="RespiratoryRate" id="vitalsRespiratoryRate" type="number" class="form-control" placeholder="16" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveVitals()">
+                        <i class="fas fa-save me-1"></i> Save Vitals
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function saveVitals() {
+            const form = document.getElementById('addVitalsForm');
+            const patientId = document.getElementById('vitalsPatientId').value;
+            
+            // Validation
+            if (!patientId || patientId === '') {
+                showToast('Please select a patient', 'error');
+                return;
+            }
+            
+            // Submit form
+            form.submit();
+        }
+        
+        // Reset form when modal is closed
+        document.getElementById('addVitalsModal')?.addEventListener('hidden.bs.modal', function() {
+            document.getElementById('addVitalsForm')?.reset();
+        });
+    </script>
+}
 

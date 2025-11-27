@@ -2,37 +2,7 @@
 // Profile Page JavaScript
 // ===================================
 
-// Make switchTab available globally immediately
-function switchTab(tabId) {
-    console.log('Switching to tab:', tabId);
-    
-    // Remove active class from all tabs and panes
-    document.querySelectorAll('#profileTabs .nav-link').forEach(function(link) {
-        link.classList.remove('active');
-    });
-    
-    document.querySelectorAll('.tab-pane').forEach(function(pane) {
-        pane.classList.remove('show', 'active');
-    });
-    
-    // Add active class to selected tab
-    const activeTab = document.querySelector(`#profileTabs a[href="#${tabId}"]`);
-    if (activeTab) {
-        activeTab.classList.add('active');
-    }
-    
-    // Show selected pane
-    const activePane = document.getElementById(tabId);
-    if (activePane) {
-        activePane.classList.add('show', 'active');
-        console.log('Tab switched successfully to:', tabId);
-    } else {
-        console.error('Tab pane not found:', tabId);
-    }
-}
-
-// Make it globally accessible
-window.switchTab = switchTab;
+// switchTab will be defined below and made globally accessible
 
 document.addEventListener('DOMContentLoaded', function() {
     initializeTabs();
@@ -544,6 +514,10 @@ function changeAvatar() {
     // };
     // input.click();
 }
+
+// Make functions globally accessible
+window.switchTab = switchTab;
+window.changeAvatar = changeAvatar;
 
 // ===================================
 // Helper Functions

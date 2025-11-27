@@ -25,7 +25,9 @@ namespace Shefaa_ICU.Controllers
                 .OrderByDescending(m => m.ScheduledTime ?? DateTime.MaxValue)
                 .ToListAsync();
 
+            // Get only active patients (not discharged)
             var patients = await _context.Patients
+                .Where(p => p.DischargeDate == null)
                 .OrderBy(p => p.Name)
                 .Select(p => new SimpleLookupItem
                 {
@@ -34,7 +36,9 @@ namespace Shefaa_ICU.Controllers
                 })
                 .ToListAsync();
 
+            // Get only active staff
             var staffMembers = await _context.Staff
+                .Where(s => s.Status == StaffStatus.Active)
                 .OrderBy(s => s.Name)
                 .Select(s => new SimpleLookupItem
                 {
@@ -74,18 +78,48 @@ namespace Shefaa_ICU.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(MedicationFormViewModel model)
         {
-            if (!ModelState.IsValid)
+            // Verify patient exists and is active
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(p => p.ID == model.PatientId && p.DischargeDate == null);
+            
+            if (patient == null)
             {
-                TempData["Error"] = "Please fill in the required fields.";
+                TempData["Error"] = "Please select a valid active patient.";
                 return RedirectToAction(nameof(Index));
+            }
+
+            // Simple validation
+            if (model.PatientId <= 0)
+            {
+                TempData["Error"] = "Please select a patient.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Name))
+            {
+                TempData["Error"] = "Please enter medication name.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Verify staff exists if provided
+            if (model.AdministeredBy.HasValue)
+            {
+                var staff = await _context.Staff
+                    .FirstOrDefaultAsync(s => s.ID == model.AdministeredBy.Value && s.Status == StaffStatus.Active);
+                
+                if (staff == null)
+                {
+                    TempData["Error"] = "Selected staff member is not active.";
+                    return RedirectToAction(nameof(Index));
+                }
             }
 
             var medication = new Medication
             {
                 PatientID = model.PatientId,
-                Name = model.Name,
-                Dose = model.Dose,
-                Frequency = model.Frequency,
+                Name = model.Name.Trim(),
+                Dose = string.IsNullOrWhiteSpace(model.Dose) ? null : model.Dose.Trim(),
+                Frequency = string.IsNullOrWhiteSpace(model.Frequency) ? null : model.Frequency.Trim(),
                 ScheduledTime = model.ScheduledTime,
                 Status = MedicationStatus.Scheduled,
                 AdministeredBy = model.AdministeredBy
@@ -111,6 +145,17 @@ namespace Shefaa_ICU.Controllers
 
             medication.Status = MedicationStatus.Given;
             medication.AdministeredAt = DateTime.UtcNow;
+            
+            // Set AdministeredBy if not already set
+            if (medication.AdministeredBy == null)
+            {
+                // Get current user's staff ID
+                var staffIdClaim = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(staffIdClaim) && int.TryParse(staffIdClaim, out int staffId))
+                {
+                    medication.AdministeredBy = staffId;
+                }
+            }
 
             await _context.SaveChangesAsync();
             TempData["Success"] = "Medication marked as given.";

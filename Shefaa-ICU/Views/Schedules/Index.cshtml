@@ -3,7 +3,6 @@
     ViewData["PageTitle"] = "Staff Schedules";
     ViewData["ActivePage"] = "Schedules";
     ViewData["HideSearch"] = true;
-    ViewData["TopbarExtras"] = "<button class=\"btn btn-sm btn-primary\" data-bs-toggle=\"modal\" data-bs-target=\"#addShiftModal\"><i class=\\\"fas fa-plus\\\"></i> <span class=\\\"d-none d-md-inline\\\">New Shift</span></button>";
 }
 
 <div class="page-header" data-animate>
@@ -13,9 +12,9 @@
         <p class="page-subtitle">Plan and monitor ICU coverage with balanced shift loads and zero staffing gaps.</p>
     </div>
     <div class="page-actions">
-        <button class="btn btn-soft btn-icon" type="button" onclick="window.print()">
-            <i class="fas fa-print"></i>
-            Print Week
+        <button class="btn btn-soft btn-icon" type="button" onclick="exportScheduleHTML()">
+            <i class="fas fa-file-code"></i>
+            Export HTML
         </button>
         <button class="btn btn-primary btn-icon" type="button" data-bs-toggle="modal" data-bs-target="#addShiftModal">
             <i class="fas fa-plus"></i>
@@ -36,7 +35,7 @@
                 </div>
             </div>
             <div class="shift-count">
-                <span id="morningCount">0</span> Staff Assigned
+                <span id="morningCount">@(ViewBag.MorningCount ?? 0)</span> Staff Assigned
             </div>
         </div>
     </div>
@@ -50,7 +49,7 @@
                 </div>
             </div>
             <div class="shift-count">
-                <span id="eveningCount">0</span> Staff Assigned
+                <span id="eveningCount">@(ViewBag.EveningCount ?? 0)</span> Staff Assigned
             </div>
         </div>
     </div>
@@ -64,7 +63,7 @@
                 </div>
             </div>
             <div class="shift-count">
-                <span id="nightCount">0</span> Staff Assigned
+                <span id="nightCount">@(ViewBag.NightCount ?? 0)</span> Staff Assigned
             </div>
         </div>
     </div>
@@ -152,7 +151,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveShift()">Save Shift</button>
+                    <button type="button" class="btn btn-primary" onclick="saveShift(event)">Save Shift</button>
                 </div>
             </div>
         </div>
@@ -160,6 +159,32 @@
 }
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    @Html.AntiForgeryToken()
+    <script>
+        // Pass data from server to JavaScript
+        window.schedulesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+            schedules = ((List<Schedule>)ViewBag.Schedules ?? new List<Schedule>()).Select(s => new {
+                id = s.Id,
+                date = s.Date.ToString("yyyy-MM-dd"),
+                shiftType = s.ShiftType.ToString(),
+                staffId = s.StaffID,
+                staffName = s.Staff?.Name ?? "Unknown",
+                notes = s.Notes
+            }),
+            staffList = ((List<Staff>)ViewBag.StaffList ?? new List<Staff>()).Select(s => new {
+                id = s.ID,
+                name = s.Name,
+                role = s.Role,
+                specialty = s.Specialty
+            }),
+            startOfWeek = ViewBag.StartOfWeek?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"),
+            endOfWeek = ViewBag.EndOfWeek?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"),
+            morningCount = ViewBag.MorningCount ?? 0,
+            eveningCount = ViewBag.EveningCount ?? 0,
+            nightCount = ViewBag.NightCount ?? 0
+        }));
+    </script>
     <script src="~/js/schedules.js" asp-append-version="true"></script>
 }
 

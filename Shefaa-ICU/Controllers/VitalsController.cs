@@ -25,7 +25,9 @@ namespace Shefaa_ICU.Controllers
                 .Take(30)
                 .ToListAsync();
 
+            // Get only active patients (not discharged)
             var patients = await _context.Patients
+                .Where(p => p.DischargeDate == null)
                 .OrderBy(p => p.Name)
                 .Select(p => new SimpleLookupItem
                 {
@@ -61,9 +63,20 @@ namespace Shefaa_ICU.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(VitalsFormViewModel model)
         {
-            if (!ModelState.IsValid)
+            // Verify patient exists and is active
+            var patient = await _context.Patients
+                .FirstOrDefaultAsync(p => p.ID == model.PatientId && p.DischargeDate == null);
+            
+            if (patient == null)
             {
-                TempData["Error"] = "Please correct the highlighted fields.";
+                TempData["Error"] = "Please select a valid active patient.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            // Simple validation
+            if (model.PatientId <= 0)
+            {
+                TempData["Error"] = "Please select a patient.";
                 return RedirectToAction(nameof(Index));
             }
 
@@ -71,7 +84,7 @@ namespace Shefaa_ICU.Controllers
             {
                 PatientID = model.PatientId,
                 RecordedAt = DateTime.UtcNow,
-                BP = model.BP,
+                BP = string.IsNullOrWhiteSpace(model.BP) ? null : model.BP.Trim(),
                 Temperature = model.Temperature,
                 Pulse = model.Pulse,
                 SpO2 = model.SpO2,
@@ -81,7 +94,7 @@ namespace Shefaa_ICU.Controllers
             _context.Vitals.Add(entry);
             await _context.SaveChangesAsync();
 
-            TempData["Success"] = "Vitals recorded.";
+            TempData["Success"] = "Vitals recorded successfully.";
             return RedirectToAction(nameof(Index));
         }
     }

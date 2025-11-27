@@ -5,62 +5,22 @@
     ViewData["ActivePage"] = "Medications";
 }
 
-<div class="row g-4">
-    <div class="col-lg-4">
-        <div class="card h-100">
-            <div class="card-header">
-                <h5 class="mb-0"><i class="fas fa-prescription-bottle-alt me-2"></i>New Medication Order</h5>
-            </div>
-            <div class="card-body">
-                <form asp-action="Create" method="post">
-                    @Html.AntiForgeryToken()
-                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-                    <div class="mb-3">
-                        <label asp-for="Form.PatientId" class="form-label"></label>
-                        <select asp-for="Form.PatientId" class="form-select" asp-items="@(new SelectList(Model.Patients, nameof(SimpleLookupItem.Id), nameof(SimpleLookupItem.Name)))">
-                            <option value="">Select patient...</option>
-                        </select>
-                        <span class="text-danger" asp-validation-for="Form.PatientId"></span>
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Form.Name" class="form-label"></label>
-                        <input asp-for="Form.Name" class="form-control" />
-                        <span class="text-danger" asp-validation-for="Form.Name"></span>
-                    </div>
-
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <label asp-for="Form.Dose" class="form-label"></label>
-                            <input asp-for="Form.Dose" class="form-control" />
-                        </div>
-                        <div class="col-6">
-                            <label asp-for="Form.Frequency" class="form-label"></label>
-                            <input asp-for="Form.Frequency" class="form-control" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 mt-3">
-                        <label asp-for="Form.ScheduledTime" class="form-label"></label>
-                        <input asp-for="Form.ScheduledTime" class="form-control" type="datetime-local" />
-                    </div>
-
-                    <div class="mb-3">
-                        <label asp-for="Form.AdministeredBy" class="form-label"></label>
-                        <select asp-for="Form.AdministeredBy" class="form-select" asp-items="@(new SelectList(Model.Staff, nameof(SimpleLookupItem.Id), nameof(SimpleLookupItem.Name)))">
-                            <option value="">Unassigned</option>
-                        </select>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-plus-circle me-1"></i> Save Medication
-                    </button>
-                </form>
-            </div>
-        </div>
+<div class="page-header" data-animate>
+    <div>
+        <p class="page-eyebrow">Pharmacy</p>
+        <h2>Medication Orders</h2>
+        <p class="page-subtitle">Manage medication orders and track administration.</p>
     </div>
+    <div class="page-actions">
+        <button class="btn btn-primary btn-icon" type="button" data-bs-toggle="modal" data-bs-target="#addMedicationModal">
+            <i class="fas fa-plus"></i>
+            Add Medication
+        </button>
+    </div>
+</div>
 
-    <div class="col-lg-8">
+<div class="row g-4">
+    <div class="col-12">
         <div class="card">
             <div class="card-header d-flex align-items-center justify-content-between">
                 <h5 class="mb-0"><i class="fas fa-pills me-2"></i>Active Medication Orders</h5>
@@ -141,4 +101,113 @@
         </div>
     </div>
 </div>
+
+@section Modals {
+    <div class="modal fade" id="addMedicationModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-prescription-bottle-alt me-2"></i>New Medication Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addMedicationForm" asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="mb-3">
+                            <label for="PatientId" class="form-label">Patient <span class="text-danger">*</span></label>
+                            <select name="PatientId" id="medPatientId" class="form-select" required>
+                                <option value="">Select patient...</option>
+                                @if (Model.Patients != null && Model.Patients.Any())
+                                {
+                                    @foreach (var patient in Model.Patients)
+                                    {
+                                        <option value="@patient.Id">@patient.Name</option>
+                                    }
+                                }
+                                else
+                                {
+                                    <option value="" disabled>No active patients available</option>
+                                }
+                            </select>
+                            <span class="text-danger" asp-validation-for="Form.PatientId"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Name" class="form-label">Medication Name <span class="text-danger">*</span></label>
+                            <input name="Name" id="medName" class="form-control" required />
+                            <span class="text-danger" asp-validation-for="Form.Name"></span>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <label for="Dose" class="form-label">Dose</label>
+                                <input name="Dose" id="medDose" class="form-control" />
+                            </div>
+                            <div class="col-6">
+                                <label for="Frequency" class="form-label">Frequency</label>
+                                <input name="Frequency" id="medFrequency" class="form-control" />
+                            </div>
+                        </div>
+
+                        <div class="mb-3 mt-3">
+                            <label for="ScheduledTime" class="form-label">Schedule Time</label>
+                            <input name="ScheduledTime" id="medScheduledTime" class="form-control" type="datetime-local" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="AdministeredBy" class="form-label">Assigned Staff</label>
+                            <select name="AdministeredBy" id="medAdministeredBy" class="form-select">
+                                <option value="">Unassigned</option>
+                                @if (Model.Staff != null && Model.Staff.Any())
+                                {
+                                    @foreach (var staff in Model.Staff)
+                                    {
+                                        <option value="@staff.Id">@staff.Name</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveMedication()">
+                        <i class="fas fa-plus-circle me-1"></i> Save Medication
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function saveMedication() {
+            const form = document.getElementById('addMedicationForm');
+            const patientId = document.getElementById('medPatientId').value;
+            const name = document.getElementById('medName').value.trim();
+            
+            // Validation
+            if (!patientId || patientId === '') {
+                showToast('Please select a patient', 'error');
+                return;
+            }
+            
+            if (!name || name === '') {
+                showToast('Please enter medication name', 'error');
+                return;
+            }
+            
+            // Submit form
+            form.submit();
+        }
+        
+        // Reset form when modal is closed
+        document.getElementById('addMedicationModal')?.addEventListener('hidden.bs.modal', function() {
+            document.getElementById('addMedicationForm')?.reset();
+        });
+    </script>
+}
 

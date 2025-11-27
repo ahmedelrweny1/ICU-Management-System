@@ -68,6 +68,24 @@
             localStorage.removeItem('currentUser');
         </script>
     }
+    @* Display TempData messages *@
+    @if (TempData["Success"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showToast('@Html.Raw(TempData["Success"])', 'success');
+            });
+        </script>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                showToast('@Html.Raw(TempData["Error"])', 'error');
+            });
+        </script>
+    }
+    
     @RenderSection("Scripts", required: false)
 </body>
 </html>

@@ -12,9 +12,9 @@
         <p class="page-subtitle">Review ICU performance indicators and export ready-to-share packs for leadership.</p>
     </div>
     <div class="page-actions">
-        <button class="btn btn-soft btn-icon" type="button" onclick="exportPDF()">
-            <i class="fas fa-file-pdf"></i>
-            Export PDF
+        <button class="btn btn-soft btn-icon" type="button" onclick="exportHTML()">
+            <i class="fas fa-file-code"></i>
+            Export HTML
         </button>
         <button class="btn btn-primary btn-icon" type="button" onclick="exportCSV()">
             <i class="fas fa-file-csv"></i>
@@ -25,9 +25,21 @@
 
 <div class="card mb-4 delay-1" data-animate>
     <div class="card-header">
-        <h5><i class="fas fa-filter"></i> Filters</h5>
+        <h5><i class="fas fa-filter"></i> Filters & Search</h5>
     </div>
     <div class="card-body">
+        <div class="row g-3 mb-3">
+            <div class="col-md-12">
+                <label class="form-label">Search</label>
+                <div class="input-group">
+                    <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" id="reportSearch" placeholder="Search by patient name, condition, or ID...">
+                    <button class="btn btn-outline-secondary" type="button" onclick="clearSearch()">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
+            </div>
+        </div>
         <div class="row g-3">
             <div class="col-md-3">
                 <label class="form-label">Date Range</label>
@@ -44,7 +56,7 @@
                     <option value="patient">Patient Demographics</option>
                     <option value="room">Room Occupancy</option>
                     <option value="staff">Staff Performance</option>
-                    <option value="comprehensive">Comprehensive</option>
+                    <option value="comprehensive" selected>Comprehensive</option>
                 </select>
             </div>
             <div class="col-md-3">
@@ -56,7 +68,6 @@
                 <input type="date" class="form-control" id="toDate">
             </div>
         </div>
-        @* Data: filters should trigger backend reporting endpoints *@
     </div>
 </div>
 
@@ -189,6 +200,36 @@
 </div>
 
 @section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        // Pass data from server to JavaScript
+        window.reportsData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
+            patients = ((List<Patient>)ViewBag.Patients ?? new List<Patient>()).Select(p => new {
+                id = p.ID,
+                name = p.Name,
+                age = p.Age ?? 0,
+                condition = p.Condition ?? "Unknown",
+                admissionDate = p.AdmissionDate.ToString("yyyy-MM-dd")
+            }),
+            rooms = ((List<Room>)ViewBag.Rooms ?? new List<Room>()).Select(r => new {
+                id = r.ID,
+                status = r.Status.ToString()
+            }),
+            staff = ((List<Staff>)ViewBag.Staff ?? new List<Staff>()).Select(s => new {
+                id = s.ID,
+                name = s.Name,
+                role = s.Role
+            }),
+            totalAdmissions = ViewBag.TotalAdmissions ?? 0,
+            minAge = ViewBag.MinAge ?? 0,
+            maxAge = ViewBag.MaxAge ?? 0,
+            avgStay = ViewBag.AvgStay ?? 0,
+            occupancyRate = ViewBag.OccupancyRate ?? 0,
+            totalBeds = ViewBag.TotalBeds ?? 0,
+            totalShifts = ViewBag.TotalShifts ?? 0,
+            staffUtilization = ViewBag.StaffUtilization ?? 0
+        }));
+    </script>
     <script src="~/js/reports.js" asp-append-version="true"></script>
 }
 

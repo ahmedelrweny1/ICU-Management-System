@@ -19,7 +19,6 @@ namespace Shefaa_ICU
             builder.Services.AddMemoryCache();
             builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
             
-            // Configure antiforgery to ignore JSON requests
             builder.Services.AddAntiforgery(options =>
             {
                 options.HeaderName = "X-CSRF-TOKEN";

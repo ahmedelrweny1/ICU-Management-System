@@ -263,30 +263,62 @@
             ]
         };
         
-        // Get the actual model data
-        const modelData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model));
+        // Get the actual model data with camelCase naming
+        const modelData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model, new System.Text.Json.JsonSerializerOptions { 
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase 
+        }));
+        
+        // Helper function to get property value (handles both PascalCase and camelCase)
+        function getProp(obj, camelKey, pascalKey) {
+            return obj[camelKey] ?? obj[pascalKey] ?? null;
+        }
         
         // Create a data object that uses actual database values
-        // Use the model data directly and only fall back to hardcoded data if needed
+        // Handle both PascalCase (from default serializer) and camelCase
         const dashboardData = {
-            // Use actual database values for counts
-            totalRooms: modelData.totalRooms || 10,
-            totalPatients: modelData.totalPatients || 10,
-            totalStaff: modelData.totalStaff || 11,
-            criticalCases: modelData.criticalCases || 0,
-            availableRooms: modelData.availableRooms || 0,
-            occupiedRooms: modelData.occupiedRooms || 0,
-            cleaningRooms: modelData.cleaningRooms || 0,
-            staffOnDuty: modelData.staffOnDuty || 0,
+            // Use actual database values for counts - handle both naming conventions
+            totalRooms: getProp(modelData, 'totalRooms', 'TotalRooms') ?? 0,
+            totalPatients: getProp(modelData, 'totalPatients', 'TotalPatients') ?? 0,
+            totalStaff: getProp(modelData, 'totalStaff', 'TotalStaff') ?? 0,
+            criticalCases: getProp(modelData, 'criticalCases', 'CriticalCases') ?? 0,
+            availableRooms: getProp(modelData, 'availableRooms', 'AvailableRooms') ?? 0,
+            occupiedRooms: getProp(modelData, 'occupiedRooms', 'OccupiedRooms') ?? 0,
+            cleaningRooms: getProp(modelData, 'cleaningRooms', 'CleaningRooms') ?? 0,
+            staffOnDuty: getProp(modelData, 'staffOnDuty', 'StaffOnDuty') ?? 0,
             
-            // Use model data for all sections
-            weeklyOccupancy: modelData.weeklyOccupancy || [],
-            recentActivities: modelData.recentActivities || [],
-            staffOnDutyList: modelData.staffOnDutyList || [],
-            currentShift: modelData.currentShift || { shiftName: "", shiftTime: "", staffCount: 0 },
-            vitalsTrend: modelData.vitalsTrend || [],
-            vitalAlerts: modelData.vitalAlerts || []
+            // Use model data for all sections - handle both naming conventions
+            weeklyOccupancy: getProp(modelData, 'weeklyOccupancy', 'WeeklyOccupancy') ?? [],
+            recentActivities: getProp(modelData, 'recentActivities', 'RecentActivities') ?? [],
+            staffOnDutyList: getProp(modelData, 'staffOnDutyList', 'StaffOnDutyList') ?? [],
+            currentShift: (() => {
+                const shift = getProp(modelData, 'currentShift', 'CurrentShift');
+                if (!shift) return { shiftName: "", shiftTime: "", staffCount: 0 };
+                return {
+                    shiftName: shift.shiftName || shift.ShiftName || "",
+                    shiftTime: shift.shiftTime || shift.ShiftTime || "",
+                    staffCount: shift.staffCount ?? shift.StaffCount ?? 0
+                };
+            })(),
+            vitalsTrend: getProp(modelData, 'vitalsTrend', 'VitalsTrend') ?? [],
+            vitalAlerts: getProp(modelData, 'vitalAlerts', 'VitalAlerts') ?? []
         };
+        
+        // Ensure arrays are always arrays (not null/undefined)
+        if (!Array.isArray(dashboardData.recentActivities)) {
+            dashboardData.recentActivities = [];
+        }
+        if (!Array.isArray(dashboardData.staffOnDutyList)) {
+            dashboardData.staffOnDutyList = [];
+        }
+        if (!Array.isArray(dashboardData.weeklyOccupancy)) {
+            dashboardData.weeklyOccupancy = [];
+        }
+        if (!Array.isArray(dashboardData.vitalsTrend)) {
+            dashboardData.vitalsTrend = [];
+        }
+        if (!Array.isArray(dashboardData.vitalAlerts)) {
+            dashboardData.vitalAlerts = [];
+        }
         
         // Use dashboard data directly from the model
         window.dashboardData = dashboardData;
@@ -295,24 +327,49 @@
         window.modelData = modelData;
         window.hardcodedData = hardcodedData;
         
+        // Log final dashboard data structure
+        console.log("Final dashboardData structure:", {
+            recentActivities: dashboardData.recentActivities,
+            staffOnDutyList: dashboardData.staffOnDutyList,
+            recentActivitiesIsArray: Array.isArray(dashboardData.recentActivities),
+            staffOnDutyListIsArray: Array.isArray(dashboardData.staffOnDutyList)
+        });
+        
         // Log detailed data for debugging
+        console.log("Model data keys:", Object.keys(modelData));
         console.log("Actual database counts:", {
-            totalRooms: modelData.totalRooms,
-            totalPatients: modelData.totalPatients,
-            totalStaff: modelData.totalStaff
+            totalRooms: dashboardData.totalRooms,
+            totalPatients: dashboardData.totalPatients,
+            totalStaff: dashboardData.totalStaff
         });
         
         // Log activities and staff data specifically
-        console.log("Recent Activities from database:", modelData.recentActivities);
-        console.log("Staff on duty from database:", modelData.staffOnDutyList);
+        console.log("Recent Activities from database:", dashboardData.recentActivities);
+        console.log("Staff on duty from database:", dashboardData.staffOnDutyList);
         
-        // Always use hardcoded data for now until database is properly populated
-        console.log("Using hardcoded data for charts and lists to ensure dashboard displays correctly");
-        dashboardData.recentActivities = hardcodedData.recentActivities;
-        dashboardData.staffOnDutyList = hardcodedData.staffOnDutyList;
-        dashboardData.weeklyOccupancy = hardcodedData.weeklyOccupancy;
-        dashboardData.vitalsTrend = hardcodedData.vitalsTrend;
-        dashboardData.vitalAlerts = hardcodedData.vitalAlerts;
+        // Use database data if available, otherwise use hardcoded fallback
+        // Check if arrays are empty (length === 0) or undefined/null
+        if (!Array.isArray(dashboardData.recentActivities) || dashboardData.recentActivities.length === 0) {
+            console.log("No activities in database, using fallback data");
+            dashboardData.recentActivities = hardcodedData.recentActivities || [];
+        }
+        
+        if (!Array.isArray(dashboardData.staffOnDutyList) || dashboardData.staffOnDutyList.length === 0) {
+            console.log("No staff on duty in database, using fallback data");
+            dashboardData.staffOnDutyList = hardcodedData.staffOnDutyList || [];
+        }
+        
+        if (!dashboardData.weeklyOccupancy || dashboardData.weeklyOccupancy.length === 0) {
+            dashboardData.weeklyOccupancy = hardcodedData.weeklyOccupancy;
+        }
+        
+        if (!dashboardData.vitalsTrend || dashboardData.vitalsTrend.length === 0) {
+            dashboardData.vitalsTrend = hardcodedData.vitalsTrend;
+        }
+        
+        if (!dashboardData.vitalAlerts || dashboardData.vitalAlerts.length === 0) {
+            dashboardData.vitalAlerts = hardcodedData.vitalAlerts;
+        }
         
         // Make sure room status data is available
         if (!dashboardData.occupiedRooms && !dashboardData.availableRooms && !dashboardData.cleaningRooms) {

@@ -13,13 +13,7 @@
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
     @RenderSection("Styles", required: false)
 </head>
-<body class="auth-page" data-authenticated="false" data-theme="light">
-    <!-- Theme initialization script -->
-    <script>
-        // Check for saved theme preference or use default (light)
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.body.setAttribute('data-theme', savedTheme);
-    </script>
+<body class="auth-page" data-authenticated="false">
     @RenderBody()
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

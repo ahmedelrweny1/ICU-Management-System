@@ -226,11 +226,17 @@ namespace Shefaa_ICU.Controllers
                 Console.WriteLine($"Error fetching check-ins: {ex.Message}");
             }
             
-            // Sort activities by time and take most recent
-            viewModel.RecentActivities = activities
-                .OrderByDescending(a => a.Time)
-                .Take(10)
-                .ToList();
+            // Sort activities by timestamp (store original timestamp for sorting)
+            // Create a list with timestamps for proper sorting
+            var activitiesWithTimestamps = activities.Select(a => new
+            {
+                Activity = a,
+                Timestamp = DateTime.TryParseExact(a.Time, "HH:mm", null, System.Globalization.DateTimeStyles.None, out var dt) 
+                    ? dt 
+                    : DateTime.MinValue
+            }).OrderByDescending(x => x.Timestamp).Take(10).Select(x => x.Activity).ToList();
+            
+            viewModel.RecentActivities = activitiesWithTimestamps;
                 
             Console.WriteLine($"Total activities collected: {activities.Count}");
             Console.WriteLine($"Final activities in viewModel: {viewModel.RecentActivities.Count}");
@@ -249,7 +255,8 @@ namespace Shefaa_ICU.Controllers
                         Id = a.Staff != null ? a.Staff.ID : 0,
                         Name = a.Staff != null ? a.Staff.Name : "Unknown",
                         Role = a.Staff != null ? a.Staff.Role : "",
-                        Specialty = a.Staff != null ? a.Staff.Specialty : null
+                        Specialty = a.Staff != null ? a.Staff.Specialty : null,
+                        ProfilePhotoPath = a.Staff != null ? a.Staff.ProfilePhotoPath : null
                     })
                     .ToList();
                     

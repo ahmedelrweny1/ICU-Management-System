@@ -139,8 +139,12 @@ function populateProfileData(data) {
     
     // Update avatar
     if (profileAvatarEl) {
-        const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'User')}&background=6366F1&color=fff&size=120`;
-        profileAvatarEl.src = avatarUrl;
+        if (data.profilePhotoPath) {
+            profileAvatarEl.src = data.profilePhotoPath;
+        } else {
+            const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(data.name || 'User')}&background=6366F1&color=fff&size=120`;
+            profileAvatarEl.src = avatarUrl;
+        }
     }
     
     // Days active
@@ -499,20 +503,86 @@ async function saveNotificationSettings() {
 // Avatar Upload
 // ===================================
 function changeAvatar() {
-    showToast('Avatar upload will be available in a future update', 'info');
-    // TODO: Implement file upload functionality
-    // const input = document.createElement('input');
-    // input.type = 'file';
-    // input.accept = 'image/*';
-    // input.onchange = async (e) => {
-    //     const file = e.target.files[0];
-    //     if (file) {
-    //         const formData = new FormData();
-    //         formData.append('avatar', file);
-    //         await fetch('/Profile/UploadAvatar', { method: 'POST', body: formData });
-    //     }
-    // };
-    // input.click();
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.style.display = 'none';
+    
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Validate file type
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedTypes.includes(file.type)) {
+            showToast('Invalid file type. Please upload an image (JPG, PNG, GIF, or WEBP)', 'error');
+            return;
+        }
+        
+        // Validate file size (5MB max)
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('File size too large. Maximum size is 5MB', 'error');
+            return;
+        }
+        
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const profileAvatar = document.getElementById('profileAvatar');
+            if (profileAvatar) {
+                profileAvatar.src = e.target.result;
+            }
+        };
+        reader.readAsDataURL(file);
+        
+        // Upload file
+        try {
+            showLoading(true);
+            const formData = new FormData();
+            formData.append('photo', file);
+            
+            const response = await fetch('/Profile/UploadProfilePhoto', {
+                method: 'POST',
+                body: formData
+            });
+            
+            const result = await response.json();
+            showLoading(false);
+            
+            if (result.success) {
+                showToast(result.message || 'Profile photo uploaded successfully!', 'success');
+                
+                // Update avatar in profile header
+                const profileAvatar = document.getElementById('profileAvatar');
+                if (profileAvatar && result.photoPath) {
+                    profileAvatar.src = result.photoPath;
+                }
+                
+                // Update avatar in top navbar
+                const userProfileImg = document.querySelector('.user-profile img');
+                if (userProfileImg && result.photoPath) {
+                    userProfileImg.src = result.photoPath;
+                }
+                
+                // Reload page after a short delay to ensure all avatars are updated
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showToast(result.message || 'Error uploading photo', 'error');
+                // Revert preview on error
+                loadProfileData();
+            }
+        } catch (error) {
+            showLoading(false);
+            console.error('Error uploading photo:', error);
+            showToast('Error uploading photo. Please try again.', 'error');
+            // Revert preview on error
+            loadProfileData();
+        }
+    };
+    
+    input.click();
 }
 
 // Make functions globally accessible

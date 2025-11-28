@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Shefaa_ICU.Data;
 using Shefaa_ICU.Models;
+using Shefaa_ICU.Services;
  
 namespace Shefaa_ICU
 {
@@ -14,6 +15,9 @@ namespace Shefaa_ICU
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IPasswordHasher<Staff>, PasswordHasher<Staff>>();
+            builder.Services.AddScoped<Shefaa_ICU.Services.NotificationService>();
+            builder.Services.AddMemoryCache();
+            builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
             
             // Configure antiforgery to ignore JSON requests
             builder.Services.AddAntiforgery(options =>

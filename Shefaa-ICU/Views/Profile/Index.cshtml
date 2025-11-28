@@ -29,8 +29,15 @@
     <div class="profile-header-content">
         <div class="profile-avatar-section">
             <div class="profile-avatar-wrapper">
-                <img src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff&size=120"
-                     alt="Profile" class="profile-avatar" id="profileAvatar">
+                @if (Model.ProfilePhotoPath != null)
+                {
+                    <img src="@Model.ProfilePhotoPath" alt="Profile" class="profile-avatar" id="profileAvatar">
+                }
+                else
+                {
+                    <img src="https://ui-avatars.com/api/?name=@(Model.Name ?? "User")&background=6366F1&color=fff&size=120"
+                         alt="Profile" class="profile-avatar" id="profileAvatar">
+                }
                 <button class="avatar-edit-btn" type="button" onclick="changeAvatar()">
                     <i class="fas fa-camera"></i>
                 </button>
@@ -301,6 +308,7 @@
                 email = Model.Email ?? "",
                 phoneNumber = Model.PhoneNumber ?? "",
                 specialty = Model.Specialty ?? "",
+                profilePhotoPath = Model.ProfilePhotoPath ?? "",
                 daysActive = Model.DaysActive,
                 lastLogin = Model.LastLogin
             }));

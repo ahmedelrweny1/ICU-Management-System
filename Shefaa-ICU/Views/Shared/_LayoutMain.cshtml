@@ -1,14 +1,30 @@
 @using System.Security.Claims
 @using System.Text.Json
+@using Microsoft.EntityFrameworkCore
+@using Shefaa_ICU.Data
+@inject AppDbContext DbContext
 @{
     var pageTitle = ViewData["Title"] as string ?? "Shefaa (ICU Management System)";
     var bodyClass = ViewData["BodyClass"] as string ?? string.Empty;
     var isAuthenticated = User?.Identity?.IsAuthenticated ?? false;
+    string? profilePhotoPath = null;
+    
+    if (isAuthenticated)
+    {
+        var staffIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (!string.IsNullOrEmpty(staffIdClaim) && int.TryParse(staffIdClaim, out int staffId))
+        {
+            var staff = DbContext.Staff.FirstOrDefault(s => s.ID == staffId);
+            profilePhotoPath = staff?.ProfilePhotoPath;
+        }
+    }
+    
     var currentUserPayload = isAuthenticated ? new
     {
         name = User?.FindFirst(ClaimTypes.Name)?.Value ?? "User",
         email = User?.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty,
-        role = User?.FindFirst(ClaimTypes.Role)?.Value ?? "Staff"
+        role = User?.FindFirst(ClaimTypes.Role)?.Value ?? "Staff",
+        profilePhotoPath = profilePhotoPath ?? ""
     } : null;
 }
 
@@ -21,15 +37,31 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    <style>
+        /* Force sidebar hidden on mobile - highest priority */
+        @@media screen and (max-width: 991px) {
+            #sidebar:not(.active) {
+                transform: translateX(-100%) !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+                width: 0 !important;
+                min-width: 0 !important;
+                max-width: 0 !important;
+                left: -9999px !important;
+            }
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+        }
+    </style>
     @RenderSection("Styles", required: false)
 </head>
-<body class="@bodyClass" data-authenticated="@(isAuthenticated.ToString().ToLower())" data-theme="light">
-    <!-- Theme initialization script -->
-    <script>
-        // Check for saved theme preference or use default (light)
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        document.body.setAttribute('data-theme', savedTheme);
-    </script>
+<body class="@bodyClass" data-authenticated="@(isAuthenticated.ToString().ToLower())">
     <div class="app-wrapper">
         <div class="sidebar" id="sidebar">
             @await Html.PartialAsync("_Sidebar")

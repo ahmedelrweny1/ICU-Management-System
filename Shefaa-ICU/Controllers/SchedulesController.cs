@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shefaa_ICU.Data;
 using Shefaa_ICU.Models;
+using Shefaa_ICU.Services;
 using System.Linq;
 
 namespace Shefaa_ICU.Controllers
@@ -11,10 +12,12 @@ namespace Shefaa_ICU.Controllers
     public class SchedulesController : Controller
     {
         private readonly AppDbContext _context;
+        private readonly NotificationService _notificationService;
 
-        public SchedulesController(AppDbContext context)
+        public SchedulesController(AppDbContext context, NotificationService notificationService)
         {
             _context = context;
+            _notificationService = notificationService;
         }
 
         public IActionResult Index(string weekStart = null)
@@ -121,7 +124,8 @@ namespace Shefaa_ICU.Controllers
                     return Json(new { success = false, message = "Please select at least one staff member" });
                 }
 
-                // Verify all staff exist and are active
+                // Verify all staff exist and are active, and get their names
+                var staffList = new List<string>();
                 foreach (var staffId in staffIds)
                 {
                     var staff = await _context.Staff
@@ -131,6 +135,7 @@ namespace Shefaa_ICU.Controllers
                     {
                         return Json(new { success = false, message = $"Staff member with ID {staffId} is not active or does not exist" });
                     }
+                    staffList.Add(staff.Name);
                 }
 
                 // Save schedule for each staff member
@@ -157,6 +162,18 @@ namespace Shefaa_ICU.Controllers
                 }
 
                 await _context.SaveChangesAsync();
+
+                // Main action: Notify everyone about schedule changes
+                var staffNames = string.Join(", ", staffList);
+                
+                await _notificationService.NotifyMainActionAsync(
+                    "Schedule Updated",
+                    $"{shift} shift scheduled for {scheduleDate:MMM dd} - Staff: {staffNames}",
+                    NotificationType.Info,
+                    "fa-calendar-alt",
+                    "Schedule",
+                    null
+                );
 
                 return Json(new { success = true, message = "Schedule saved successfully" });
             }
@@ -196,6 +213,16 @@ namespace Shefaa_ICU.Controllers
 
                 _context.Schedules.RemoveRange(schedulesToDelete);
                 await _context.SaveChangesAsync();
+
+                // Main action: Notify everyone about schedule deletion
+                await _notificationService.NotifyMainActionAsync(
+                    "Schedule Deleted",
+                    $"{shift} shift deleted for {scheduleDate:MMM dd}",
+                    NotificationType.Warning,
+                    "fa-calendar-times",
+                    "Schedule",
+                    null
+                );
 
                 return Json(new { success = true, message = "Schedule deleted successfully" });
             }

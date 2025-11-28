@@ -5,7 +5,7 @@
 }
 
 <div class="auth-container">
-    <div class="auth-card">
+    <div class="auth-card login-card">
         <div class="auth-header">
             <div class="auth-logo">
                 <i class="fas fa-shield-alt"></i>
@@ -56,6 +56,73 @@
     </div>
 </div>
 
+<div class="modal fade" id="forgotPasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content reset-modal">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-unlock-alt me-2"></i>Reset Password</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="reset-step" id="resetStepEmail">
+                    <label class="form-label d-flex justify-content-between align-items-center">
+                        <span>Email</span>
+                        <small class="verification-status text-muted" id="resetEmailStatus">Awaiting request</small>
+                    </label>
+                    <div class="verification-actions mb-3">
+                        <input type="email" class="form-control" id="resetEmailInput" placeholder="Enter your registered email">
+                        <button type="button" class="btn btn-soft btn-otp" id="sendResetOtpBtn">
+                            <span class="default-text">Send OTP</span>
+                            <span class="loading-text d-none">
+                                <span class="spinner-border spinner-border-sm me-1"></span>Sending
+                            </span>
+                        </button>
+                    </div>
+                    <small class="text-muted">We'll send a temporary code to this email to verify your identity.</small>
+                </div>
+
+                <div class="reset-step collapse" id="resetStepOtp">
+                    <label class="form-label">Enter the 6-digit OTP</label>
+                    <div class="otp-inputs" id="resetOtpInputs">
+                        <input type="text" maxlength="1" inputmode="numeric">
+                        <input type="text" maxlength="1" inputmode="numeric">
+                        <input type="text" maxlength="1" inputmode="numeric">
+                        <input type="text" maxlength="1" inputmode="numeric">
+                        <input type="text" maxlength="1" inputmode="numeric">
+                        <input type="text" maxlength="1" inputmode="numeric">
+                    </div>
+                    <div class="otp-actions">
+                        <button type="button" class="btn btn-outline-secondary btn-sm" id="verifyResetOtpBtn">Verify OTP</button>
+                        <button type="button" class="btn btn-link btn-sm" id="resendResetOtpBtn" disabled>Resend in <span id="resetOtpTimer">30</span>s</button>
+                    </div>
+                    <small class="text-muted" id="resetOtpHelper">Enter the code we emailed you.</small>
+                </div>
+
+                <div class="reset-step collapse" id="resetStepPassword">
+                    <label class="form-label">New Password</label>
+                    <div class="password-input-wrapper mb-3">
+                        <input type="password" class="form-control" id="resetNewPassword" placeholder="Enter new password">
+                        <button type="button" class="password-toggle" onclick="toggleResetPassword('resetNewPassword', 'resetToggleIcon1')">
+                            <i class="fas fa-eye" id="resetToggleIcon1"></i>
+                        </button>
+                    </div>
+                    <label class="form-label">Confirm Password</label>
+                    <div class="password-input-wrapper mb-3">
+                        <input type="password" class="form-control" id="resetConfirmPassword" placeholder="Confirm new password">
+                        <button type="button" class="password-toggle" onclick="toggleResetPassword('resetConfirmPassword', 'resetToggleIcon2')">
+                            <i class="fas fa-eye" id="resetToggleIcon2"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button class="btn btn-primary d-none" id="saveNewPasswordBtn">Save Password</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
@@ -69,6 +136,218 @@
             } else {
                 passwordInput.type = 'password';
                 toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+        document.querySelector('.forgot-password').addEventListener('click', (e) => {
+            e.preventDefault();
+            const modal = new bootstrap.Modal(forgotPasswordModal);
+            modal.show();
+        });
+
+        (function () {
+            const sendBtn = document.getElementById('sendResetOtpBtn');
+            const resendBtn = document.getElementById('resendResetOtpBtn');
+            const verifyBtn = document.getElementById('verifyResetOtpBtn');
+            const saveBtn = document.getElementById('saveNewPasswordBtn');
+            const statusPill = document.getElementById('resetEmailStatus');
+            const stepOtp = document.getElementById('resetStepOtp');
+            const stepPassword = document.getElementById('resetStepPassword');
+            const helper = document.getElementById('resetOtpHelper');
+            const timerEl = document.getElementById('resetOtpTimer');
+            const inputs = Array.from(document.querySelectorAll('#resetOtpInputs input'));
+            let countdown;
+
+            function getCsrfToken() {
+                const tokenField = document.querySelector('input[name="__RequestVerificationToken"]');
+                return tokenField ? tokenField.value : '';
+            }
+
+            function startTimer(duration = 30) {
+                let remaining = duration;
+                resendBtn.disabled = true;
+                timerEl.textContent = remaining;
+                countdown = setInterval(() => {
+                    remaining--;
+                    timerEl.textContent = remaining;
+                    if (remaining <= 0) {
+                        clearInterval(countdown);
+                        resendBtn.disabled = false;
+                        resendBtn.textContent = 'Resend code';
+                    }
+                }, 1000);
+            }
+
+            async function sendOtpToServer() {
+                const email = document.getElementById('resetEmailInput').value.trim();
+                if (!email) {
+                    helper.textContent = 'Please enter your email.';
+                    helper.classList.add('text-danger');
+                    return;
+                }
+                helper.classList.remove('text-danger');
+                helper.textContent = 'Sending code to your email...';
+                sendBtn.disabled = true;
+                sendBtn.querySelector('.default-text').classList.add('d-none');
+                sendBtn.querySelector('.loading-text').classList.remove('d-none');
+
+                try {
+                    const response = await fetch('/Account/SendResetOtp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken()
+                        },
+                        body: JSON.stringify({ email })
+                    });
+                    const result = await response.json().catch(() => ({ success: false }));
+
+                    sendBtn.disabled = false;
+                    sendBtn.querySelector('.default-text').classList.remove('d-none');
+                    sendBtn.querySelector('.loading-text').classList.add('d-none');
+
+                    if (!result.success) {
+                        helper.textContent = result.message || 'Could not send code. Please try again.';
+                        helper.classList.add('text-danger');
+                        return;
+                    }
+
+                    stepOtp.classList.add('show');
+                    statusPill.textContent = 'OTP sent';
+                    statusPill.classList.remove('text-muted');
+                    statusPill.classList.add('text-warning');
+                    helper.textContent = 'Enter the six digits to continue.';
+                    startTimer();
+                    inputs[0].focus();
+                } catch {
+                    helper.textContent = 'Network error while sending code.';
+                    helper.classList.add('text-danger');
+                    sendBtn.disabled = false;
+                    sendBtn.querySelector('.default-text').classList.remove('d-none');
+                    sendBtn.querySelector('.loading-text').classList.add('d-none');
+                }
+            }
+
+            async function verifyOtpOnServer() {
+                const code = inputs.map(i => i.value.trim()).join('');
+                if (code.length !== 6) {
+                    helper.textContent = 'Enter all six digits.';
+                    helper.classList.add('text-danger');
+                    return;
+                }
+                helper.classList.remove('text-danger');
+                helper.textContent = 'Verifying...';
+                verifyBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/Account/VerifyResetOtp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken()
+                        },
+                        body: JSON.stringify({ email: document.getElementById('resetEmailInput').value.trim(), code })
+                    });
+                    const result = await response.json().catch(() => ({ success: false }));
+
+                    if (!result.success) {
+                        helper.textContent = result.message || 'Invalid or expired code.';
+                        helper.classList.add('text-danger');
+                        verifyBtn.disabled = false;
+                        return;
+                    }
+
+                    helper.textContent = 'OTP verified! You can set a new password.';
+                    statusPill.textContent = 'Verified';
+                    statusPill.classList.remove('text-warning');
+                    statusPill.classList.add('text-success');
+                    stepPassword.classList.add('show');
+                    saveBtn.classList.remove('d-none');
+                    verifyBtn.disabled = false;
+                    resendBtn.disabled = true;
+                    clearInterval(countdown);
+                } catch {
+                    helper.textContent = 'Network error while verifying code.';
+                    helper.classList.add('text-danger');
+                    verifyBtn.disabled = false;
+                }
+            }
+
+            function attachOtpInputs() {
+                inputs.forEach((input, idx) => {
+                    input.addEventListener('input', (e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, '');
+                        e.target.value = value.slice(-1);
+                        if (value && idx < inputs.length - 1) {
+                            inputs[idx + 1].focus();
+                        }
+                    });
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+                            inputs[idx - 1].focus();
+                        }
+                    });
+                });
+            }
+
+            attachOtpInputs();
+            sendBtn.addEventListener('click', sendOtpToServer);
+            resendBtn.addEventListener('click', () => {
+                resendBtn.textContent = 'Sending...';
+                sendOtpToServer();
+            });
+            verifyBtn.addEventListener('click', verifyOtpOnServer);
+            saveBtn.addEventListener('click', () => {
+                const email = document.getElementById('resetEmailInput').value.trim();
+                const newPassword = document.getElementById('resetNewPassword').value;
+                const confirmPassword = document.getElementById('resetConfirmPassword').value;
+                if (!newPassword || newPassword !== confirmPassword) {
+                    alert('Passwords do not match.');
+                    return;
+                }
+
+                saveBtn.textContent = 'Saving...';
+                saveBtn.disabled = true;
+
+                fetch('/Account/ResetPassword', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': getCsrfToken()
+                    },
+                    body: JSON.stringify({ email, newPassword })
+                })
+                    .then(r => r.json().catch(() => ({ success: false })))
+                    .then(result => {
+                        if (!result.success) {
+                            alert(result.message || 'Could not update password.');
+                            saveBtn.textContent = 'Save Password';
+                            saveBtn.disabled = false;
+                            return;
+                        }
+                        saveBtn.textContent = 'Save Password';
+                        saveBtn.disabled = false;
+                        bootstrap.Modal.getInstance(forgotPasswordModal).hide();
+                        alert('Password updated successfully. You can now login with the new password.');
+                    })
+                    .catch(() => {
+                        alert('Network error while updating password.');
+                        saveBtn.textContent = 'Save Password';
+                        saveBtn.disabled = false;
+                    });
+            });
+        })();
+
+        function toggleResetPassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
     </script>

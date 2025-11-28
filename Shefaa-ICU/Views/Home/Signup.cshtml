@@ -5,7 +5,7 @@
 }
 
 <div class="auth-container">
-    <div class="auth-card" style="max-width: 500px;">
+    <div class="auth-card register-card">
         <div class="auth-header">
             <div class="auth-logo">
                 <i class="fas fa-shield-alt"></i>
@@ -16,35 +16,65 @@
             <p class="auth-subtitle">Already have an account? <a asp-action="Index">Log in</a></p>
         </div>
 
-        <form asp-controller="Account" asp-action="Register" method="post" class="auth-form">
+        <form asp-controller="Account" asp-action="Register" method="post" class="auth-form two-column-form" autocomplete="off">
             @Html.AntiForgeryToken()
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <div class="form-group mb-3">
-                <label asp-for="FullName" class="form-label"></label>
-                <input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
-                <span asp-validation-for="FullName" class="text-danger small"></span>
+            <div class="form-grid">
+                <div class="form-group mb-3">
+                    <label asp-for="FullName" class="form-label"></label>
+                    <input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
+                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Username" class="form-label"></label>
+                    <input asp-for="Username" class="form-control" placeholder="Choose a username" />
+                    <span asp-validation-for="Username" class="text-danger small"></span>
+                </div>
+
+                <div class="form-group mb-3 verification-group">
+                    <label asp-for="Email" class="form-label d-flex justify-content-between align-items-center">
+                        <span>Email</span>
+                        <small class="verification-status text-muted" id="signupEmailStatus">Not verified</small>
+                    </label>
+                    <div class="verification-actions">
+                        <input asp-for="Email" class="form-control" placeholder="Enter your email" id="signupEmailInput" />
+                        <button type="button" class="btn btn-soft btn-otp" id="sendSignupOtpBtn">
+                            <span class="default-text">Send OTP</span>
+                            <span class="loading-text d-none">
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                                Sending...
+                            </span>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                    <div class="otp-entry collapse" id="signupOtpWrapper">
+                        <label class="form-label">Verification Code</label>
+                        <div class="otp-inputs" id="signupOtpInputs">
+                            <input type="text" maxlength="1" inputmode="numeric">
+                            <input type="text" maxlength="1" inputmode="numeric">
+                            <input type="text" maxlength="1" inputmode="numeric">
+                            <input type="text" maxlength="1" inputmode="numeric">
+                            <input type="text" maxlength="1" inputmode="numeric">
+                            <input type="text" maxlength="1" inputmode="numeric">
+                        </div>
+                        <div class="otp-actions">
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="verifySignupOtpBtn">Verify Code</button>
+                            <button type="button" class="btn btn-link btn-sm" id="resendSignupOtpBtn" disabled>Resend in <span id="signupOtpTimer">30</span>s</button>
+                        </div>
+                        <small class="text-muted" id="signupOtpHelper">Enter the 6-digit code we sent to your email.</small>
+                    </div>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="PhoneNumber" class="form-label"></label>
+                    <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                </div>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Username" class="form-label"></label>
-                <input asp-for="Username" class="form-control" placeholder="Choose a username" />
-                <span asp-validation-for="Username" class="text-danger small"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" class="form-control" placeholder="Enter your email" />
-                <span asp-validation-for="Email" class="text-danger small"></span>
-            </div>
-
-            <div class="form-group mb-3">
-                <label asp-for="PhoneNumber" class="form-label"></label>
-                <input asp-for="PhoneNumber" class="form-control" placeholder="Enter your phone number" />
-                <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
-            </div>
-
-            <div class="form-group mb-3">
+            <div class="form-group mb-3 role-group">
                 <label class="form-label">Role</label>
                 <div class="role-selector">
                     <input type="radio" class="btn-check" asp-for="Role" id="roleDoctor" value="Doctor" autocomplete="off" checked="@((Model?.Role ?? "Doctor") == "Doctor")">
@@ -59,29 +89,31 @@
                 <span asp-validation-for="Role" class="text-danger small"></span>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <div class="password-input-wrapper">
-                    <input asp-for="Password" class="form-control" id="signupPassword" placeholder="Enter your password" />
-                    <button type="button" class="password-toggle" onclick="togglePassword('signupPassword', 'toggleIcon1')">
-                        <i class="fas fa-eye" id="toggleIcon1"></i>
-                    </button>
+            <div class="form-grid">
+                <div class="form-group mb-3">
+                    <label asp-for="Password" class="form-label"></label>
+                    <div class="password-input-wrapper">
+                        <input asp-for="Password" class="form-control" id="signupPassword" placeholder="Enter your password" />
+                        <button type="button" class="password-toggle" onclick="togglePassword('signupPassword', 'toggleIcon1')">
+                            <i class="fas fa-eye" id="toggleIcon1"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger small"></span>
                 </div>
-                <span asp-validation-for="Password" class="text-danger small"></span>
+
+                <div class="form-group mb-3">
+                    <label asp-for="ConfirmPassword" class="form-label"></label>
+                    <div class="password-input-wrapper">
+                        <input asp-for="ConfirmPassword" class="form-control" id="confirmPassword" placeholder="Confirm your password" />
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
+                            <i class="fas fa-eye" id="toggleIcon2"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                </div>
             </div>
 
-            <div class="form-group mb-3">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <div class="password-input-wrapper">
-                    <input asp-for="ConfirmPassword" class="form-control" id="confirmPassword" placeholder="Confirm your password" />
-                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword', 'toggleIcon2')">
-                        <i class="fas fa-eye" id="toggleIcon2"></i>
-                    </button>
-                </div>
-                <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
-            </div>
-
-            <button type="submit" class="btn btn-primary w-100 mb-3">Register</button>
+            <button type="submit" class="btn btn-primary w-100 mb-3" id="registerSubmitBtn" disabled>Register</button>
         </form>
     </div>
 
@@ -105,6 +137,166 @@
                 toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
+
+        // === Simple front-end OTP simulation ===
+        (function () {
+            const otpWrapper = document.getElementById('signupOtpWrapper');
+            const sendBtn = document.getElementById('sendSignupOtpBtn');
+            const resendBtn = document.getElementById('resendSignupOtpBtn');
+            const verifyBtn = document.getElementById('verifySignupOtpBtn');
+            const statusPill = document.getElementById('signupEmailStatus');
+            const helperText = document.getElementById('signupOtpHelper');
+            const timerEl = document.getElementById('signupOtpTimer');
+            const emailInput = document.getElementById('signupEmailInput');
+            const inputs = Array.from(document.querySelectorAll('#signupOtpInputs input'));
+            let countdown;
+
+            function startTimer(duration = 30) {
+                let remaining = duration;
+                resendBtn.disabled = true;
+                timerEl.textContent = remaining;
+                countdown = setInterval(() => {
+                    remaining--;
+                    timerEl.textContent = remaining;
+                    if (remaining <= 0) {
+                        clearInterval(countdown);
+                        resendBtn.disabled = false;
+                        resendBtn.textContent = 'Resend code';
+                    }
+                }, 1000);
+            }
+
+            function getCsrfToken() {
+                const tokenField = document.querySelector('input[name="__RequestVerificationToken"]');
+                return tokenField ? tokenField.value : '';
+            }
+
+            async function sendOtpToServer() {
+                const email = emailInput.value.trim();
+                if (!email) {
+                    helperText.textContent = 'Please enter an email first.';
+                    helperText.classList.add('text-danger');
+                    return;
+                }
+
+                helperText.classList.remove('text-danger');
+                helperText.textContent = 'Sending code to your email...';
+                sendBtn.disabled = true;
+                sendBtn.querySelector('.default-text').classList.add('d-none');
+                sendBtn.querySelector('.loading-text').classList.remove('d-none');
+
+                try {
+                    const response = await fetch('/Account/SendRegisterOtp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken()
+                        },
+                        body: JSON.stringify({ email })
+                    });
+                    const result = await response.json().catch(() => ({ success: false }));
+
+                    sendBtn.disabled = false;
+                    sendBtn.querySelector('.default-text').classList.remove('d-none');
+                    sendBtn.querySelector('.loading-text').classList.add('d-none');
+
+                    if (!result.success) {
+                        helperText.textContent = result.message || 'Could not send code. Please try again.';
+                        helperText.classList.add('text-danger');
+                        return;
+                    }
+
+                    otpWrapper.classList.add('show');
+                    helperText.textContent = `We emailed a 6-digit code to ${email}.`;
+                    statusPill.textContent = 'Pending verification';
+                    statusPill.classList.remove('text-success');
+                    statusPill.classList.add('text-warning');
+                    startTimer();
+                    inputs[0].focus();
+                } catch {
+                    helperText.textContent = 'Network error while sending code.';
+                    helperText.classList.add('text-danger');
+                    sendBtn.disabled = false;
+                    sendBtn.querySelector('.default-text').classList.remove('d-none');
+                    sendBtn.querySelector('.loading-text').classList.add('d-none');
+                }
+            }
+
+            async function handleVerify() {
+                const code = inputs.map(i => i.value.trim()).join('');
+                if (code.length !== 6) {
+                    helperText.textContent = 'Please enter all 6 digits.';
+                    helperText.classList.add('text-danger');
+                    return;
+                }
+                helperText.classList.remove('text-danger');
+                helperText.textContent = 'Verifying...';
+                verifyBtn.disabled = true;
+
+                try {
+                    const response = await fetch('/Account/VerifyRegisterOtp', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': getCsrfToken()
+                        },
+                        body: JSON.stringify({ email: emailInput.value.trim(), code })
+                    });
+                    const result = await response.json().catch(() => ({ success: false }));
+
+                    if (!result.success) {
+                        helperText.textContent = result.message || 'Invalid or expired code.';
+                        helperText.classList.add('text-danger');
+                        verifyBtn.disabled = false;
+                        return;
+                    }
+
+                    helperText.textContent = 'Email verified successfully!';
+                    statusPill.textContent = 'Verified';
+                    statusPill.classList.remove('text-warning');
+                    statusPill.classList.add('text-success');
+                    verifyBtn.disabled = false;
+                    resendBtn.disabled = true;
+                    clearInterval(countdown);
+                    
+                    // Enable the register button after successful verification
+                    const registerBtn = document.getElementById('registerSubmitBtn');
+                    if (registerBtn) {
+                        registerBtn.disabled = false;
+                    }
+                }
+                catch {
+                    helperText.textContent = 'Network error while verifying code.';
+                    helperText.classList.add('text-danger');
+                    verifyBtn.disabled = false;
+                }
+            }
+
+            function attachInputBehavior() {
+                inputs.forEach((input, idx) => {
+                    input.addEventListener('input', (e) => {
+                        const value = e.target.value.replace(/[^0-9]/g, '');
+                        e.target.value = value.slice(-1);
+                        if (value && idx < inputs.length - 1) {
+                            inputs[idx + 1].focus();
+                        }
+                    });
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+                            inputs[idx - 1].focus();
+                        }
+                    });
+                });
+            }
+
+            attachInputBehavior();
+            sendBtn.addEventListener('click', sendOtpToServer);
+            resendBtn.addEventListener('click', () => {
+                resendBtn.textContent = 'Sending...';
+                sendOtpToServer();
+            });
+            verifyBtn.addEventListener('click', handleVerify);
+        })();
     </script>
 }
 

@@ -2,7 +2,8 @@ let occupancyChart = null;
 let roomStatusChart = null;
 let vitalsChart = null;
 
-document.addEventListener('DOMContentLoaded', function() {
+// Initialize dashboard when DOM is ready
+function initializeDashboard() {
     // Get dashboard data from the model
     const data = window.dashboardData || {};
     
@@ -19,6 +20,18 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log("weeklyOccupancy:", data.weeklyOccupancy);
     console.log("recentActivities:", data.recentActivities);
     console.log("staffOnDutyList:", data.staffOnDutyList);
+    
+    // If no data, log error and use fallback
+    if (!data || Object.keys(data).length === 0) {
+        console.error("No dashboard data found! window.dashboardData:", window.dashboardData);
+        console.error("window.modelData:", window.modelData);
+        console.error("window.hardcodedData:", window.hardcodedData);
+        if (window.hardcodedData) {
+            console.log("Using hardcoded fallback data");
+            window.dashboardData = window.hardcodedData;
+            return initializeDashboard(); // Retry with hardcoded data
+        }
+    }
     
     // Force data to be defined to avoid empty charts
     if (!data.weeklyOccupancy || data.weeklyOccupancy.length === 0) {
@@ -46,14 +59,47 @@ document.addEventListener('DOMContentLoaded', function() {
         ];
     }
     
+    // Apply fallback data if arrays are empty (but only if hardcoded data exists)
+    if (window.hardcodedData) {
+        if (!data.recentActivities || data.recentActivities.length === 0) {
+            console.log("No activities in database, using fallback data");
+            data.recentActivities = window.hardcodedData.recentActivities || [];
+        }
+        
+        if (!data.staffOnDutyList || data.staffOnDutyList.length === 0) {
+            console.log("No staff on duty in database, using fallback data");
+            data.staffOnDutyList = window.hardcodedData.staffOnDutyList || [];
+        }
+    }
+    
     // Update all dashboard components
+    console.log("Initializing dashboard components...");
     updateStatistics(data);
-    loadActivityFeed(data.recentActivities || []);
-    loadStaffOnDuty(data.staffOnDutyList || []);
+    
+    // Ensure we have arrays before calling functions
+    const activities = Array.isArray(data.recentActivities) ? data.recentActivities : [];
+    const staff = Array.isArray(data.staffOnDutyList) ? data.staffOnDutyList : [];
+    
+    console.log("Calling loadActivityFeed with:", activities);
+    loadActivityFeed(activities);
+    
+    console.log("Calling loadStaffOnDuty with:", staff);
+    loadStaffOnDuty(staff);
+    
     loadCurrentShift(data.currentShift);
     renderVitalsAlerts(data.vitalAlerts || []);
     initializeCharts(data);
-});
+    
+    console.log("Dashboard initialization complete");
+}
+
+// Run when DOM is ready, or immediately if already loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDashboard);
+} else {
+    // DOM is already loaded
+    initializeDashboard();
+}
 
 function updateStatistics(data) {
     animateNumber(document.getElementById('totalRooms'), 0, data.totalRooms || 0, 1000);
@@ -66,43 +112,98 @@ function updateStatistics(data) {
 
 function loadActivityFeed(activities) {
     const feedContainer = document.getElementById('activityFeed');
-    if (!feedContainer) return;
-    
-    console.log("Loading activity feed with:", activities);
-    
-    if (!activities || activities.length === 0) {
-        feedContainer.innerHTML = '<p class="text-muted">No recent activities</p>';
+    if (!feedContainer) {
+        console.error("Activity feed container not found - element with id 'activityFeed' does not exist");
         return;
     }
     
-    feedContainer.innerHTML = activities.map((activity, index) => `
-        <div class="activity-item" style="animation-delay: ${index * 100}ms">
-            <div class="activity-time">${activity.time || ''}</div>
-            <div class="activity-text">${activity.text || ''}</div>
-        </div>
-    `).join('');
+    console.log("Loading activity feed with:", activities);
+    console.log("Activities count:", activities ? activities.length : 0);
+    console.log("Activities type:", Array.isArray(activities) ? "Array" : typeof activities);
+    
+    // Ensure activities is an array
+    if (!Array.isArray(activities)) {
+        console.warn("Activities is not an array, converting...");
+        activities = [];
+    }
+    
+    if (!activities || activities.length === 0) {
+        console.log("No activities to display, showing empty message");
+        feedContainer.innerHTML = '<p class="text-muted text-center py-3" style="color: var(--text-secondary) !important; opacity: 1 !important;">No recent activities</p>';
+        return;
+    }
+    
+    try {
+        feedContainer.innerHTML = activities.map((activity, index) => {
+            // Handle both camelCase (from JSON) and PascalCase (direct from model)
+            const time = activity.time || activity.Time || '';
+            const text = activity.text || activity.Text || '';
+            const type = activity.type || activity.Type || '';
+            
+            return `
+            <div class="activity-item" style="animation-delay: ${index * 100}ms">
+                <div class="activity-time">${time}</div>
+                <div class="activity-text">${text}</div>
+            </div>
+            `;
+        }).join('');
+        console.log("Activity feed rendered successfully");
+    } catch (error) {
+        console.error("Error rendering activity feed:", error);
+        feedContainer.innerHTML = '<p class="text-danger text-center py-3">Error loading activities</p>';
+    }
 }
 
 function loadStaffOnDuty(staff) {
     const staffContainer = document.getElementById('staffOnDutyList');
-    if (!staffContainer) return;
-    
-    console.log("Loading staff on duty with:", staff);
-    
-    if (!staff || staff.length === 0) {
-        staffContainer.innerHTML = '<p class="text-muted">No staff currently on duty</p>';
+    if (!staffContainer) {
+        console.error("Staff on duty container not found - element with id 'staffOnDutyList' does not exist");
         return;
     }
     
-    staffContainer.innerHTML = staff.map((member, index) => `
-        <div class="staff-item" style="animation-delay: ${index * 100}ms">
-            <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(member.name || 'Staff')}&background=random" alt="${member.name || 'Staff'}">
-            <div class="staff-info">
-                <h6>${member.name || 'Unknown'}</h6>
-                <p>${member.role || ''}${member.specialty ? ' - ' + member.specialty : ''}</p>
+    console.log("Loading staff on duty with:", staff);
+    console.log("Staff count:", staff ? staff.length : 0);
+    console.log("Staff type:", Array.isArray(staff) ? "Array" : typeof staff);
+    
+    // Ensure staff is an array
+    if (!Array.isArray(staff)) {
+        console.warn("Staff is not an array, converting...");
+        staff = [];
+    }
+    
+    if (!staff || staff.length === 0) {
+        console.log("No staff to display, showing empty message");
+        staffContainer.innerHTML = '<p class="text-muted text-center py-3" style="color: var(--text-secondary) !important; opacity: 1 !important;">No staff currently on duty</p>';
+        return;
+    }
+    
+    try {
+        staffContainer.innerHTML = staff.map((member, index) => {
+            // Handle both camelCase (from JSON) and PascalCase (direct from model)
+            const name = member.name || member.Name || 'Unknown';
+            const role = member.role || member.Role || '';
+            const specialty = member.specialty || member.Specialty || '';
+            const id = member.id || member.Id || 0;
+            
+            // Use profile photo if available, otherwise use avatar API
+            const photoUrl = member.profilePhotoPath || member.ProfilePhotoPath || 
+                            `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=4F46E5&color=fff`;
+            
+            return `
+            <div class="staff-item" style="animation-delay: ${index * 100}ms">
+                <img src="${photoUrl}" alt="${name}">
+                <div class="staff-info">
+                    <h6>${name}</h6>
+                    <p>${role}${specialty ? ' - ' + specialty : ''}</p>
+                </div>
             </div>
-        </div>
-    `).join('');
+            `;
+        }).join('');
+        console.log("Staff on duty rendered successfully");
+    } catch (error) {
+        console.error("Error rendering staff on duty:", error);
+        staffContainer.innerHTML = '<p class="text-danger text-center py-3">Error loading staff</p>';
+    }
 }
 
 function loadCurrentShift(shiftInfo) {
@@ -112,9 +213,14 @@ function loadCurrentShift(shiftInfo) {
     const shiftTimeEl = document.getElementById('shiftTime');
     const shiftStaffCountEl = document.getElementById('shiftStaffCount');
     
-    if (currentShiftEl) currentShiftEl.textContent = shiftInfo.shiftName || 'Morning Shift';
-    if (shiftTimeEl) shiftTimeEl.textContent = shiftInfo.shiftTime || '08:00 AM - 04:00 PM';
-    if (shiftStaffCountEl) shiftStaffCountEl.textContent = shiftInfo.staffCount || 0;
+    // Handle both camelCase and PascalCase property names
+    const shiftName = shiftInfo.shiftName || shiftInfo.ShiftName || 'Morning Shift';
+    const shiftTime = shiftInfo.shiftTime || shiftInfo.ShiftTime || '08:00 AM - 04:00 PM';
+    const staffCount = shiftInfo.staffCount ?? shiftInfo.StaffCount ?? 0;
+    
+    if (currentShiftEl) currentShiftEl.textContent = shiftName;
+    if (shiftTimeEl) shiftTimeEl.textContent = shiftTime;
+    if (shiftStaffCountEl) shiftStaffCountEl.textContent = staffCount;
 }
 
 function renderVitalsAlerts(alerts) {
@@ -126,18 +232,33 @@ function renderVitalsAlerts(alerts) {
         return;
     }
 
-    container.innerHTML = alerts.map((alert, index) => `
+    // Handle both camelCase and PascalCase property names
+    container.innerHTML = alerts.map((alert, index) => {
+        const patientName = alert.patientName || alert.PatientName || 'Unknown';
+        const metric = alert.metric || alert.Metric || '';
+        const recordedAt = alert.recordedAt || alert.RecordedAt || '';
+        const value = alert.value || alert.Value || '';
+        const severity = alert.severity || alert.Severity || 'warning';
+        
+        return `
         <div class="list-group-item d-flex justify-content-between align-items-center" style="animation-delay: ${index * 100}ms">
             <div>
-                <div class="fw-semibold">${alert.patientName}</div>
-                <small class="text-muted">${alert.metric} • ${alert.recordedAt}</small>
+                <div class="fw-semibold">${patientName}</div>
+                <small class="text-muted">${metric} • ${recordedAt}</small>
             </div>
-            <span class="badge bg-${alert.severity || 'warning'} pulse-animation">${alert.value}</span>
+            <span class="badge bg-${severity} pulse-animation">${value}</span>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 function initializeCharts(data) {
+    // Check if Chart.js is available
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js is not loaded! Charts will not be displayed.');
+        return;
+    }
+    
     // Get colors from CSS variables to ensure theme compatibility
     const root = document.documentElement;
     const primaryColor = getComputedStyle(root).getPropertyValue('--primary').trim() || '#4F6BED';
@@ -155,8 +276,9 @@ function initializeCharts(data) {
             occupancyChart.destroy();
         }
         
-        const labels = data.weeklyOccupancy?.map(w => w.day) || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-        const occupancyData = data.weeklyOccupancy?.map(w => w.occupancyRate) || [0, 0, 0, 0, 0, 0, 0];
+        // Handle both camelCase and PascalCase property names
+        const labels = data.weeklyOccupancy?.map(w => w.day || w.Day) || ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const occupancyData = data.weeklyOccupancy?.map(w => w.occupancyRate ?? w.OccupancyRate) || [0, 0, 0, 0, 0, 0, 0];
         
         occupancyChart = new Chart(occupancyCtx, {
             type: 'line',
@@ -269,14 +391,15 @@ function initializeCharts(data) {
             ];
         }
         console.log("Vitals trend data:", trend);
+        // Handle both camelCase and PascalCase property names
         vitalsChart = new Chart(vitalsCtx, {
             type: 'line',
             data: {
-                labels: trend.map(item => item.label),
+                labels: trend.map(item => item.label || item.Label || ''),
                 datasets: [
                     {
                         label: 'Pulse',
-                        data: trend.map(item => item.pulse),
+                        data: trend.map(item => item.pulse ?? item.Pulse ?? 0),
                         borderColor: primaryColor,
                         backgroundColor: primaryColor + '1A',
                         borderWidth: 2,
@@ -285,7 +408,7 @@ function initializeCharts(data) {
                     },
                     {
                         label: 'SpO₂',
-                        data: trend.map(item => item.spO2),
+                        data: trend.map(item => item.spO2 ?? item.SpO2 ?? 0),
                         borderColor: successColor,
                         backgroundColor: successColor + '1A',
                         borderWidth: 2,

@@ -17,6 +17,7 @@
         public string? Specialty { get; set; }
         public string? PhoneNumber { get; set; }
         public string? Email { get; set; }
+        public string? ProfilePhotoPath { get; set; }
         public StaffStatus? Status { get; set; }
         public DateTime CreatedAt { get; set; }
 
@@ -24,5 +25,6 @@
         public virtual List<Medication> Medications { get; set; } = new();
         public virtual List<ClinicalNotes> ClinicalNotes { get; set; } = new();
         public virtual List<Schedule> Schedules { get; set; } = new();
+        public virtual List<Notification> Notifications { get; set; } = new();
     }
 }

@@ -20,59 +20,10 @@ document.addEventListener('DOMContentLoaded', function() {
         checkAuth();
     }
     
-    initializeTheme();
     loadCurrentUser();
     initializeMenuToggle();
     initializeNotifications();
 });
-
-// ===================================
-// Theme Management
-// ===================================
-function initializeTheme() {
-    const themeToggle = document.getElementById('themeToggle');
-    const themeIcon = document.getElementById('themeIcon');
-    
-    if (themeToggle) {
-        // Set initial icon based on current theme
-        updateThemeIcon();
-        
-        // Add event listener for theme toggle
-        themeToggle.addEventListener('click', toggleTheme);
-    }
-}
-
-function updateThemeIcon() {
-    const themeIcon = document.getElementById('themeIcon');
-    if (!themeIcon) return;
-    
-    const currentTheme = document.body.getAttribute('data-theme');
-    
-    if (currentTheme === 'dark') {
-        themeIcon.classList.remove('fa-moon');
-        themeIcon.classList.add('fa-sun');
-    } else {
-        themeIcon.classList.remove('fa-sun');
-        themeIcon.classList.add('fa-moon');
-    }
-}
-
-function toggleTheme() {
-    const currentTheme = document.body.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    
-    // Update body attribute
-    document.body.setAttribute('data-theme', newTheme);
-    
-    // Save preference to localStorage
-    localStorage.setItem('theme', newTheme);
-    
-    // Update the icon
-    updateThemeIcon();
-    
-    // Dispatch event for components to react to theme change
-    document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: newTheme } }));
-}
 
 // ===================================
 // Authentication Functions
@@ -94,19 +45,29 @@ function checkAuth() {
 }
 
 function loadCurrentUser() {
-    const currentUser = window.__currentUser || JSON.parse(localStorage.getItem('currentUser') || '{}');
-    const userNameElements = document.querySelectorAll('#currentUserName');
-    userNameElements.forEach(el => {
-        if (currentUser.name) {
-            el.textContent = currentUser.name;
+    // Wait a bit to ensure __currentUser is set from the layout script
+    setTimeout(() => {
+        const currentUser = window.__currentUser || JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const userNameElements = document.querySelectorAll('#currentUserName');
+        userNameElements.forEach(el => {
+            if (currentUser && currentUser.name && currentUser.name !== 'User') {
+                el.textContent = currentUser.name;
+            } else if (currentUser && currentUser.name) {
+                el.textContent = currentUser.name;
+            }
+        });
+        
+        // Update avatar
+        const userProfile = document.querySelector('.user-profile img');
+        if (userProfile && currentUser && currentUser.name) {
+            if (currentUser.profilePhotoPath) {
+                userProfile.src = currentUser.profilePhotoPath;
+            } else {
+                userProfile.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=4F46E5&color=fff`;
+            }
+            userProfile.alt = currentUser.name;
         }
-    });
-    
-    // Update avatar
-    const userProfile = document.querySelector('.user-profile img');
-    if (userProfile && currentUser.name) {
-        userProfile.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name)}&background=4F46E5&color=fff`;
-    }
+    }, 100);
 }
 
 function logout() {
@@ -127,16 +88,200 @@ function initializeMenuToggle() {
     const menuToggle = document.getElementById('menuToggle');
     const sidebar = document.getElementById('sidebar');
     
+    // CRITICAL: Force sidebar hidden on mobile by default
+    if (window.innerWidth < 992 && sidebar) {
+        sidebar.classList.remove('active');
+        // Force inline styles to ensure it's hidden
+        sidebar.style.transform = 'translateX(-100%)';
+        sidebar.style.visibility = 'hidden';
+        sidebar.style.opacity = '0';
+        sidebar.style.width = '0';
+        sidebar.style.minWidth = '0';
+        sidebar.style.maxWidth = '0';
+    }
+    
+    // Also ensure main-content has no margin on mobile
+    const mainContent = document.querySelector('.main-content');
+    if (window.innerWidth < 992 && mainContent) {
+        mainContent.style.marginLeft = '0';
+        mainContent.style.width = '100%';
+        mainContent.style.maxWidth = '100vw';
+    }
+    
+    // Create sidebar overlay if it doesn't exist
+    let sidebarOverlay = document.getElementById('sidebarOverlay');
+    if (!sidebarOverlay) {
+        sidebarOverlay = document.createElement('div');
+        sidebarOverlay.id = 'sidebarOverlay';
+        sidebarOverlay.className = 'sidebar-overlay';
+        document.body.appendChild(sidebarOverlay);
+    }
+    
     if (menuToggle && sidebar) {
-        menuToggle.addEventListener('click', function() {
+        const toggleSidebar = () => {
+            const wasActive = sidebar.classList.contains('active');
+            const isMobile = window.innerWidth < 992;
+            
+            // Toggle the active class
             sidebar.classList.toggle('active');
+            const isNowActive = sidebar.classList.contains('active');
+            
+            sidebarOverlay.classList.toggle('active');
+            document.body.style.overflow = isNowActive ? 'hidden' : '';
+            
+            // On mobile, use setProperty with important to override CSS
+            if (isMobile) {
+                if (isNowActive) {
+                    // Opening sidebar - use setProperty with important flag
+                    sidebar.style.setProperty('transform', 'translateX(0)', 'important');
+                    sidebar.style.setProperty('visibility', 'visible', 'important');
+                    sidebar.style.setProperty('opacity', '1', 'important');
+                    sidebar.style.setProperty('width', '280px', 'important');
+                    sidebar.style.setProperty('min-width', '280px', 'important');
+                    sidebar.style.setProperty('max-width', '280px', 'important');
+                    sidebar.style.setProperty('pointer-events', 'auto', 'important');
+                } else {
+                    // Closing sidebar
+                    sidebar.style.setProperty('transform', 'translateX(-100%)', 'important');
+                    sidebar.style.setProperty('visibility', 'hidden', 'important');
+                    sidebar.style.setProperty('opacity', '0', 'important');
+                    sidebar.style.setProperty('width', '0', 'important');
+                    sidebar.style.setProperty('min-width', '0', 'important');
+                    sidebar.style.setProperty('max-width', '0', 'important');
+                    sidebar.style.setProperty('pointer-events', 'none', 'important');
+                }
+            }
+        };
+        
+        menuToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            toggleSidebar();
+            // Toggle active class on button for visual feedback
+            menuToggle.classList.toggle('active');
+        });
+        
+        // Close sidebar when clicking overlay
+        sidebarOverlay.addEventListener('click', function() {
+            sidebar.classList.remove('active');
+            sidebarOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+            menuToggle.classList.remove('active');
+            // Reset inline styles on mobile
+            if (window.innerWidth < 992) {
+                sidebar.style.transform = 'translateX(-100%)';
+                sidebar.style.visibility = 'hidden';
+                sidebar.style.opacity = '0';
+                sidebar.style.width = '0';
+                sidebar.style.minWidth = '0';
+                sidebar.style.maxWidth = '0';
+            }
+        });
+        
+        // Close sidebar button (inside sidebar)
+        const sidebarClose = document.getElementById('sidebarClose');
+        if (sidebarClose) {
+            sidebarClose.addEventListener('click', function(e) {
+                e.stopPropagation();
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+                menuToggle.classList.remove('active');
+                // Reset inline styles on mobile
+                if (window.innerWidth < 992) {
+                    sidebar.style.transform = 'translateX(-100%)';
+                    sidebar.style.visibility = 'hidden';
+                    sidebar.style.opacity = '0';
+                    sidebar.style.width = '0';
+                    sidebar.style.minWidth = '0';
+                    sidebar.style.maxWidth = '0';
+                }
+            });
+        }
+        
+        // Close sidebar when clicking navigation links on mobile
+        const navLinks = sidebar.querySelectorAll('.nav-item');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                if (window.innerWidth < 992) {
+                    setTimeout(() => {
+                        sidebar.classList.remove('active');
+                        sidebarOverlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                        menuToggle.classList.remove('active');
+                        // Reset inline styles on mobile
+                        sidebar.style.transform = 'translateX(-100%)';
+                        sidebar.style.visibility = 'hidden';
+                        sidebar.style.opacity = '0';
+                        sidebar.style.width = '0';
+                        sidebar.style.minWidth = '0';
+                        sidebar.style.maxWidth = '0';
+                    }, 150); // Small delay to allow navigation to start
+                }
+            });
         });
         
         // Close sidebar when clicking outside on mobile
         document.addEventListener('click', function(e) {
             if (window.innerWidth < 992) {
-                if (!sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+                if (sidebar.classList.contains('active') && 
+                    !sidebar.contains(e.target) && 
+                    !menuToggle.contains(e.target) &&
+                    !sidebarOverlay.contains(e.target)) {
                     sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                    menuToggle.classList.remove('active');
+                    // Reset inline styles on mobile
+                    sidebar.style.transform = 'translateX(-100%)';
+                    sidebar.style.visibility = 'hidden';
+                    sidebar.style.opacity = '0';
+                    sidebar.style.width = '0';
+                    sidebar.style.minWidth = '0';
+                    sidebar.style.maxWidth = '0';
+                }
+            }
+        });
+        
+        // Close sidebar on window resize if it becomes desktop size
+        // Also ensure it's hidden on mobile when resizing
+        window.addEventListener('resize', function() {
+            const isMobile = window.innerWidth < 992;
+            const mainContent = document.querySelector('.main-content');
+            
+            if (window.innerWidth >= 992) {
+                // Desktop: remove inline styles, let CSS handle it
+                sidebar.classList.remove('active');
+                sidebarOverlay.classList.remove('active');
+                document.body.style.overflow = '';
+                sidebar.style.transform = '';
+                sidebar.style.visibility = '';
+                sidebar.style.opacity = '';
+                sidebar.style.width = '';
+                sidebar.style.minWidth = '';
+                sidebar.style.maxWidth = '';
+                if (mainContent) {
+                    mainContent.style.marginLeft = '';
+                    mainContent.style.width = '';
+                    mainContent.style.maxWidth = '';
+                }
+            } else {
+                // Mobile: ensure sidebar is hidden if not active
+                if (!sidebar.classList.contains('active')) {
+                    sidebar.classList.remove('active');
+                    sidebarOverlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                    sidebar.style.transform = 'translateX(-100%)';
+                    sidebar.style.visibility = 'hidden';
+                    sidebar.style.opacity = '0';
+                    sidebar.style.width = '0';
+                    sidebar.style.minWidth = '0';
+                    sidebar.style.maxWidth = '0';
+                }
+                if (mainContent) {
+                    mainContent.style.marginLeft = '0';
+                    mainContent.style.width = '100%';
+                    mainContent.style.maxWidth = '100vw';
                 }
             }
         });
@@ -501,65 +646,118 @@ function animateNumber(element, start, end, duration) {
 // ===================================
 // Notifications System
 // ===================================
-function initializeNotifications() {
+let notificationDropdown = null;
+
+async function initializeNotifications() {
     const notificationIcon = document.querySelector('.notification-icon');
     if (!notificationIcon) return;
     
-    // Update badge count
-    updateNotificationBadge();
+    await updateNotificationBadge();
     
-    // Create notifications dropdown
-    const dropdown = createNotificationsDropdown();
-    notificationIcon.appendChild(dropdown);
+    notificationDropdown = await createNotificationsDropdown();
+    notificationIcon.appendChild(notificationDropdown);
     
-    // Toggle dropdown on click
-    notificationIcon.addEventListener('click', function(e) {
+    notificationIcon.addEventListener('click', async function(e) {
+        e.preventDefault();
         e.stopPropagation();
-        dropdown.classList.toggle('show');
+        const isShowing = notificationDropdown.classList.contains('show');
+        
+        if (!isShowing) {
+            await refreshNotificationsContent();
+        }
+        
+        notificationDropdown.classList.toggle('show');
     });
     
-    // Close dropdown when clicking outside
+    // Make sure badge and icon are clickable
+    const badge = document.getElementById('notificationBadge');
+    const icon = notificationIcon.querySelector('i');
+    if (badge) {
+        badge.style.pointerEvents = 'none'; // Let clicks pass through to parent
+    }
+    if (icon) {
+        icon.style.pointerEvents = 'none'; // Let clicks pass through to parent
+    }
+    
     document.addEventListener('click', function(e) {
-        if (!notificationIcon.contains(e.target)) {
-            dropdown.classList.remove('show');
+        if (!notificationIcon.contains(e.target) && !notificationDropdown.contains(e.target)) {
+            notificationDropdown.classList.remove('show');
         }
     });
+    
+    setInterval(async () => {
+        await updateNotificationBadge();
+    }, 30000);
 }
 
-function updateNotificationBadge() {
-    const notifications = getNotifications();
-    const unreadCount = notifications.filter(n => n.unread).length;
-    const badge = document.querySelector('.notification-badge');
-    
-    if (badge) {
-        badge.textContent = unreadCount;
-        badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+async function updateNotificationBadge() {
+    try {
+        const response = await fetch('/api/notifications/unread-count');
+        if (!response.ok) {
+            hideBadge();
+            return;
+        }
+        const data = await response.json();
+        const badge = document.getElementById('notificationBadge');
+        if (badge) {
+            const count = data.count || 0;
+            if (count > 0) {
+                badge.textContent = String(count);
+                badge.style.display = 'flex';
+            } else {
+                hideBadge();
+            }
+        }
+    } catch (error) {
+        console.error('Error updating badge:', error);
+        hideBadge();
     }
 }
 
-function createNotificationsDropdown() {
+function hideBadge() {
+    const badge = document.getElementById('notificationBadge');
+    if (badge) {
+        badge.textContent = '';
+        badge.style.display = 'none';
+    }
+}
+
+async function createNotificationsDropdown() {
     const dropdown = document.createElement('div');
     dropdown.className = 'notifications-dropdown';
     
-    // Get notifications (sample data for now)
-    const notifications = getNotifications();
+    const notifications = await getNotifications();
+    
+    function formatTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    }
     
     dropdown.innerHTML = `
         <div class="notifications-header">
             <h6>Notifications</h6>
-            <span class="mark-read" onclick="markAllAsRead()">Mark all as read</span>
+            ${notifications.some(n => n.unread) ? `<span class="mark-read" onclick="markAllAsRead()">Mark all as read</span>` : ''}
         </div>
         <div class="notifications-body">
             ${notifications.length > 0 ? 
                 notifications.map(notif => `
-                    <div class="notification-item-dropdown ${notif.unread ? 'unread' : ''}" onclick="handleNotificationClick('${notif.id}')">
+                    <div class="notification-item-dropdown ${notif.unread ? 'unread' : ''}" onclick="handleNotificationClick(${notif.id})">
                         <div class="notification-icon-wrapper ${notif.type}">
                             <i class="fas ${notif.icon}"></i>
                         </div>
                         <div class="notification-content">
                             <p class="notification-title">${notif.title}</p>
                             <p class="notification-text">${notif.text}</p>
-                            <p class="notification-time">${notif.time}</p>
+                            <p class="notification-time">${formatTime(notif.time)}</p>
                         </div>
                     </div>
                 `).join('') 
@@ -570,73 +768,93 @@ function createNotificationsDropdown() {
                 </div>`
             }
         </div>
-        ${notifications.length > 0 ? `
-            <div class="notifications-footer">
-                <a href="#" onclick="viewAllNotifications()">View all notifications</a>
-            </div>
-        ` : ''}
     `;
     
     return dropdown;
 }
 
-function getNotifications() {
-    // Sample notifications - will be replaced with API call in ASP.NET MVC
-    return [
-        {
-            id: '1',
-            type: 'danger',
-            icon: 'fa-exclamation-circle',
-            title: 'Critical Patient Alert',
-            text: 'Patient John Doe (Room 101) vitals are critical',
-            time: '2 minutes ago',
-            unread: true
-        },
-        {
-            id: '2',
-            type: 'success',
-            icon: 'fa-check-circle',
-            title: 'Patient Discharged',
-            text: 'Jane Smith has been successfully discharged',
-            time: '1 hour ago',
-            unread: true
-        },
-        {
-            id: '3',
-            type: 'info',
-            icon: 'fa-user-md',
-            title: 'Shift Change',
-            text: 'Evening shift starts in 30 minutes',
-            time: '3 hours ago',
-            unread: false
-        },
-        {
-            id: '4',
-            type: 'warning',
-            icon: 'fa-bed',
-            title: 'Room Maintenance',
-            text: 'Room 105 requires cleaning',
-            time: '5 hours ago',
-            unread: false
-        }
-    ];
+let notificationsCache = [];
+
+async function getNotifications() {
+    try {
+        const response = await fetch('/api/notifications?limit=20');
+        if (!response.ok) return [];
+        const data = await response.json();
+        notificationsCache = data;
+        return data;
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        return [];
+    }
 }
 
-function handleNotificationClick(notificationId) {
-    console.log('Notification clicked:', notificationId);
-    // Mark as read and navigate to relevant page
-    // For ASP.NET MVC: await fetch(`/api/notifications/read/${notificationId}`)
+async function handleNotificationClick(notificationId) {
+    await fetch(`/api/notifications/${notificationId}/read`, { method: 'POST' });
+    await refreshNotifications();
 }
 
-function markAllAsRead() {
-    const unreadItems = document.querySelectorAll('.notification-item-dropdown.unread');
-    unreadItems.forEach(item => item.classList.remove('unread'));
+async function markAllAsRead() {
+    try {
+        await fetch('/api/notifications/mark-all-read', { method: 'POST' });
+        await refreshNotifications();
+        showToast('All notifications marked as read', 'success');
+    } catch (error) {
+        console.error('Error marking all as read:', error);
+    }
+}
+
+async function refreshNotificationsContent() {
+    const notifications = await getNotifications();
     
-    // Update badge
-    updateNotificationBadge();
+    function formatTime(dateString) {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffMs = now - date;
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+        
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    }
     
-    showToast('All notifications marked as read', 'success');
-    // For ASP.NET MVC: await fetch('/api/notifications/markallread', { method: 'POST' })
+    if (!notificationDropdown) return;
+    
+    const header = notificationDropdown.querySelector('.notifications-header');
+    const body = notificationDropdown.querySelector('.notifications-body');
+    
+    if (header && body) {
+        header.innerHTML = `
+            <h6>Notifications</h6>
+            ${notifications.some(n => n.unread) ? `<span class="mark-read" onclick="markAllAsRead()">Mark all as read</span>` : ''}
+        `;
+        
+        body.innerHTML = notifications.length > 0 ? 
+            notifications.map(notif => `
+                <div class="notification-item-dropdown ${notif.unread ? 'unread' : ''}" onclick="handleNotificationClick(${notif.id})">
+                    <div class="notification-icon-wrapper ${notif.type}">
+                        <i class="fas ${notif.icon}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <p class="notification-title">${notif.title}</p>
+                        <p class="notification-text">${notif.text}</p>
+                        <p class="notification-time">${formatTime(notif.time)}</p>
+                    </div>
+                </div>
+            `).join('') 
+            : 
+            `<div class="notifications-empty">
+                <i class="fas fa-bell-slash"></i>
+                <p>No notifications</p>
+            </div>`;
+    }
+}
+
+async function refreshNotifications() {
+    await updateNotificationBadge();
+    await refreshNotificationsContent();
 }
 
 function viewAllNotifications() {
@@ -673,51 +891,4 @@ function setData(key, value) {
     }
 }
 
-// ===================================
-// Theme Management (Dark/Light Mode)
-// ===================================
-function initializeTheme() {
-    // Get saved theme or default to light
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
-    
-    // Initialize theme toggle button
-    const themeToggle = document.getElementById('themeToggle');
-    if (themeToggle) {
-        themeToggle.addEventListener('click', toggleTheme);
-        updateThemeIcon(savedTheme);
-    }
-}
-
-function setTheme(theme) {
-    const html = document.documentElement;
-    if (theme === 'dark') {
-        html.setAttribute('data-theme', 'dark');
-    } else {
-        html.removeAttribute('data-theme');
-    }
-    localStorage.setItem('theme', theme);
-    updateThemeIcon(theme);
-}
-
-function toggleTheme() {
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    setTheme(newTheme);
-}
-
-function updateThemeIcon(theme) {
-    const themeIcon = document.getElementById('themeIcon');
-    if (themeIcon) {
-        if (theme === 'dark') {
-            themeIcon.className = 'fas fa-sun';
-        } else {
-            themeIcon.className = 'fas fa-moon';
-        }
-    }
-}
-
-// Make theme functions globally accessible
-window.setTheme = setTheme;
-window.toggleTheme = toggleTheme;
 

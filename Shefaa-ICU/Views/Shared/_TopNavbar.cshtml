@@ -29,13 +29,9 @@
             @Html.Raw(topbarExtras)
         }
 
-        <button class="theme-toggle" id="themeToggle" type="button" data-tooltip="Toggle Dark Mode" title="Toggle Dark Mode">
-            <i class="fas fa-moon" id="themeIcon"></i>
-        </button>
-
         <div class="notification-icon" id="notificationIcon" data-tooltip="Notifications">
             <i class="fas fa-bell"></i>
-            <span class="notification-badge" id="notificationBadge">3</span>
+            <span class="notification-badge" id="notificationBadge" style="display: none;"></span>
             @* Data: notification count from backend *@
         </div>
 

@@ -8,23 +8,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadReports() {
-    // Use data from server if available
-    if (window.reportsData) {
-        const patients = window.reportsData.patients || [];
-        const rooms = window.reportsData.rooms || [];
-        const staff = window.reportsData.staff || [];
-        
-        updateReportStatistics(patients, rooms, staff);
-        loadPatientReportTable(patients);
-    } else {
-        // Fallback to DataManager if server data not available
-        const patients = DataManager.getPatients();
-        const rooms = DataManager.getRooms();
-        const staff = DataManager.getStaff();
-        
-        updateReportStatistics(patients, rooms, staff);
-        loadPatientReportTable(patients);
-    }
+    const patients = window.reportsData?.patients || [];
+    const rooms = window.reportsData?.rooms || [];
+    const staff = window.reportsData?.staff || [];
+
+    updateReportStatistics(patients, rooms, staff);
+    loadPatientReportTable(patients);
 }
 
 function updateReportStatistics(patients, rooms, staff) {

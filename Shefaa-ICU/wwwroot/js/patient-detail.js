@@ -20,8 +20,11 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadPatientDetails() {
-    currentPatient = DataManager.getPatient(currentPatientId);
-    
+    // Expect server to provide current patient as JSON
+    if (window.patientDetailData && window.patientDetailData.id === currentPatientId) {
+        currentPatient = window.patientDetailData;
+    }
+
     if (!currentPatient) {
         showToast('Patient not found', 'error');
         setTimeout(() => redirectToPatients(), 2000);
@@ -93,23 +96,16 @@ function saveVitals() {
     const spo2 = document.getElementById('spo2Input').value.trim();
     
     const updatedVitals = {
-        bp: bp || currentPatient.vitals.bp,
-        temp: temp || currentPatient.vitals.temp,
-        pulse: pulse || currentPatient.vitals.pulse,
-        spo2: spo2 || currentPatient.vitals.spo2
+        bp: bp || currentPatient.vitals?.bp,
+        temp: temp || currentPatient.vitals?.temp,
+        pulse: pulse || currentPatient.vitals?.pulse,
+        spo2: spo2 || currentPatient.vitals?.spo2
     };
-    
-    DataManager.updatePatient(currentPatientId, { vitals: updatedVitals });
-    
-    DataManager.addActivity({
-        time: 'Just now',
-        text: `Vital signs updated for patient ${currentPatient.name}`
-    });
-    
-    showToast('Vital signs updated successfully!');
-    
-    closeModal('updateVitalsModal');
-    loadPatientDetails();
+
+    postPatientDetailAction('/Patients/UpdateVitals', {
+        id: currentPatientId,
+        vitals: updatedVitals
+    }, 'Vital signs updated successfully!', 'updateVitalsModal');
 }
 
 function displayMedications() {
@@ -160,38 +156,26 @@ function saveMedication() {
         name,
         dose,
         frequency,
-        time,
-        status: 'Pending'
+        time
     };
-    
-    const updatedDrugs = [...(currentPatient.drugs || []), newMedication];
-    DataManager.updatePatient(currentPatientId, { drugs: updatedDrugs });
-    
-    DataManager.addActivity({
-        time: 'Just now',
-        text: `New medication ${name} prescribed to patient ${currentPatient.name}`
-    });
-    
-    showToast('Medication added successfully!');
-    
-    closeModal('addMedicationModal');
-    resetForm('addMedicationForm');
-    loadPatientDetails();
+
+    postPatientDetailAction('/Medications/CreateFromPatientDetail', {
+        patientId: currentPatientId,
+        medication: newMedication
+    }, 'Medication added successfully!', 'addMedicationModal', 'addMedicationForm');
 }
 
 function markMedicationGiven(index) {
-    const updatedDrugs = [...currentPatient.drugs];
-    updatedDrugs[index].status = 'Given';
-    
-    DataManager.updatePatient(currentPatientId, { drugs: updatedDrugs });
-    
-    DataManager.addActivity({
-        time: 'Just now',
-        text: `Medication ${updatedDrugs[index].name} administered to patient ${currentPatient.name}`
-    });
-    
-    showToast('Medication marked as administered!');
-    loadPatientDetails();
+    const medications = currentPatient.drugs || [];
+    const med = medications[index];
+    if (!med || !med.id) {
+        showToast('Medication not found', 'error');
+        return;
+    }
+
+    postPatientDetailAction('/Medications/MarkGiven', {
+        id: med.id
+    }, 'Medication marked as administered!');
 }
 
 function displayNotes() {
@@ -229,27 +213,10 @@ function saveNote() {
         return;
     }
     
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    
-    const newNote = {
-        date: new Date().toISOString(),
-        author: currentUser.name || 'Unknown User',
-        note: noteText
-    };
-    
-    const updatedNotes = [...(currentPatient.notes || []), newNote];
-    DataManager.updatePatient(currentPatientId, { notes: updatedNotes });
-    
-    DataManager.addActivity({
-        time: 'Just now',
-        text: `Clinical note added for patient ${currentPatient.name}`
-    });
-    
-    showToast('Clinical note added successfully!');
-    
-    closeModal('addNoteModal');
-    resetForm('addNoteForm');
-    loadPatientDetails();
+    postPatientDetailAction('/Patients/AddNote', {
+        id: currentPatientId,
+        noteText: noteText
+    }, 'Clinical note added successfully!', 'addNoteModal', 'addNoteForm');
 }
 
 function calculateDateOfBirth(age) {
@@ -261,10 +228,41 @@ function calculateDateOfBirth(age) {
 // Populate vitals form when modal opens
 document.getElementById('updateVitalsModal')?.addEventListener('shown.bs.modal', function() {
     if (currentPatient && currentPatient.vitals) {
-        document.getElementById('bpInput').value = currentPatient.vitals.bp !== '-/-' ? currentPatient.vitals.bp : '';
-        document.getElementById('tempInput').value = currentPatient.vitals.temp !== '-' ? currentPatient.vitals.temp : '';
-        document.getElementById('pulseInput').value = currentPatient.vitals.pulse !== '-' ? currentPatient.vitals.pulse : '';
-        document.getElementById('spo2Input').value = currentPatient.vitals.spo2 !== '-' ? currentPatient.vitals.spo2 : '';
+        document.getElementById('bpInput').value = currentPatient.vitals.bp && currentPatient.vitals.bp !== '-/-' ? currentPatient.vitals.bp : '';
+        document.getElementById('tempInput').value = currentPatient.vitals.temp && currentPatient.vitals.temp !== '-' ? currentPatient.vitals.temp : '';
+        document.getElementById('pulseInput').value = currentPatient.vitals.pulse && currentPatient.vitals.pulse !== '-' ? currentPatient.vitals.pulse : '';
+        document.getElementById('spo2Input').value = currentPatient.vitals.spo2 && currentPatient.vitals.spo2 !== '-' ? currentPatient.vitals.spo2 : '';
     }
 });
+
+async function postPatientDetailAction(url, payload, successMessage, modalId, formId) {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload ?? {})
+        });
+
+        const result = await response.json().catch(() => ({}));
+        const success = !!result.success;
+
+        showToast(result.message || successMessage || 'Request sent.', success ? 'success' : 'info');
+
+        if (success) {
+            if (modalId) {
+                closeModal(modalId);
+            }
+            if (formId) {
+                resetForm(formId);
+            }
+            // Reload page so server-provided patientDetailData is refreshed
+            window.location.reload();
+        }
+    } catch (error) {
+        console.error('Patient detail action failed', error);
+        showToast('Unable to reach the server right now.', 'error');
+    }
+}
 

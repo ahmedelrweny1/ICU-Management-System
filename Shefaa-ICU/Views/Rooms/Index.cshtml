@@ -1,9 +1,15 @@
+@using System
+@using System.Text.Json
+
 @{
     ViewData["Title"] = "Room Management";
     ViewData["PageTitle"] = "Room Management";
     ViewData["ActivePage"] = "Rooms";
     ViewData["SearchInputId"] = "roomSearch";
     ViewData["SearchPlaceholder"] = "Search by room or patient...";
+
+    var roomsJson = JsonSerializer.Serialize(ViewBag.Rooms ?? Array.Empty<object>());
+    var unassignedPatientsJson = JsonSerializer.Serialize(ViewBag.UnassignedPatients ?? Array.Empty<object>());
 }
 
 <div class="page-header" data-animate>
@@ -27,7 +33,7 @@
 
 <div class="row g-3 filter-card-grid delay-1" data-animate>
     <div class="col-xxl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn active" onclick="filterRooms('all')">
+        <button type="button" class="filter-card filter-btn active" onclick="filterRooms('all', event)">
             <div class="filter-card-body">
                 <span>All Rooms</span>
                 <small>Full inventory</small>
@@ -36,7 +42,7 @@
         </button>
     </div>
     <div class="col-xxl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn variant-success" onclick="filterRooms('Available')">
+        <button type="button" class="filter-card filter-btn variant-success" onclick="filterRooms('Available', event)">
             <div class="filter-card-body">
                 <span>Available</span>
                 <small>Ready for admission</small>
@@ -45,7 +51,7 @@
         </button>
     </div>
     <div class="col-xxl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn variant-danger" onclick="filterRooms('Occupied')">
+        <button type="button" class="filter-card filter-btn variant-danger" onclick="filterRooms('Occupied', event)">
             <div class="filter-card-body">
                 <span>Occupied</span>
                 <small>In use</small>
@@ -54,7 +60,7 @@
         </button>
     </div>
     <div class="col-xxl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn variant-warning" onclick="filterRooms('Cleaning')">
+        <button type="button" class="filter-card filter-btn variant-warning" onclick="filterRooms('Cleaning', event)">
             <div class="filter-card-body">
                 <span>Cleaning</span>
                 <small>Turnover in progress</small>
@@ -97,6 +103,10 @@
 }
 
 @section Scripts {
+    <script>
+        window.roomsData = @Html.Raw(roomsJson);
+        window.unassignedPatientsData = @Html.Raw(unassignedPatientsJson);
+    </script>
     <script src="~/js/rooms.js" asp-append-version="true"></script>
 }
 

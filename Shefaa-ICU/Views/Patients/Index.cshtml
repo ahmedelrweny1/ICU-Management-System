@@ -1,9 +1,15 @@
+@using System
+@using System.Text.Json
+
 @{
     ViewData["Title"] = "Patient Management";
     ViewData["PageTitle"] = "Patient Management";
     ViewData["ActivePage"] = "Patients";
     ViewData["SearchInputId"] = "patientSearch";
     ViewData["SearchPlaceholder"] = "Search patients...";
+
+    var patientsJson = JsonSerializer.Serialize(ViewBag.Patients ?? Array.Empty<object>());
+    var patientRoomsJson = JsonSerializer.Serialize(ViewBag.PatientRooms ?? Array.Empty<object>());
 }
 
 <div class="page-header" data-animate>
@@ -27,7 +33,7 @@
 
 <div class="row g-3 filter-card-grid delay-1" data-animate>
     <div class="col-xxl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn active" onclick="filterPatients('all')">
+        <button type="button" class="filter-card filter-btn active" onclick="filterPatients('all', event)">
             <div class="filter-card-body">
                 <span>All Patients</span>
                 <small>Overview</small>
@@ -36,7 +42,7 @@
         </button>
     </div>
     <div class="col-xxl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn variant-danger" onclick="filterPatients('Critical')">
+        <button type="button" class="filter-card filter-btn variant-danger" onclick="filterPatients('Critical', event)">
             <div class="filter-card-body">
                 <span>Critical</span>
                 <small>Needs attention</small>
@@ -45,7 +51,7 @@
         </button>
     </div>
     <div class="col-xxl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn variant-success" onclick="filterPatients('Stable')">
+        <button type="button" class="filter-card filter-btn variant-success" onclick="filterPatients('Stable', event)">
             <div class="filter-card-body">
                 <span>Stable</span>
                 <small>Tracking well</small>
@@ -54,7 +60,7 @@
         </button>
     </div>
     <div class="col-xxl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn variant-warning" onclick="filterPatients('Moderate')">
+        <button type="button" class="filter-card filter-btn variant-warning" onclick="filterPatients('Moderate', event)">
             <div class="filter-card-body">
                 <span>Moderate</span>
                 <small>Under observation</small>
@@ -182,6 +188,10 @@
 }
 
 @section Scripts {
+    <script>
+        window.patientsData = @Html.Raw(patientsJson);
+        window.patientRoomsData = @Html.Raw(patientRoomsJson);
+    </script>
     <script src="~/js/patients.js" asp-append-version="true"></script>
 }
 

@@ -5,14 +5,17 @@
 let currentRoomFilter = 'all';
 let selectedRoomForAssignment = null;
 
-document.addEventListener('DOMContentLoaded', function() {
+const getRoomsData = () => Array.isArray(window.roomsData) ? window.roomsData : [];
+const getUnassignedPatients = () => Array.isArray(window.unassignedPatientsData) ? window.unassignedPatientsData : [];
+
+document.addEventListener('DOMContentLoaded', function () {
     loadRooms();
     loadPatientsForAssignment();
     initializeRoomSearch();
 });
 
 function loadRooms() {
-    const rooms = DataManager.getRooms();
+    const rooms = getRoomsData();
     displayRooms(rooms);
     updateRoomFilterCounts(rooms);
 }
@@ -20,56 +23,60 @@ function loadRooms() {
 function displayRooms(rooms) {
     const roomsGrid = document.getElementById('roomsGrid');
     if (!roomsGrid) return;
-    
-    // Apply filter
+
     let filtered = rooms;
     if (currentRoomFilter !== 'all') {
-        filtered = rooms.filter(r => r.status === currentRoomFilter);
+        filtered = rooms.filter(r => normalizeStatus(r.status ?? r.Status) === currentRoomFilter);
     }
-    
-    if (filtered.length === 0) {
+
+    if (!filtered.length) {
         roomsGrid.innerHTML = '<p class="text-center text-muted">No rooms found</p>';
         return;
     }
-    
+
     roomsGrid.innerHTML = filtered.map(room => {
-        const patient = room.patientId ? DataManager.getPatient(room.patientId) : null;
-        
+        const roomId = room.id ?? room.roomId ?? room.roomNumber ?? room.number ?? 'N/A';
+        const status = normalizeStatus(room.status ?? room.Status ?? 'Available');
+        const patient = getRoomPatient(room);
+        const patientId = patient?.id ?? patient?.Id ?? room.patientId ?? room.PatientId ?? '';
+        const condition = patient?.condition ?? patient?.Condition ?? '';
+        const admissionDate = patient?.admissionDate ?? patient?.AdmissionDate ?? '';
+
         return `
-            <div class="room-card ${room.status.toLowerCase()}">
+            <div class="room-card ${status.toLowerCase()}">
                 <div class="room-header">
-                    <div class="room-number">Room ${room.id}</div>
-                    <span class="room-status ${room.status.toLowerCase()}">${room.status}</span>
+                    <div class="room-number">Room ${roomId}</div>
+                    <span class="room-status ${status.toLowerCase()}">${status}</span>
                 </div>
-                
+
                 ${patient ? `
                     <div class="room-patient">
-                        <p><strong>Patient:</strong> ${patient.name} - ${patient.id}</p>
-                        <p><strong>Admitted:</strong> ${formatDate(patient.admissionDate)}</p>
-                        <p><strong>Condition:</strong> <span class="badge ${getConditionBadgeClass(patient.condition)}">${patient.condition}</span></p>
+                        <p><strong>Patient:</strong> ${patient.name ?? patient.Name ?? 'N/A'} - ${patientId}</p>
+                        <p><strong>Admitted:</strong> ${formatDate(admissionDate)}</p>
+                        ${condition ? `<p><strong>Condition:</strong> <span class="badge ${getConditionBadgeClass(condition)}">${condition}</span></p>` : ''}
                     </div>
                 ` : `
                     <div class="room-patient">
-                        <p class="text-muted">N/A</p>
+                        <p class="text-muted">No patient assigned</p>
                     </div>
                 `}
-                
+
                 <div class="room-actions">
-                    ${room.status === 'Available' ? `
-                        <button class="btn btn-sm btn-primary" onclick="openAssignPatientModal(${room.id})">
+                    ${status === 'Available' ? `
+                        <button class="btn btn-sm btn-primary" onclick="openAssignPatientModal(${roomId})">
                             <i class="fas fa-user-plus"></i> Assign
                         </button>
                     ` : ''}
-                    ${room.status === 'Occupied' ? `
-                        <button class="btn btn-sm btn-outline-primary" onclick="viewPatientDetail('${room.patientId}')">
+                    ${status === 'Occupied' && patientId ? `
+                        <button class="btn btn-sm btn-outline-primary" onclick="viewPatientDetail('${patientId}')">
                             <i class="fas fa-eye"></i> View
                         </button>
-                        <button class="btn btn-sm btn-danger" onclick="evacuateRoom(${room.id})">
+                        <button class="btn btn-sm btn-danger" onclick="evacuateRoom(${roomId})">
                             <i class="fas fa-door-open"></i> Evacuate
                         </button>
                     ` : ''}
-                    ${room.status === 'Cleaning' ? `
-                        <button class="btn btn-sm btn-success" onclick="markRoomAvailable(${room.id})">
+                    ${status === 'Cleaning' ? `
+                        <button class="btn btn-sm btn-success" onclick="markRoomAvailable(${roomId})">
                             <i class="fas fa-check"></i> Mark Available
                         </button>
                     ` : ''}
@@ -81,182 +88,157 @@ function displayRooms(rooms) {
 
 function updateRoomFilterCounts(rooms) {
     const all = rooms.length;
-    const available = rooms.filter(r => r.status === 'Available').length;
-    const occupied = rooms.filter(r => r.status === 'Occupied').length;
-    const cleaning = rooms.filter(r => r.status === 'Cleaning').length;
-    
+    const available = rooms.filter(r => normalizeStatus(r.status ?? r.Status) === 'Available').length;
+    const occupied = rooms.filter(r => normalizeStatus(r.status ?? r.Status) === 'Occupied').length;
+    const cleaning = rooms.filter(r => normalizeStatus(r.status ?? r.Status) === 'Cleaning').length;
+
     const allCount = document.getElementById('allRoomsCount');
     const availableCount = document.getElementById('availableCount');
     const occupiedCount = document.getElementById('occupiedCount');
     const cleaningCount = document.getElementById('cleaningCount');
-    
+
     if (allCount) allCount.textContent = all;
     if (availableCount) availableCount.textContent = available;
     if (occupiedCount) occupiedCount.textContent = occupied;
     if (cleaningCount) cleaningCount.textContent = cleaning;
 }
 
-function filterRooms(filter) {
+function filterRooms(filter, evt) {
     currentRoomFilter = filter;
-    
-    // Update active filter button
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    event.target.closest('.filter-btn').classList.add('active');
-    
+
+    document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+    const button = evt?.target?.closest('.filter-btn');
+    if (button) {
+        button.classList.add('active');
+    }
+
     loadRooms();
 }
 
 function openAssignPatientModal(roomId) {
     selectedRoomForAssignment = roomId;
-    document.getElementById('assignRoomNumber').textContent = roomId;
-    
-    const modal = new bootstrap.Modal(document.getElementById('assignPatientModal'));
+    const roomLabelElement = document.getElementById('assignRoomNumber');
+    if (roomLabelElement) {
+        roomLabelElement.textContent = roomId;
+    }
+
+    const modalEl = document.getElementById('assignPatientModal');
+    if (!modalEl) return;
+    const modal = new bootstrap.Modal(modalEl);
     modal.show();
 }
 
 function loadPatientsForAssignment() {
-    const patients = DataManager.getPatients();
-    const rooms = DataManager.getRooms();
-    
-    // Get patients not assigned to any room
-    const assignedPatientIds = rooms.filter(r => r.patientId).map(r => r.patientId);
-    const unassignedPatients = patients.filter(p => !assignedPatientIds.includes(p.id));
-    
     const selectElement = document.getElementById('selectPatient');
     if (!selectElement) return;
-    
+
+    const patients = getUnassignedPatients();
+    if (!patients.length) {
+        selectElement.innerHTML = '<option value="">No unassigned patients</option>';
+        return;
+    }
+
     selectElement.innerHTML = '<option value="">Choose a patient...</option>' +
-        unassignedPatients.map(p => `
-            <option value="${p.id}">${p.name} (${p.id}) - ${p.condition}</option>
-        `).join('');
+        patients.map(p => {
+            const id = p.id ?? p.Id ?? '';
+            const name = p.name ?? p.Name ?? 'Unnamed';
+            const condition = p.condition ?? p.Condition ?? '';
+            return `<option value="${id}">${name} (${id}) ${condition ? `- ${condition}` : ''}</option>`;
+        }).join('');
 }
 
-function confirmAssignPatient() {
-    const patientId = document.getElementById('selectPatient').value;
-    
+async function confirmAssignPatient() {
+    const patientId = document.getElementById('selectPatient')?.value;
+
     if (!patientId) {
         showToast('Please select a patient', 'error');
         return;
     }
-    
-    // Update room
-    DataManager.updateRoom(selectedRoomForAssignment, {
-        status: 'Occupied',
+
+    await sendRoomPost('/Rooms/AssignPatient', {
+        roomId: selectedRoomForAssignment,
         patientId: patientId
     });
-    
-    // Update patient room
-    const patient = DataManager.getPatient(patientId);
-    if (patient) {
-        DataManager.updatePatient(patientId, {
-            room: `ICU-${selectedRoomForAssignment}`
-        });
-    }
-    
-    // Add activity
-    DataManager.addActivity({
-        time: 'Just now',
-        text: `Patient ${patient.name} assigned to Room ${selectedRoomForAssignment}`
-    });
-    
-    showToast('Patient assigned successfully!');
-    
-    closeModal('assignPatientModal');
-    loadRooms();
-    loadPatientsForAssignment();
 }
 
-function evacuateRoom(roomId) {
-    if (!confirm('Are you sure you want to evacuate this room? The patient will be discharged.')) {
+async function evacuateRoom(roomId) {
+    if (!confirm('Are you sure you want to evacuate this room?')) {
         return;
     }
-    
-    const room = DataManager.getRoom(roomId);
-    if (room && room.patientId) {
-        const patient = DataManager.getPatient(room.patientId);
-        
-        // Update room status
-        DataManager.updateRoom(roomId, {
-            status: 'Cleaning',
-            patientId: null
-        });
-        
-        // Add activity
-        if (patient) {
-            DataManager.addActivity({
-                time: 'Just now',
-                text: `Room ${roomId} evacuated - Patient ${patient.name} discharged`
-            });
-        }
-        
-        showToast('Room evacuated successfully. Room marked for cleaning.');
-        loadRooms();
-    }
+    await sendRoomPost('/Rooms/EvacuateRoom', { roomId });
 }
 
-function markRoomAvailable(roomId) {
-    DataManager.updateRoom(roomId, {
-        status: 'Available',
-        patientId: null
-    });
-    
-    DataManager.addActivity({
-        time: 'Just now',
-        text: `Room ${roomId} cleaned and marked available`
-    });
-    
-    showToast('Room marked as available!');
-    loadRooms();
+async function markRoomAvailable(roomId) {
+    await sendRoomPost('/Rooms/MarkRoomAvailable', { roomId });
 }
 
 function viewPatientDetail(patientId) {
+    if (!patientId) return;
     const target = window.AppRoutes?.patientDetails
         ? window.AppRoutes.patientDetails(patientId)
         : `/Patients/Details?id=${encodeURIComponent(patientId)}`;
     window.location.href = target;
 }
 
-function addRoom() {
-    const rooms = DataManager.getRooms();
-    const maxId = Math.max(...rooms.map(r => r.id), 100);
-    const newRoomId = maxId + 1;
-    
-    const newRoom = {
-        id: newRoomId,
-        status: 'Available',
-        patientId: null
-    };
-    
-    DataManager.addRoom(newRoom);
-    showToast(`Room ${newRoomId} added successfully!`);
-    loadRooms();
+async function addRoom() {
+    await sendRoomPost('/Rooms/AddRoom', {});
 }
 
 function initializeRoomSearch() {
     const searchInput = document.getElementById('roomSearch');
     if (!searchInput) return;
-    
-    searchInput.addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const rooms = DataManager.getRooms();
-        
+
+    searchInput.addEventListener('input', function (e) {
+        const searchTerm = (e.target.value || '').toLowerCase();
+        const rooms = getRoomsData();
+
         const filtered = rooms.filter(r => {
-            const roomMatch = `room ${r.id}`.includes(searchTerm) || `${r.id}`.includes(searchTerm);
-            if (roomMatch) return true;
-            
-            if (r.patientId) {
-                const patient = DataManager.getPatient(r.patientId);
-                if (patient) {
-                    return patient.name.toLowerCase().includes(searchTerm) ||
-                           patient.id.toLowerCase().includes(searchTerm);
-                }
-            }
-            return false;
+            const roomId = `${r.id ?? r.roomId ?? r.roomNumber ?? ''}`.toLowerCase();
+            const patient = getRoomPatient(r);
+            const patientName = (patient?.name ?? patient?.Name ?? '').toLowerCase();
+            const patientCode = (patient?.id ?? patient?.Id ?? r.patientId ?? '').toLowerCase();
+
+            return roomId.includes(searchTerm) ||
+                patientName.includes(searchTerm) ||
+                patientCode.includes(searchTerm);
         });
-        
+
         displayRooms(filtered);
     });
+}
+
+function getRoomPatient(room) {
+    return room.patient ?? room.Patient ?? room.patientInfo ?? null;
+}
+
+function normalizeStatus(status) {
+    if (!status) return 'Available';
+    const normalized = status.toString().toLowerCase();
+    if (normalized.includes('clean')) return 'Cleaning';
+    if (normalized.includes('occup')) return 'Occupied';
+    return normalized.includes('avail') ? 'Available' : status;
+}
+
+async function sendRoomPost(url, payload) {
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload ?? {})
+        });
+
+        const result = await response.json().catch(() => ({}));
+        const success = !!result.success;
+        showToast(result.message || 'Request sent. Awaiting backend implementation.', success ? 'success' : 'info');
+
+        if (success) {
+            window.location.reload();
+        }
+    } catch (error) {
+        console.error('Room action failed', error);
+        showToast('Unable to reach the server right now.', 'error');
+    }
 }
 

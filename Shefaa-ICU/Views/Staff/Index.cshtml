@@ -1,9 +1,14 @@
+@using System
+@using System.Text.Json
+
 @{
     ViewData["Title"] = "Staff Management";
     ViewData["PageTitle"] = "Staff Management";
     ViewData["ActivePage"] = "Staff";
     ViewData["SearchInputId"] = "staffSearch";
     ViewData["SearchPlaceholder"] = "Search by name or ID...";
+
+    var staffJson = JsonSerializer.Serialize(ViewBag.Staff ?? Array.Empty<object>());
 }
 
 <div class="page-header" data-animate>
@@ -54,7 +59,7 @@
 
 <div class="row g-3 filter-card-grid delay-2" data-animate>
     <div class="col-xl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn active" onclick="filterStaff('all')">
+        <button type="button" class="filter-card filter-btn active" onclick="filterStaff('all', event)">
             <div class="filter-card-body">
                 <span>All Staff</span>
                 <small>Entire roster</small>
@@ -62,7 +67,7 @@
         </button>
     </div>
     <div class="col-xl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn variant-primary" onclick="filterStaff('Doctor')">
+        <button type="button" class="filter-card filter-btn variant-primary" onclick="filterStaff('Doctor', event)">
             <div class="filter-card-body">
                 <span>Doctors</span>
                 <small>Consultants</small>
@@ -70,7 +75,7 @@
         </button>
     </div>
     <div class="col-xl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn variant-success" onclick="filterStaff('Nurse')">
+        <button type="button" class="filter-card filter-btn variant-success" onclick="filterStaff('Nurse', event)">
             <div class="filter-card-body">
                 <span>Nurses</span>
                 <small>Bedside care</small>
@@ -78,7 +83,7 @@
         </button>
     </div>
     <div class="col-xl-2 col-md-3 col-sm-6">
-        <button type="button" class="filter-card filter-btn variant-info" onclick="filterStaff('Technician')">
+        <button type="button" class="filter-card filter-btn variant-info" onclick="filterStaff('Technician', event)">
             <div class="filter-card-body">
                 <span>Technicians</span>
                 <small>Support</small>
@@ -243,6 +248,9 @@
 }
 
 @section Scripts {
+    <script>
+        window.staffData = @Html.Raw(staffJson);
+    </script>
     <script src="~/js/staff.js" asp-append-version="true"></script>
 }
 

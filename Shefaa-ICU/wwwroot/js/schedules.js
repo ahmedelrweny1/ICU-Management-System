@@ -17,28 +17,16 @@ function getWeekStart(date) {
 }
 
 function loadSchedules() {
-    // Use data from server if available
-    if (window.schedulesData) {
-        const schedules = window.schedulesData.schedules || [];
-        const staff = window.schedulesData.staffList || [];
-        
-        // Set current week from server data
-        if (window.schedulesData.startOfWeek) {
-            currentWeekStart = new Date(window.schedulesData.startOfWeek);
-        }
-        
-        updateShiftCounts(schedules);
-        displayWeeklySchedule(schedules, staff);
-        updateWeekDisplay();
-    } else {
-        // Fallback to DataManager if server data not available
-        const schedules = DataManager.getSchedules();
-        const staff = DataManager.getStaff();
-        
-        updateShiftCounts(schedules);
-        displayWeeklySchedule(schedules, staff);
-        updateWeekDisplay();
+    const schedules = window.schedulesData?.schedules || [];
+    const staff = window.schedulesData?.staffList || [];
+
+    if (window.schedulesData?.startOfWeek) {
+        currentWeekStart = new Date(window.schedulesData.startOfWeek);
     }
+
+    updateShiftCounts(schedules);
+    displayWeeklySchedule(schedules, staff);
+    updateWeekDisplay();
 }
 
 function updateShiftCounts(schedules) {

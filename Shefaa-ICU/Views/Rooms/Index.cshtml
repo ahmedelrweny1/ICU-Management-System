@@ -71,7 +71,121 @@
 </div>
 
 <div class="rooms-grid delay-2" id="roomsGrid" data-animate>
-    @* Data: cards per room with patient details *@
+    @if (ViewBag.Rooms != null)
+    {
+        foreach (var room in ViewBag.Rooms)
+        {
+            var statusClass = room.Status.ToString() switch
+            {
+                "Available" => "room-card-available",
+                "Occupied" => "room-card-occupied",
+                "Cleaning" => "room-card-cleaning",
+                _ => "room-card-available"
+            };
+
+            var statusIcon = room.Status.ToString() switch
+            {
+                "Available" => "fa-bed",
+                "Occupied" => "fa-procedures",
+                "Cleaning" => "fa-broom",
+                _ => "fa-bed"
+            };
+
+    <div class="room-card @statusClass" data-status="@room.Status">
+        <div class="room-card-header">
+            <div class="room-number">@room.Number</div>
+            <div class="room-status">
+                <i class="fas @statusIcon"></i>
+                <span>@room.Status</span>
+            </div>
+        </div>
+
+        <div class="room-card-body">
+            @if (room.Status.ToString() == "Occupied" )
+                    {
+            <div class="patient-info">
+                <div class="patient-name">@room.PatientName</div>
+                <div class="patient-condition">
+                    <span class="condition-badge @(room.PatientCondition?.ToLower() ?? "")">
+                        @room.PatientCondition
+                    </span>
+                </div>
+                <div class="patient-meta">
+                    <small>Room @room.Number</small>
+                </div>
+            </div>
+                    }
+                    else
+                    {
+            <div class="room-empty">
+                <i class="fas fa-door-open"></i>
+                <span>Available for admission</span>
+            </div>
+                    }
+        </div>
+
+        <div class="room-card-footer">
+            @if (room.Status.ToString() == "Available")
+                    {
+            <button class="btn btn-sm btn-success" onclick="assignPatient(@room.ID)">
+                <i class="fas fa-user-plus"></i> Assign
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="editRoom(@room.ID)">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteRoom(@room.ID)">
+                <i class="fas fa-trash"></i>
+            </button>
+                    }
+                    else if (room.Status.ToString() == "Occupied")
+                    {
+            <button class="btn btn-sm btn-danger" onclick="evacuateRoom(@room.ID)">
+                <i class="fas fa-user-minus"></i> Evacuate
+            </button>
+            if (room.PatientId != null)
+{
+            <a class="btn btn-sm btn-primary" href="@Url.Action("Details", "Patients", new { id = room.PatientId })">
+                <i class="fas fa-eye"></i> View
+            </a>
+}
+            <button class="btn btn-sm btn-outline-secondary" onclick="editRoom(@room.ID)">
+                <i class="fas fa-edit"></i>
+            </button>
+                    }
+                    else if (room.Status.ToString() == "Cleaning")
+                    {
+            <button class="btn btn-sm btn-success" onclick="markRoomAvailable(@room.ID)">
+                <i class="fas fa-check"></i> Available
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" onclick="editRoom(@room.ID)">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteRoom(@room.ID, '@room.Number')">
+                <i class="fas fa-trash"></i>
+            </button>
+                    }
+        </div>
+
+        @if (!string.IsNullOrEmpty(room.Notes))
+                {
+        <div class="room-notes">
+            <small class="text-muted">@room.Notes</small>
+        </div>
+                }
+    </div>
+        }
+    }
+    else
+    {
+    <div class="col-12 text-center py-5">
+        <i class="fas fa-door-closed fa-3x text-muted mb-3"></i>
+        <h4 class="text-muted">No Rooms Found</h4>
+        <p class="text-muted">Add your first room to get started.</p>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+            <i class="fas fa-plus"></i> Add Room
+        </button>
+    </div>
+    }
 </div>
 
 @section Modals {

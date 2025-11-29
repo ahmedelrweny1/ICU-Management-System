@@ -118,7 +118,9 @@ namespace Shefaa_ICU.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                var existingRoom = await _context.Rooms.FindAsync(id);
+                var existingRoom = await _context.Rooms
+                    .Include(r => r.Patient)
+                    .FirstOrDefaultAsync(r => r.ID == id);
                 if (existingRoom == null)
                 {
                     TempData["Error"] = "Room not found";
@@ -134,12 +136,55 @@ namespace Shefaa_ICU.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
+                // Handle Status enum conversion from form
+                var statusValue = Request.Form["Status"].ToString();
+                RoomStatus newStatus;
+                if (Enum.TryParse<RoomStatus>(statusValue, out RoomStatus parsedStatus))
+                {
+                    newStatus = parsedStatus;
+                }
+                else
+                {
+                    newStatus = existingRoom.Status; // Keep existing status if parsing fails
+                }
+
+                if (existingRoom.Status != newStatus)
+                {
+                    if (existingRoom.Status == RoomStatus.Occupied &&
+                        (newStatus == RoomStatus.Available || newStatus == RoomStatus.Cleaning))
+                    {
+                        if (existingRoom.PatientID.HasValue)
+                        {
+                            var patient = existingRoom.Patient;
+                            if (patient != null)
+                            {
+                                patient.RoomId = null;
+                                TempData["Success"] = $"Room updated successfully. Patient '{patient.Name}' was removed from the room.";
+                            }
+                            existingRoom.PatientID = null;
+                        }
+                    }
+                    else if (newStatus == RoomStatus.Occupied && !existingRoom.PatientID.HasValue)
+                    {
+                        TempData["Warning"] = "Room marked as Occupied but no patient is assigned.";
+                    }
+                    else if (newStatus == RoomStatus.Occupied && existingRoom.PatientID.HasValue)
+                    {
+                        TempData["Success"] = "Room updated successfully. Patient assignment maintained.";
+                    }
+                }
+
+                // Update room properties
                 existingRoom.Number = room.Number.Trim();
+                existingRoom.Status = newStatus;
                 existingRoom.Notes = room.Notes?.Trim();
 
                 await _context.SaveChangesAsync();
 
-                TempData["Success"] = "Room updated successfully";
+                if (!TempData.ContainsKey("Success") && !TempData.ContainsKey("Warning"))
+                {
+                    TempData["Success"] = "Room updated successfully";
+                }
                 return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)

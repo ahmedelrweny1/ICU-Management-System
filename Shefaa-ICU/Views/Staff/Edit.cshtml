@@ -1,0 +1,154 @@
+@using Shefaa_ICU.Models
+@{
+    ViewData["Title"] = "Edit Staff Member";
+    ViewData["PageTitle"] = "Edit Staff Member";
+    ViewData["ActivePage"] = "Staff";
+    
+    var staff = ViewBag.StaffMember as Staff;
+}
+
+<div class="page-header" data-animate>
+    <div>
+        <p class="page-eyebrow">Team</p>
+        <h2>Edit Staff Member</h2>
+        <p class="page-subtitle">Update staff member information and status.</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-soft btn-icon" asp-controller="Staff" asp-action="Index">
+            <i class="fas fa-arrow-left"></i>
+            Back to Staff
+        </a>
+    </div>
+</div>
+
+<div class="card delay-1" data-animate>
+    <div class="card-body">
+        @if (staff != null)
+        {
+            <form method="post" action="@Url.Action("Update", "Staff", new { id = staff.ID })">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="ID" value="@staff.ID">
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Name">Name *</label>
+                        <input type="text" class="form-control" id="Name" name="Name" value="@staff.Name" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Role">Role *</label>
+                        <select class="form-select" id="Role" name="Role" required>
+                            <option value="">Select Role</option>
+                            @if (staff.Role == "Doctor")
+                            {
+                                <option value="Doctor" selected>Doctor</option>
+                            }
+                            else
+                            {
+                                <option value="Doctor">Doctor</option>
+                            }
+                            @if (staff.Role == "Nurse")
+                            {
+                                <option value="Nurse" selected>Nurse</option>
+                            }
+                            else
+                            {
+                                <option value="Nurse">Nurse</option>
+                            }
+                            @if (staff.Role == "Technician")
+                            {
+                                <option value="Technician" selected>Technician</option>
+                            }
+                            else
+                            {
+                                <option value="Technician">Technician</option>
+                            }
+                            @if (staff.Role == "Administrator")
+                            {
+                                <option value="Administrator" selected>Administrator</option>
+                            }
+                            else
+                            {
+                                <option value="Administrator">Administrator</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Username">Username</label>
+                        <input type="text" class="form-control" id="Username" name="Username" value="@staff.Username">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Specialty">Specialty</label>
+                        <input type="text" class="form-control" id="Specialty" name="Specialty" value="@staff.Specialty" placeholder="e.g., Cardiology, ICU">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Email">Email</label>
+                        <input type="email" class="form-control" id="Email" name="Email" value="@staff.Email">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="PhoneNumber">Phone Number</label>
+                        <input type="tel" class="form-control" id="PhoneNumber" name="PhoneNumber" value="@staff.PhoneNumber">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="Status">Status</label>
+                        <select class="form-select" id="Status" name="Status">
+                            @if (staff.Status == StaffStatus.Active)
+                            {
+                                <option value="Active" selected>Active</option>
+                            }
+                            else
+                            {
+                                <option value="Active">Active</option>
+                            }
+                            @if (staff.Status == StaffStatus.Inactive)
+                            {
+                                <option value="Inactive" selected>Inactive</option>
+                            }
+                            else
+                            {
+                                <option value="Inactive">Inactive</option>
+                            }
+                            @if (staff.Status == StaffStatus.OnLeave)
+                            {
+                                <option value="OnLeave" selected>On Leave</option>
+                            }
+                            else
+                            {
+                                <option value="OnLeave">On Leave</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" for="ProfilePhotoPath">Profile Photo Path</label>
+                        <input type="text" class="form-control" id="ProfilePhotoPath" name="ProfilePhotoPath" value="@staff.ProfilePhotoPath" placeholder="/uploads/profiles/photo.jpg">
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Update Staff Member
+                    </button>
+                    <a class="btn btn-secondary" asp-controller="Staff" asp-action="Index">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                Staff member not found.
+            </div>
+            <a class="btn btn-secondary" asp-controller="Staff" asp-action="Index">Back to Staff</a>
+        }
+    </div>
+</div>
+

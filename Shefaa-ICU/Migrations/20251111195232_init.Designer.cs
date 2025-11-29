@@ -13,7 +13,7 @@ namespace Shefaa_ICU.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20251111195232_init")]
-    partial class init
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

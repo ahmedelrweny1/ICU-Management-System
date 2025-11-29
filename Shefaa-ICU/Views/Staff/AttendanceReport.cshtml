@@ -1,0 +1,106 @@
+@using Shefaa_ICU.Models
+@{
+    ViewData["Title"] = "Attendance Report";
+    ViewData["PageTitle"] = "Attendance Report";
+    ViewData["ActivePage"] = "Staff";
+
+    var attendanceLogs = ViewBag.AttendanceLogs as List<AttendanceLog> ?? new List<AttendanceLog>();
+    var staffMember = ViewBag.StaffMember as Staff;
+    var reportType = ViewBag.ReportType as string ?? "Attendance Report";
+}
+
+<div class="page-header" data-animate>
+    <div>
+        <a class="btn btn-outline-secondary btn-sm mb-2" asp-controller="Staff" asp-action="Index">
+            <i class="fas fa-arrow-left"></i> Back to Staff
+        </a>
+        <p class="page-eyebrow">Reports</p>
+        <h2>@reportType</h2>
+        <p class="page-subtitle">Attendance history and tracking</p>
+    </div>
+    <div class="page-actions">
+        <button class="btn btn-soft btn-icon" onclick="window.print()">
+            <i class="fas fa-print"></i>
+            Print Report
+        </button>
+    </div>
+</div>
+
+<div class="card delay-1" data-animate>
+    <div class="card-body">
+        @if (attendanceLogs.Any())
+        {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        @if (staffMember == null)
+                            {
+                        <th scope="col">Staff Member</th>
+                            }
+                        <th scope="col">Check In Time</th>
+                        <th scope="col">Check Out Time</th>
+                        <th scope="col">Duration</th>
+                        <th scope="col">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var log in attendanceLogs)
+                        {
+                            var duration = log.CheckOutTime.HasValue ? log.CheckOutTime - log.CheckInTime : TimeSpan.Zero;
+                    <tr>
+                        @if (staffMember == null)
+                                {
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="@(log.Staff?.ProfilePhotoPath ?? $"https://ui-avatars.com/api/?name={log.Staff?.Name}&background=random")"
+                                     style="width: 32px; height: 32px; border-radius: 50%;" alt="@log.Staff?.Name">
+                                <div>
+                                    <strong>@log.Staff?.Name</strong>
+                                    <div class="text-muted small">@log.Staff?.Role</div>
+                                </div>
+                            </div>
+                        </td>
+                                }
+                        <td>@log.CheckInTime.ToString("MMM dd, yyyy HH:mm")</td>
+                        <td>
+                            @if (log.CheckOutTime.HasValue)
+                                    {
+                            @log.CheckOutTime.Value.ToString("MMM dd, yyyy HH:mm")
+                                    }
+                                    else
+                                    {
+                            <span class="text-muted">Still on duty</span>
+                                    }
+                        </td>
+                        <td>
+                            @if (log.CheckOutTime.HasValue)
+                                    {
+                            <span>@duration.Value.Hours h @duration.Value.Minutes m</span>
+                                    }
+                                    else
+                                    {
+                            <span class="text-muted">-</span>
+                                    }
+                        </td>
+                        <td>
+                            <span class="badge bg-@(log.Status == AttendanceStatus.OnDuty ? "success" : "secondary")">
+                                @log.Status
+                            </span>
+                        </td>
+                    </tr>
+                        }
+                </tbody>
+            </table>
+        </div>
+        }
+        else
+        {
+        <div class="text-center text-muted py-4">
+            <i class="fas fa-clipboard-list fa-2x mb-2"></i>
+            <br>
+            No attendance records found
+        </div>
+        }
+    </div>
+</div>

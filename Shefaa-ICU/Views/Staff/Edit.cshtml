@@ -1,0 +1,114 @@
+@model Shefaa_ICU.Models.Staff
+@{
+    ViewData["Title"] = "Edit Staff";
+    ViewData["PageTitle"] = "Edit Staff Member";
+    ViewData["ActivePage"] = "Staff";
+
+    var staff = ViewBag.StaffMember as Shefaa_ICU.Models.Staff;
+}
+<div class="page-header" data-animate>
+    <div>
+        <p class="page-eyebrow">Staff Management</p>
+        <h2>Edit Staff Member</h2>
+        <p class="page-subtitle">Update staff information and role details.</p>
+    </div>
+    <div class="page-actions">
+        <a class="btn btn-soft btn-icon" asp-action="Index">
+            <i class="fas fa-arrow-left"></i>
+            Back to Staff
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center delay-1" data-animate>
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Staff Information</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-action="Update" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="ID" value="@staff.ID" />
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Name" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="Name" name="Name" value="@staff.Name" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Username" class="form-label">Username *</label>
+                                <input type="text" class="form-control" id="Username" name="Username" value="@staff.Username" required />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Role" class="form-label">Role *</label>
+                                <select class="form-select" id="Role" name="Role" required>
+                                    <option value="Doctor" selected = "@(staff.Role == "Doctor")">Doctor</option>
+                                    <option value="Nurse" selected = "@(staff.Role == "Nurse" )">Nurse</option>
+                                    <option value="Technician" selected ="@(staff.Role == "Technician")">Technician</option>
+                                    <option value="Administrator" selected="@(staff.Role == "Administrator")">Administrator</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Specialty" class="form-label">Specialty</label>
+                                <input type="text" class="form-control" id="Specialty" name="Specialty" value="@staff.Specialty" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="Email" name="Email" value="@staff.Email" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="PhoneNumber" class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" id="PhoneNumber" name="PhoneNumber" value="@staff.PhoneNumber" />
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="Status" class="form-label">Status</label>
+                                <select class="form-select" id="Status" name="Status">
+                                    <option value="Active" selected="@(staff.Status.ToString() == "Active")">Active</option>
+                                    <option value="Inactive" selected="@(staff.Status.ToString() == "Inactive")">Inactive</option>
+                                    <option value="OnLeave" selected="@(staff.Status.ToString() == "OnLeave")">On Leave</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="ProfilePhotoPath" class="form-label">Profile Photo URL</label>
+                                <input type="text" class="form-control" id="ProfilePhotoPath" name="ProfilePhotoPath" value="@staff.ProfilePhotoPath" />
+                                <small class="form-text text-muted">Enter URL for profile photo</small>
+                            </div>
+                        </div>
+
+                        
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-end mt-4">
+                        <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Update Staff
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

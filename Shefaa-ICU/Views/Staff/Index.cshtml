@@ -5,7 +5,7 @@
     ViewData["ActivePage"] = "Staff";
     ViewData["SearchInputId"] = "staffSearch";
     ViewData["SearchPlaceholder"] = "Search by name or ID...";
-    
+
     var staff = ViewBag.Staff as IEnumerable<dynamic> ?? new List<dynamic>();
     var totalCount = staff.Count();
     var doctorCount = staff.Count(s => s.Role?.ToString() == "Doctor");
@@ -30,6 +30,20 @@
         </button>
     </div>
 </div>
+@if (TempData["Success"] != null)
+{
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle me-2"></i>@TempData["Success"]
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+}
+@if (TempData["Error"] != null)
+{
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="fas fa-exclamation-circle me-2"></i>@TempData["Error"]
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+}
 
 <div class="row mb-4 g-3 delay-1" data-animate>
     <div class="col-md-3">
@@ -107,64 +121,85 @@
                         <th scope="col">Role</th>
                         <th scope="col">Contact</th>
                         <th scope="col">Status</th>
+                        <th scope="col">Attendance</th>
                         <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="staffTableBody">
                     @if (staff.Any())
                     {
-                        @foreach (var member in staff)
+                        foreach (var member in staff)
                         {
-                            <tr data-role="@member.Role">
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <img src="@(member.ProfilePhotoPath ?? $"https://ui-avatars.com/api/?name={member.Name}&background=random")"
-                                             style="width: 40px; height: 40px; border-radius: 50%;" alt="@member.Name">
-                                        <div>
-                                            <strong>@member.Name</strong>
-                                            @if (!string.IsNullOrEmpty(member.Specialty?.ToString()))
+                    <tr data-role="@member.Role">
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="@(member.ProfilePhotoPath ?? $"https://ui-avatars.com/api/?name={member.Name}&background=random")"
+                                     style="width: 40px; height: 40px; border-radius: 50%;" alt="@member.Name">
+                                <div>
+                                    <strong>@member.Name</strong>
+                                    @if (!string.IsNullOrEmpty(member.Specialty?.ToString()))
                                             {
-                                                <div class="text-muted small">@member.Specialty</div>
+                                    <div class="text-muted small">@member.Specialty</div>
                                             }
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-@(member.Role?.ToString() == "Doctor" ? "primary" : member.Role?.ToString() == "Nurse" ? "success" : "info")">
-                                        @member.Role
-                                    </span>
-                                </td>
-                                <td>
-                                    <div>@(member.Email ?? "N/A")</div>
-                                    <div class="text-muted small">@(member.PhoneNumber ?? "N/A")</div>
-                                </td>
-                                <td>
-                                    <span class="badge bg-@(member.Status?.ToString() == "Active" ? "success" : "secondary")">
-                                        @member.Status
-                                    </span>
-                                </td>
-                                <td>
-                                    <div class="btn-group">
-                                        <button class="btn btn-sm btn-outline-secondary" onclick="editStaff(@member.ID)" data-tooltip="Edit Staff">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-primary" onclick="registerAttendance(@member.ID)" data-tooltip="Register Attendance">
-                                            <i class="fas fa-clock"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">
+                                @member.Role
+                            </span>
+                        </td>
+                        <td>
+                            <div>@(member.Email ?? "N/A")</div>
+                            <div class="text-muted small">@(member.PhoneNumber ?? "N/A")</div>
+                        </td>
+                        <td>
+                            <span class="badge bg-@(member.Status?.ToString() == "Active" ? "success" : member.Status?.ToString() == "OnLeave" ? "warning" : "secondary")">
+                                @member.Status
+                            </span>
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <form method="post" action="@Url.Action("CheckIn", "Staff")" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="staffId" value="@member.ID">
+                                    <button type="submit" class="btn btn-outline-success btn-sm" data-tooltip="Check In">
+                                        <i class="fas fa-sign-in-alt"></i> In
+                                    </button>
+                                </form>
+                                <form method="post" action="@Url.Action("CheckOut", "Staff")" class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="staffId" value="@member.ID">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" data-tooltip="Check Out">
+                                        <i class="fas fa-sign-out-alt"></i> Out
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("Edit", "Staff", new { id = member.ID })">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                
+                                <a class="btn btn-sm btn-outline-primary" href="@Url.Action("AttendanceReport", "Staff", new { id = member.ID })" data-tooltip="View Attendance">
+                                    <i class="fas fa-history"></i>
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
                         }
                     }
                     else
                     {
-                        <tr>
-                            <td colspan="5" class="text-center text-muted py-4">
-                                <i class="fas fa-users fa-2x mb-2"></i>
-                                <br>
-                                No staff found
-                            </td>
-                        </tr>
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            <i class="fas fa-users fa-2x mb-2"></i>
+                            <br>
+                            No staff found
+                        </td>
+                    </tr>
                     }
                 </tbody>
             </table>
@@ -180,9 +215,55 @@
                     <h5 class="modal-title">Add New Staff Member</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <p class="text-muted">Staff management functionality is not yet implemented.</p>
-                </div>
+                    <form method="post" action="@Url.Action("Create", "Staff")">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label" for="Name">Full Name *</label>
+                                    <input type="text" class="form-control" id="Name" name="Name" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label" for="Username">Username *</label>
+                                    <input type="text" class="form-control" id="Username" name="Username" required>
+                                    <small class="text-muted">Will be auto-generated from name if left blank</small>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label" for="Role">Role *</label>
+                                    <select class="form-select" id="Role" name="Role" required>
+                                        <option value="">Select Role</option>
+                                        <option value="Doctor">Doctor</option>
+                                        <option value="Nurse">Nurse</option>
+                                        <option value="Technician">Technician</option>
+                                        <option value="Administrator">Administrator</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label" for="Specialty">Specialty/Department</label>
+                                    <input type="text" class="form-control" id="Specialty" name="Specialty">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label" for="Email">Email</label>
+                                    <input type="email" class="form-control" id="Email" name="Email">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label" for="PhoneNumber">Phone Number</label>
+                                    <input type="tel" class="form-control" id="PhoneNumber" name="PhoneNumber">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="ProfilePhotoPath">Profile Photo URL</label>
+                                <input type="url" class="form-control" id="ProfilePhotoPath" name="ProfilePhotoPath" placeholder="https://example.com/photo.jpg">
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Add Staff Member</button>
+                        </div>
+                    </form>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>

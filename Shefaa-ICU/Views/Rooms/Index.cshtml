@@ -142,7 +142,7 @@
                         <i class="fas fa-user-minus"></i> Evacuate
                     </button>
                 </form>
-                @if (room.PatientId != null)
+                if (room.PatientId != null)
                 {
                     <a class="btn btn-sm btn-primary" href="@Url.Action("Details", "Patients", new { id = room.PatientId })">
                         <i class="fas fa-eye"></i> View
@@ -156,8 +156,8 @@
             {
                 <form method="post" action="@Url.Action("MarkAvailable", "Rooms", new { id = room.ID })" style="display:inline;">
                     @Html.AntiForgeryToken()
-                    <button type="submit" class="btn btn-sm btn-success">
-                        <i class="fas fa-check"></i> Available
+                    <button type="submit" class="btn btn-sm btn-warning">
+                        <i class="fas fa-check"></i> Mark as Available
                     </button>
                 </form>
                 <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("Edit", "Rooms", new { id = room.ID })">

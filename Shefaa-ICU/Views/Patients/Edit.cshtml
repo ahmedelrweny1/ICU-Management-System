@@ -3,8 +3,20 @@
     ViewData["Title"] = "Edit Patient";
     ViewData["PageTitle"] = "Edit Patient";
     ViewData["ActivePage"] = "Patients";
-}
 
+    var patient = ViewBag.Patient as Shefaa_ICU.Models.Patient;
+    var allRooms = ViewBag.AllRooms as IEnumerable<dynamic> ?? new List<dynamic>();
+}
+@if (patient == null)
+{
+<div class="alert alert-danger">
+    <h4>Patient Not Found</h4>
+    <p>The patient you are looking for does not exist or has been removed.</p>
+    <a href="@Url.Action("Index", "Patients")" class="btn btn-primary">Back to Patients List</a>
+</div>
+}
+else
+{
 <div class="page-header" data-animate>
     <div>
         <p class="page-eyebrow">Patients</p>
@@ -20,89 +32,84 @@
 
 <div class="card delay-1" data-animate>
     <div class="card-body">
-        <form method="post" action="@Url.Action("Update", "Patients", new { id = Model.ID })">
+        <form method="post" action="@Url.Action("Update", "Patients")">
             @Html.AntiForgeryToken()
-            <input type="hidden" asp-for="ID" />
-            <input type="hidden" asp-for="Code" />
+            <input type="hidden" name="ID" value="@patient.ID" />
+            <input type="hidden" name="Code" value="@patient.Code" />
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label" asp-for="Name">Full Name *</label>
-                    <input type="text" class="form-control" asp-for="Name" required />
-                    <span asp-validation-for="Name" class="text-danger"></span>
+                    <label class="form-label" for="Name">Full Name *</label>
+                    <input type="text" class="form-control" id="Name" name="Name" value="@patient.Name" required />
                 </div>
                 <div class="col-md-3 mb-3">
-                    <label class="form-label" asp-for="Age">Age *</label>
-                    <input type="number" class="form-control" asp-for="Age" min="0" max="120" required />
-                    <span asp-validation-for="Age" class="text-danger"></span>
+                    <label class="form-label" for="Age">Age *</label>
+                    <input type="number" class="form-control" id="Age" name="Age" value="@patient.Age" min="0" max="120" required />
                 </div>
                 <div class="col-md-3 mb-3">
-                    <label class="form-label" asp-for="Gender">Gender *</label>
-                    <select class="form-select" asp-for="Gender" required>
+                    <label class="form-label" for="Gender">Gender *</label>
+                    <select class="form-select" id="Gender" name="Gender" required>
                         <option value="">Select</option>
-                        <option value="0">Male</option>
-                        <option value="1">Female</option>
-                        <option value="2">Other</option>
+                        <option value="0" selected="@(patient.Gender == Gender.Male)">Male</option>
+                        <option value="1" selected="@(patient.Gender == Gender.Female)">Female</option>
+                        <option value="2" selected="@(patient.Gender == Gender.Other)">Other</option>
                     </select>
-                    <span asp-validation-for="Gender" class="text-danger"></span>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label" asp-for="RoomId">Room</label>
-                    <select class="form-select" asp-for="RoomId">
+                    <label class="form-label" for="RoomId">Room</label>
+                    <select class="form-select" id="RoomId" name="RoomId">
                         <option value="">Select Room</option>
-                        @if (ViewBag.AllRooms != null)
-                        {
-                            foreach (var room in ViewBag.AllRooms)
+                        @foreach (var room in allRooms)
                             {
-                                <option value="@room.ID" selected="@(Model.RoomId == room.ID)">@room.Number</option>
+                        <option value="@room.ID" selected="@(patient.RoomId == room.ID)">@room.Number</option>
                             }
-                        }
                     </select>
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label" asp-for="Condition">Condition *</label>
-                    <select class="form-select" asp-for="Condition" required>
+                    <label class="form-label" for="Condition">Condition *</label>
+                    <select class="form-select" id="Condition" name="Condition" required>
                         <option value="">Select Condition</option>
-                        <option value="Stable">Stable</option>
-                        <option value="Moderate">Moderate</option>
-                        <option value="Critical">Critical</option>
+                        <option value="Stable" selected="@(patient.Condition == "Stable")">Stable</option>
+                        <option value="Moderate" selected="@(patient.Condition == "Moderate")">Moderate</option>
+                        <option value="Critical" selected="@(patient.Condition == "Critical")">Critical</option>
                     </select>
-                    <span asp-validation-for="Condition" class="text-danger"></span>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-md-6 mb-3">
-                    <label class="form-label" asp-for="AdmissionDate">Admission Date</label>
-                    <input type="date" class="form-control" asp-for="AdmissionDate" />
+                    <label class="form-label" for="AdmissionDate">Admission Date</label>
+                    <input type="date" class="form-control" id="AdmissionDate" name="AdmissionDate"
+                           value="@patient.AdmissionDate.ToString("yyyy-MM-dd")" />
                 </div>
                 <div class="col-md-6 mb-3">
-                    <label class="form-label" asp-for="EmergencyContact">Emergency Contact</label>
-                    <input type="text" class="form-control" asp-for="EmergencyContact" placeholder="Name - Phone Number" />
+                    <label class="form-label" for="EmergencyContact">Emergency Contact</label>
+                    <input type="text" class="form-control" id="EmergencyContact" name="EmergencyContact"
+                           value="@patient.EmergencyContact" placeholder="Name - Phone Number" />
                 </div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label" asp-for="Complaint">Chief Complaint</label>
-                <textarea class="form-control" asp-for="Complaint" rows="2"></textarea>
+                <label class="form-label" for="Complaint">Chief Complaint</label>
+                <textarea class="form-control" id="Complaint" name="Complaint" rows="2">@patient.Complaint</textarea>
             </div>
 
             <div class="mb-3">
-                <label class="form-label" asp-for="MedicalHistory">Medical History</label>
-                <textarea class="form-control" asp-for="MedicalHistory" rows="3"></textarea>
+                <label class="form-label" for="MedicalHistory">Medical History</label>
+                <textarea class="form-control" id="MedicalHistory" name="MedicalHistory" rows="3">@patient.MedicalHistory</textarea>
             </div>
 
             <div class="mb-3">
-                <label class="form-label" asp-for="Diagnosis">Diagnosis</label>
-                <textarea class="form-control" asp-for="Diagnosis" rows="2"></textarea>
+                <label class="form-label" for="Diagnosis">Diagnosis</label>
+                <textarea class="form-control" id="Diagnosis" name="Diagnosis" rows="2">@patient.Diagnosis</textarea>
             </div>
 
             <div class="mb-3">
-                <label class="form-label" asp-for="Treatment">Treatment Plan</label>
-                <textarea class="form-control" asp-for="Treatment" rows="2"></textarea>
+                <label class="form-label" for="Treatment">Treatment Plan</label>
+                <textarea class="form-control" id="Treatment" name="Treatment" rows="2">@patient.Treatment</textarea>
             </div>
 
             <div class="d-flex justify-content-end gap-2">
@@ -114,6 +121,7 @@
         </form>
     </div>
 </div>
+}
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}

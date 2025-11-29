@@ -77,7 +77,9 @@ namespace Shefaa_ICU.Controllers
             if (patient == null) return NotFound();
 
             var allRooms = await _context.Rooms
-                .Select(r => new { r.ID, r.Number }).ToListAsync();
+       .Where(r => r.Status == RoomStatus.Available || r.ID == patient.RoomId)
+       .Select(r => new { r.ID, r.Number, r.Status })
+       .ToListAsync();
 
             ViewBag.Patient = patient;
             ViewBag.AllRooms = allRooms;
@@ -246,8 +248,7 @@ namespace Shefaa_ICU.Controllers
             }
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
             try

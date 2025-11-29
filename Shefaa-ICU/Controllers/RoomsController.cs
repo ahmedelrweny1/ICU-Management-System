@@ -133,8 +133,35 @@ namespace Shefaa_ICU.Controllers
                     TempData["Error"] = "Room number already exists";
                     return RedirectToAction(nameof(Index));
                 }
+                if (existingRoom.Status != room.Status)
+                {
+                    if (existingRoom.Status == RoomStatus.Occupied &&
+                        (room.Status == RoomStatus.Available || room.Status == RoomStatus.Cleaning))
+                    {
+                        if (existingRoom.PatientID.HasValue)
+                        {
+                            var patient = await _context.Patients.FindAsync(existingRoom.PatientID.Value);
+                            if (patient != null)
+                            {
+                                patient.RoomId = null;
+                                TempData["Success"] = $"Room updated successfully. Patient '{patient.Name}' was removed from the room.";
+                            }
+                            existingRoom.PatientID = null;
+                        }
+                    }
+                    else if (room.Status == RoomStatus.Occupied && !existingRoom.PatientID.HasValue)
+                    {
+                        TempData["Warning"] = "Room marked as Occupied but no patient is assigned.";
+                    }
+                    else if (room.Status == RoomStatus.Occupied && existingRoom.PatientID.HasValue)
+                    {
+                        TempData["Success"] = "Room updated successfully. Patient assignment maintained.";
+                    }
+                }
 
+                // Update room properties
                 existingRoom.Number = room.Number.Trim();
+                existingRoom.Status = room.Status;
                 existingRoom.Notes = room.Notes?.Trim();
 
                 await _context.SaveChangesAsync();

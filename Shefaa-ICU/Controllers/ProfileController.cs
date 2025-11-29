@@ -74,24 +74,27 @@ namespace Shefaa_ICU.Controllers
         }
 
         [HttpPost]
-        [Route("Profile/UpdatePersonalInfo")]
-        public async Task<IActionResult> UpdatePersonalInfo([FromBody] UpdatePersonalInfoViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdatePersonalInfo(UpdatePersonalInfoViewModel model)
         {
             if (model == null)
             {
-                return Json(new { success = false, message = "Invalid data provided" });
+                TempData["Error"] = "Invalid data provided";
+                return RedirectToAction(nameof(Index));
             }
             
             if (!ModelState.IsValid)
             {
-                return Json(new { success = false, message = "Invalid data provided", errors = ModelState });
+                TempData["Error"] = "Please fill in all required fields correctly.";
+                return RedirectToAction(nameof(Index));
             }
 
             var staffIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             
             if (string.IsNullOrEmpty(staffIdClaim) || !int.TryParse(staffIdClaim, out int staffId))
             {
-                return Json(new { success = false, message = "User not found" });
+                TempData["Error"] = "User not found";
+                return RedirectToAction(nameof(Index));
             }
 
             var staff = await _context.Staff
@@ -99,7 +102,8 @@ namespace Shefaa_ICU.Controllers
 
             if (staff == null)
             {
-                return Json(new { success = false, message = "Staff member not found" });
+                TempData["Error"] = "Staff member not found";
+                return RedirectToAction(nameof(Index));
             }
 
             // Update fields
@@ -111,43 +115,50 @@ namespace Shefaa_ICU.Controllers
             try
             {
                 await _context.SaveChangesAsync();
-                return Json(new { success = true, message = "Profile updated successfully" });
+                TempData["Success"] = "Profile updated successfully";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Error updating profile: {ex.Message}" });
+                TempData["Error"] = $"Error updating profile: {ex.Message}";
+                return RedirectToAction(nameof(Index));
             }
         }
 
         [HttpPost]
-        [Route("Profile/ChangePassword")]
-        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordViewModel model)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
             if (model == null)
             {
-                return Json(new { success = false, message = "Invalid data provided" });
+                TempData["Error"] = "Invalid data provided";
+                return RedirectToAction(nameof(Index));
             }
             
             if (!ModelState.IsValid)
             {
-                return Json(new { success = false, message = "Invalid data provided", errors = ModelState });
+                TempData["Error"] = "Please fill in all required fields correctly.";
+                return RedirectToAction(nameof(Index));
             }
 
             if (model.NewPassword != model.ConfirmPassword)
             {
-                return Json(new { success = false, message = "New passwords do not match" });
+                TempData["Error"] = "New passwords do not match";
+                return RedirectToAction(nameof(Index));
             }
 
             if (model.NewPassword.Length < 8)
             {
-                return Json(new { success = false, message = "Password must be at least 8 characters" });
+                TempData["Error"] = "Password must be at least 8 characters";
+                return RedirectToAction(nameof(Index));
             }
 
             var staffIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             
             if (string.IsNullOrEmpty(staffIdClaim) || !int.TryParse(staffIdClaim, out int staffId))
             {
-                return Json(new { success = false, message = "User not found" });
+                TempData["Error"] = "User not found";
+                return RedirectToAction(nameof(Index));
             }
 
             var staff = await _context.Staff
@@ -155,14 +166,16 @@ namespace Shefaa_ICU.Controllers
 
             if (staff == null)
             {
-                return Json(new { success = false, message = "Staff member not found" });
+                TempData["Error"] = "Staff member not found";
+                return RedirectToAction(nameof(Index));
             }
 
             // Verify current password
             var result = _passwordHasher.VerifyHashedPassword(staff, staff.PasswordHash, model.CurrentPassword);
             if (result == PasswordVerificationResult.Failed)
             {
-                return Json(new { success = false, message = "Current password is incorrect" });
+                TempData["Error"] = "Current password is incorrect";
+                return RedirectToAction(nameof(Index));
             }
 
             // Update password
@@ -171,49 +184,41 @@ namespace Shefaa_ICU.Controllers
             try
             {
                 await _context.SaveChangesAsync();
-                return Json(new { success = true, message = "Password changed successfully" });
+                TempData["Success"] = "Password changed successfully";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Error changing password: {ex.Message}" });
+                TempData["Error"] = $"Error changing password: {ex.Message}";
+                return RedirectToAction(nameof(Index));
             }
         }
 
         [HttpPost]
-        [Route("Profile/UpdateAccountSettings")]
-        public IActionResult UpdateAccountSettings([FromBody] AccountSettingsViewModel model)
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateAccountSettings(AccountSettingsViewModel model)
         {
             if (model == null)
             {
-                return Json(new { success = false, message = "Invalid data provided" });
+                TempData["Error"] = "Invalid data provided";
+                return RedirectToAction(nameof(Index));
             }
             
             // For now, store in session or user claims
             // In a full implementation, you might want a UserSettings table
-            return Json(new { success = true, message = "Account settings saved successfully" });
+            TempData["Success"] = "Account settings saved successfully";
+            return RedirectToAction(nameof(Index));
         }
 
-        [HttpPost]
-        [Route("Profile/UpdateNotificationSettings")]
-        public IActionResult UpdateNotificationSettings([FromBody] NotificationSettingsViewModel model)
-        {
-            if (model == null)
-            {
-                return Json(new { success = false, message = "Invalid data provided" });
-            }
-            
-            // For now, store in session or user claims
-            // In a full implementation, you might want a NotificationSettings table
-            return Json(new { success = true, message = "Notification settings saved successfully" });
-        }
 
         [HttpPost]
-        [Route("Profile/UploadProfilePhoto")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadProfilePhoto(IFormFile photo)
         {
             if (photo == null || photo.Length == 0)
             {
-                return Json(new { success = false, message = "No file uploaded" });
+                TempData["Error"] = "No file uploaded";
+                return RedirectToAction(nameof(Index));
             }
 
             // Validate file type
@@ -221,20 +226,23 @@ namespace Shefaa_ICU.Controllers
             var fileExtension = Path.GetExtension(photo.FileName).ToLowerInvariant();
             if (!allowedExtensions.Contains(fileExtension))
             {
-                return Json(new { success = false, message = "Invalid file type. Please upload an image (JPG, PNG, GIF, or WEBP)" });
+                TempData["Error"] = "Invalid file type. Please upload an image (JPG, PNG, GIF, or WEBP)";
+                return RedirectToAction(nameof(Index));
             }
 
             // Validate file size (max 5MB)
             if (photo.Length > 5 * 1024 * 1024)
             {
-                return Json(new { success = false, message = "File size too large. Maximum size is 5MB" });
+                TempData["Error"] = "File size too large. Maximum size is 5MB";
+                return RedirectToAction(nameof(Index));
             }
 
             var staffIdClaim = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             
             if (string.IsNullOrEmpty(staffIdClaim) || !int.TryParse(staffIdClaim, out int staffId))
             {
-                return Json(new { success = false, message = "User not found" });
+                TempData["Error"] = "User not found";
+                return RedirectToAction(nameof(Index));
             }
 
             var staff = await _context.Staff
@@ -242,7 +250,8 @@ namespace Shefaa_ICU.Controllers
 
             if (staff == null)
             {
-                return Json(new { success = false, message = "Staff member not found" });
+                TempData["Error"] = "Staff member not found";
+                return RedirectToAction(nameof(Index));
             }
 
             try
@@ -279,13 +288,14 @@ namespace Shefaa_ICU.Controllers
                 staff.ProfilePhotoPath = relativePath;
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true, message = "Profile photo uploaded successfully", photoPath = relativePath });
+                TempData["Success"] = "Profile photo uploaded successfully";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Error uploading photo: {ex.Message}" });
+                TempData["Error"] = $"Error uploading photo: {ex.Message}";
+                return RedirectToAction(nameof(Index));
             }
         }
     }
 }
-

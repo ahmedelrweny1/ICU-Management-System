@@ -1,8 +1,19 @@
+@using Shefaa_ICU.Models
 @{
     ViewData["Title"] = "Staff Schedules";
     ViewData["PageTitle"] = "Staff Schedules";
     ViewData["ActivePage"] = "Schedules";
     ViewData["HideSearch"] = true;
+    
+    var startOfWeek = ViewBag.StartOfWeek ?? DateTime.Today;
+    var endOfWeek = ViewBag.EndOfWeek ?? DateTime.Today.AddDays(6);
+    var schedules = ViewBag.Schedules as List<Schedule> ?? new List<Schedule>();
+    var staffList = ViewBag.StaffList as List<Staff> ?? new List<Staff>();
+    
+    // Group schedules by date and shift type using tuple as key
+    var scheduleGroups = schedules
+        .GroupBy(s => (Date: s.Date.Date, ShiftType: s.ShiftType))
+        .ToDictionary(g => g.Key, g => g.ToList());
 }
 
 <div class="page-header" data-animate>
@@ -24,7 +35,6 @@
 </div>
 
 <div class="row mb-4 delay-1" data-animate>
-    @* Data: counts from Schedule table *@
     <div class="col-md-4">
         <div class="shift-card morning">
             <div class="shift-header">
@@ -35,7 +45,7 @@
                 </div>
             </div>
             <div class="shift-count">
-                <span id="morningCount">@(ViewBag.MorningCount ?? 0)</span> Staff Assigned
+                <span>@(ViewBag.MorningCount ?? 0)</span> Staff Assigned
             </div>
         </div>
     </div>
@@ -49,7 +59,7 @@
                 </div>
             </div>
             <div class="shift-count">
-                <span id="eveningCount">@(ViewBag.EveningCount ?? 0)</span> Staff Assigned
+                <span>@(ViewBag.EveningCount ?? 0)</span> Staff Assigned
             </div>
         </div>
     </div>
@@ -63,7 +73,7 @@
                 </div>
             </div>
             <div class="shift-count">
-                <span id="nightCount">@(ViewBag.NightCount ?? 0)</span> Staff Assigned
+                <span>@(ViewBag.NightCount ?? 0)</span> Staff Assigned
             </div>
         </div>
     </div>
@@ -73,13 +83,13 @@
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5 class="mb-0"><i class="fas fa-calendar-week"></i> Weekly Schedule</h5>
         <div class="week-nav">
-            <button class="btn btn-sm btn-outline-secondary" onclick="previousWeek()">
+            <a href="@Url.Action("Index", "Schedules", new { weekStart = startOfWeek.AddDays(-7).ToString("yyyy-MM-dd") })" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-chevron-left"></i>
-            </button>
-            <span id="currentWeek">Week Range</span>
-            <button class="btn btn-sm btn-outline-secondary" onclick="nextWeek()">
+            </a>
+            <span>@startOfWeek.ToString("MMM dd") - @endOfWeek.ToString("MMM dd, yyyy")</span>
+            <a href="@Url.Action("Index", "Schedules", new { weekStart = startOfWeek.AddDays(7).ToString("yyyy-MM-dd") })" class="btn btn-sm btn-outline-secondary">
                 <i class="fas fa-chevron-right"></i>
-            </button>
+            </a>
         </div>
     </div>
     <div class="card-body">
@@ -87,26 +97,117 @@
             <table class="table schedule-table">
                 <thead>
                     <tr>
-                        <th>Day</th>
-                        <th>Morning Shift<br><small>08:00 AM - 04:00 PM</small></th>
-                        <th>Evening Shift<br><small>04:00 PM - 12:00 AM</small></th>
-                        <th>Night Shift<br><small>12:00 AM - 08:00 AM</small></th>
+                        <th scope="col">Day</th>
+                        <th scope="col">Morning Shift<br><small>08:00 AM - 04:00 PM</small></th>
+                        <th scope="col">Evening Shift<br><small>04:00 PM - 12:00 AM</small></th>
+                        <th scope="col">Night Shift<br><small>12:00 AM - 08:00 AM</small></th>
                     </tr>
                 </thead>
-                <tbody id="scheduleTableBody">
-                    @* Data: rows per day with assigned staff *@
+                <tbody>
+                    @{
+                        var days = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+                        for (int i = 0; i < 7; i++)
+                        {
+                            var date = startOfWeek.AddDays(i);
+                            var dateKey = date.Date;
+                            
+                            var morningKey = ((DateTime)dateKey, ShiftType.Morning);
+                            var eveningKey = ((DateTime)dateKey, ShiftType.Evening);
+                            var nightKey = ((DateTime)dateKey, ShiftType.Night);
+                            
+                            var morningSchedules = scheduleGroups.ContainsKey(morningKey) 
+                                ? scheduleGroups[morningKey] 
+                                : new List<Schedule>();
+                            var eveningSchedules = scheduleGroups.ContainsKey(eveningKey) 
+                                ? scheduleGroups[eveningKey] 
+                                : new List<Schedule>();
+                            var nightSchedules = scheduleGroups.ContainsKey(nightKey) 
+                                ? scheduleGroups[nightKey] 
+                                : new List<Schedule>();
+                            
+                            <tr>
+                                <td><strong>@days[i]</strong><br><small>@date.ToString("MMM dd")</small></td>
+                                <td>
+                                    @if (morningSchedules.Any())
+                                    {
+                                        <div class="shift-assigned">
+                                            @foreach (var sched in morningSchedules)
+                                            {
+                                                <span class="staff-badge">@(sched.Staff?.Name ?? "Unknown")</span>
+                                            }
+                                            <form method="post" action="@Url.Action("DeleteSchedule", "Schedules")" style="display:inline;" onsubmit="return confirm('Delete this shift?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="date" value="@date.ToString("yyyy-MM-dd")" />
+                                                <input type="hidden" name="shiftType" value="Morning" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger ms-2">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="shift-empty">
+                                            <span class="text-muted mb-2"><i class="fas fa-users-slash"></i> No staff assigned</span>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (eveningSchedules.Any())
+                                    {
+                                        <div class="shift-assigned">
+                                            @foreach (var sched in eveningSchedules)
+                                            {
+                                                <span class="staff-badge">@(sched.Staff?.Name ?? "Unknown")</span>
+                                            }
+                                            <form method="post" action="@Url.Action("DeleteSchedule", "Schedules")" style="display:inline;" onsubmit="return confirm('Delete this shift?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="date" value="@date.ToString("yyyy-MM-dd")" />
+                                                <input type="hidden" name="shiftType" value="Evening" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger ms-2">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="shift-empty">
+                                            <span class="text-muted mb-2"><i class="fas fa-users-slash"></i> No staff assigned</span>
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    @if (nightSchedules.Any())
+                                    {
+                                        <div class="shift-assigned">
+                                            @foreach (var sched in nightSchedules)
+                                            {
+                                                <span class="staff-badge">@(sched.Staff?.Name ?? "Unknown")</span>
+                                            }
+                                            <form method="post" action="@Url.Action("DeleteSchedule", "Schedules")" style="display:inline;" onsubmit="return confirm('Delete this shift?');">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="date" value="@date.ToString("yyyy-MM-dd")" />
+                                                <input type="hidden" name="shiftType" value="Night" />
+                                                <button type="submit" class="btn btn-sm btn-outline-danger ms-2">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="shift-empty">
+                                            <span class="text-muted mb-2"><i class="fas fa-users-slash"></i> No staff assigned</span>
+                                        </div>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
                 </tbody>
             </table>
         </div>
-    </div>
-</div>
-
-<div class="card mt-4 d-none delay-3" id="conflictCard" data-animate>
-    <div class="card-header bg-warning">
-        <h5 class="mb-0"><i class="fas fa-exclamation-triangle"></i> Scheduling Conflicts</h5>
-    </div>
-    <div class="card-body" id="conflictList">
-        @* Data: show overlapping shifts or staffing gaps *@
     </div>
 </div>
 
@@ -118,16 +219,17 @@
                     <h5 class="modal-title">Add Shift Assignment</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="addShiftForm">
+                <form method="post" action="@Url.Action("SaveSchedule", "Schedules")">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Date *</label>
-                                <input type="date" class="form-control" id="shiftDate" required>
+                                <label class="form-label" for="date">Date *</label>
+                                <input type="date" class="form-control" id="date" name="date" value="@DateTime.Today.ToString("yyyy-MM-dd")" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Shift Type *</label>
-                                <select class="form-select" id="shiftType" required>
+                                <label class="form-label" for="shiftType">Shift Type *</label>
+                                <select class="form-select" id="shiftType" name="shiftType" required>
                                     <option value="">Select Shift</option>
                                     <option value="Morning">Morning (08:00 AM - 04:00 PM)</option>
                                     <option value="Evening">Evening (04:00 PM - 12:00 AM)</option>
@@ -138,21 +240,36 @@
 
                         <div class="mb-3">
                             <label class="form-label">Assign Staff *</label>
-                            <div id="staffCheckboxes" class="staff-checkbox-container">
-                                @* Data: render staff checkboxes *@
+                            <div class="staff-checkbox-container">
+                                @if (staffList.Any())
+                                {
+                                    @foreach (var staff in staffList)
+                                    {
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="staffIds" value="@staff.ID" id="staff_@staff.ID">
+                                            <label class="form-check-label" for="staff_@staff.ID">
+                                                @staff.Name (@staff.Role)
+                                            </label>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <p class="text-muted">No active staff available</p>
+                                }
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Notes</label>
-                            <textarea class="form-control" id="shiftNotes" rows="2"></textarea>
+                            <label class="form-label" for="notes">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="2"></textarea>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveShift(event)">Save Shift</button>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Shift</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -160,31 +277,5 @@
 
 @section Scripts {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    @Html.AntiForgeryToken()
-    <script>
-        // Pass data from server to JavaScript
-        window.schedulesData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(new {
-            schedules = ((List<Schedule>)ViewBag.Schedules ?? new List<Schedule>()).Select(s => new {
-                id = s.Id,
-                date = s.Date.ToString("yyyy-MM-dd"),
-                shiftType = s.ShiftType.ToString(),
-                staffId = s.StaffID,
-                staffName = s.Staff?.Name ?? "Unknown",
-                notes = s.Notes
-            }),
-            staffList = ((List<Staff>)ViewBag.StaffList ?? new List<Staff>()).Select(s => new {
-                id = s.ID,
-                name = s.Name,
-                role = s.Role,
-                specialty = s.Specialty
-            }),
-            startOfWeek = ViewBag.StartOfWeek?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"),
-            endOfWeek = ViewBag.EndOfWeek?.ToString("yyyy-MM-dd") ?? DateTime.Today.ToString("yyyy-MM-dd"),
-            morningCount = ViewBag.MorningCount ?? 0,
-            eveningCount = ViewBag.EveningCount ?? 0,
-            nightCount = ViewBag.NightCount ?? 0
-        }));
-    </script>
     <script src="~/js/schedules.js" asp-append-version="true"></script>
 }
-

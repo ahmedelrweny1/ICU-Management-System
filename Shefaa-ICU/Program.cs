@@ -15,7 +15,6 @@ namespace Shefaa_ICU
 
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<IPasswordHasher<Staff>, PasswordHasher<Staff>>();
-            builder.Services.AddScoped<Shefaa_ICU.Services.NotificationService>();
             builder.Services.AddMemoryCache();
             builder.Services.AddScoped<IEmailSender, SmtpEmailSender>();
             

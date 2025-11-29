@@ -38,12 +38,5 @@ namespace Shefaa_ICU.ViewModels
         public bool ShowOnlineStatus { get; set; } = true;
     }
 
-    public class NotificationSettingsViewModel
-    {
-        public bool PatientUpdates { get; set; } = true;
-        public bool RoomAssignments { get; set; } = true;
-        public bool ScheduleChanges { get; set; } = true;
-        public bool EmailNotifications { get; set; } = false;
-    }
 }
 

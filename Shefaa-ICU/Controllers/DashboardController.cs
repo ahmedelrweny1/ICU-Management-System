@@ -245,34 +245,82 @@ namespace Shefaa_ICU.Controllers
             try
             {
                 Console.WriteLine("Fetching staff on duty...");
-                var staffOnDutyList = _context.AttendanceLogs
+                
+                // First, try to get staff from attendance logs (checked in and not checked out)
+                var staffFromAttendance = _context.AttendanceLogs
                     .Include(a => a.Staff)
-                    .Where(a => a.CheckInTime.Date == today && 
-                              a.Status == AttendanceStatus.OnDuty && 
-                              a.CheckOutTime == null)
+                    .Where(a => a.Status == AttendanceStatus.OnDuty && 
+                              a.CheckOutTime == null &&
+                              a.Staff != null &&
+                              a.Staff.Status == StaffStatus.Active)
                     .Select(a => new StaffOnDutyItem
                     {
-                        Id = a.Staff != null ? a.Staff.ID : 0,
-                        Name = a.Staff != null ? a.Staff.Name : "Unknown",
-                        Role = a.Staff != null ? a.Staff.Role : "",
-                        Specialty = a.Staff != null ? a.Staff.Specialty : null,
-                        ProfilePhotoPath = a.Staff != null ? a.Staff.ProfilePhotoPath : null
+                        Id = a.Staff!.ID,
+                        Name = a.Staff.Name,
+                        Role = a.Staff.Role,
+                        Specialty = a.Staff.Specialty,
+                        ProfilePhotoPath = a.Staff.ProfilePhotoPath
                     })
+                    .Distinct()
                     .ToList();
+                
+                Console.WriteLine($"Found {staffFromAttendance.Count} staff on duty from attendance logs");
+                
+                // If no staff from attendance, fall back to scheduled staff for current shift
+                if (!staffFromAttendance.Any())
+                {
+                    Console.WriteLine("No staff from attendance logs, checking scheduled staff...");
+                    var shiftHour = DateTime.Now.Hour;
+                    ShiftType shiftType;
                     
-                Console.WriteLine($"Found {staffOnDutyList.Count} staff on duty");
+                    if (shiftHour >= 8 && shiftHour < 16)
+                    {
+                        shiftType = ShiftType.Morning;
+                    }
+                    else if (shiftHour >= 16 && shiftHour < 24)
+                    {
+                        shiftType = ShiftType.Evening;
+                    }
+                    else
+                    {
+                        shiftType = ShiftType.Night;
+                    }
+                    
+                    var scheduledStaff = _context.Schedules
+                        .Include(s => s.Staff)
+                        .Where(s => s.Date.Date == today && 
+                                  s.ShiftType == shiftType &&
+                                  s.Staff != null &&
+                                  s.Staff.Status == StaffStatus.Active)
+                        .Select(s => new StaffOnDutyItem
+                        {
+                            Id = s.Staff!.ID,
+                            Name = s.Staff.Name,
+                            Role = s.Staff.Role,
+                            Specialty = s.Staff.Specialty,
+                            ProfilePhotoPath = s.Staff.ProfilePhotoPath
+                        })
+                        .Distinct()
+                        .ToList();
+                    
+                    Console.WriteLine($"Found {scheduledStaff.Count} staff scheduled for current shift");
+                    viewModel.StaffOnDutyList = scheduledStaff;
+                }
+                else
+                {
+                    viewModel.StaffOnDutyList = staffFromAttendance;
+                }
                 
                 // Debug output for each staff member
-                foreach (var staff in staffOnDutyList)
+                foreach (var staff in viewModel.StaffOnDutyList)
                 {
                     Console.WriteLine($"Staff on duty: {staff.Name}, {staff.Role}, {staff.Specialty}");
                 }
-                
-                viewModel.StaffOnDutyList = staffOnDutyList;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error fetching staff on duty: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
                 viewModel.StaffOnDutyList = new List<StaffOnDutyItem>();
             }
 

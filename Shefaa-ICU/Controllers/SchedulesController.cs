@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shefaa_ICU.Data;
 using Shefaa_ICU.Models;
-using Shefaa_ICU.Services;
 using System.Linq;
 
 namespace Shefaa_ICU.Controllers
@@ -12,15 +11,13 @@ namespace Shefaa_ICU.Controllers
     public class SchedulesController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly NotificationService _notificationService;
 
-        public SchedulesController(AppDbContext context, NotificationService notificationService)
+        public SchedulesController(AppDbContext context)
         {
             _context = context;
-            _notificationService = notificationService;
         }
 
-        public IActionResult Index(string weekStart = null)
+        public IActionResult Index(string? weekStart = null)
         {
             // Get today's date
             var today = DateTime.Today;
@@ -87,19 +84,18 @@ namespace Shefaa_ICU.Controllers
         {
             try
             {
-                // Debug logging
-                Console.WriteLine($"SaveSchedule called - Date: {date}, ShiftType: {shiftType}, StaffIds: {(staffIds != null ? string.Join(",", staffIds) : "null")}");
-                
                 // Parse date
                 if (!DateTime.TryParse(date, out DateTime scheduleDate))
                 {
-                    return Json(new { success = false, message = "Invalid date" });
+                    TempData["Error"] = "Invalid date";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 // Parse shift type
                 if (!Enum.TryParse<ShiftType>(shiftType, out ShiftType shift))
                 {
-                    return Json(new { success = false, message = "Invalid shift type" });
+                    TempData["Error"] = "Invalid shift type";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 // Validate staff IDs - check if null or empty
@@ -109,19 +105,29 @@ namespace Shefaa_ICU.Controllers
                     var formStaffIds = Request.Form["staffIds"];
                     if (formStaffIds.Count > 0)
                     {
-                        staffIds = formStaffIds.Select(id => int.Parse(id.ToString())).ToArray();
-                        Console.WriteLine($"Got staffIds from Form collection: {string.Join(",", staffIds)}");
+                        var parsedIds = new List<int>();
+                        foreach (var id in formStaffIds)
+                        {
+                            var idString = id?.ToString() ?? string.Empty;
+                            if (!string.IsNullOrEmpty(idString) && int.TryParse(idString, out int parsedId) && parsedId > 0)
+                            {
+                                parsedIds.Add(parsedId);
+                            }
+                        }
+                        staffIds = parsedIds.ToArray();
                     }
                     else
                     {
-                        return Json(new { success = false, message = "Please select at least one staff member. No staff IDs received." });
+                        TempData["Error"] = "Please select at least one staff member";
+                        return RedirectToAction(nameof(Index));
                     }
                 }
                 
                 // Final validation
                 if (staffIds == null || staffIds.Length == 0)
                 {
-                    return Json(new { success = false, message = "Please select at least one staff member" });
+                    TempData["Error"] = "Please select at least one staff member";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 // Verify all staff exist and are active, and get their names
@@ -133,7 +139,8 @@ namespace Shefaa_ICU.Controllers
                     
                     if (staff == null)
                     {
-                        return Json(new { success = false, message = $"Staff member with ID {staffId} is not active or does not exist" });
+                        TempData["Error"] = $"Staff member with ID {staffId} is not active or does not exist";
+                        return RedirectToAction(nameof(Index));
                     }
                     staffList.Add(staff.Name);
                 }
@@ -163,23 +170,15 @@ namespace Shefaa_ICU.Controllers
 
                 await _context.SaveChangesAsync();
 
-                // Main action: Notify everyone about schedule changes
-                var staffNames = string.Join(", ", staffList);
-                
-                await _notificationService.NotifyMainActionAsync(
-                    "Schedule Updated",
-                    $"{shift} shift scheduled for {scheduleDate:MMM dd} - Staff: {staffNames}",
-                    NotificationType.Info,
-                    "fa-calendar-alt",
-                    "Schedule",
-                    null
-                );
+                // Schedule updated successfully
 
-                return Json(new { success = true, message = "Schedule saved successfully" });
+                TempData["Success"] = "Schedule saved successfully";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Error: {ex.Message}" });
+                TempData["Error"] = $"Error: {ex.Message}";
+                return RedirectToAction(nameof(Index));
             }
         }
 
@@ -192,13 +191,15 @@ namespace Shefaa_ICU.Controllers
                 // Parse date
                 if (!DateTime.TryParse(date, out DateTime scheduleDate))
                 {
-                    return Json(new { success = false, message = "Invalid date" });
+                    TempData["Error"] = "Invalid date";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 // Parse shift type
                 if (!Enum.TryParse<ShiftType>(shiftType, out ShiftType shift))
                 {
-                    return Json(new { success = false, message = "Invalid shift type" });
+                    TempData["Error"] = "Invalid shift type";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 // Find and delete all schedules for this date and shift type
@@ -208,29 +209,23 @@ namespace Shefaa_ICU.Controllers
 
                 if (schedulesToDelete.Count == 0)
                 {
-                    return Json(new { success = false, message = "No schedules found to delete" });
+                    TempData["Error"] = "No schedules found to delete";
+                    return RedirectToAction(nameof(Index));
                 }
 
                 _context.Schedules.RemoveRange(schedulesToDelete);
                 await _context.SaveChangesAsync();
 
-                // Main action: Notify everyone about schedule deletion
-                await _notificationService.NotifyMainActionAsync(
-                    "Schedule Deleted",
-                    $"{shift} shift deleted for {scheduleDate:MMM dd}",
-                    NotificationType.Warning,
-                    "fa-calendar-times",
-                    "Schedule",
-                    null
-                );
+                // Schedule deleted successfully
 
-                return Json(new { success = true, message = "Schedule deleted successfully" });
+                TempData["Success"] = "Schedule deleted successfully";
+                return RedirectToAction(nameof(Index));
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = $"Error: {ex.Message}" });
+                TempData["Error"] = $"Error: {ex.Message}";
+                return RedirectToAction(nameof(Index));
             }
         }
     }
 }
-

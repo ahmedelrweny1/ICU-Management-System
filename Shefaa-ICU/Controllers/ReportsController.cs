@@ -35,7 +35,7 @@ namespace Shefaa_ICU.Controllers
 
             // Calculate patient statistics
             var totalAdmissions = patients.Count;
-            var ages = patients.Where(p => p.Age.HasValue).Select(p => p.Age.Value).ToList();
+            var ages = patients.Where(p => p.Age.HasValue).Select(p => p.Age!.Value).ToList();
             var minAge = ages.Any() ? ages.Min() : 0;
             var maxAge = ages.Any() ? ages.Max() : 0;
             

@@ -1,15 +1,10 @@
-@using System
-@using System.Text.Json
-
+@using Shefaa_ICU.Models
 @{
     ViewData["Title"] = "Patient Management";
     ViewData["PageTitle"] = "Patient Management";
     ViewData["ActivePage"] = "Patients";
     ViewData["SearchInputId"] = "patientSearch";
     ViewData["SearchPlaceholder"] = "Search patients...";
-
-    var patientsJson = JsonSerializer.Serialize(ViewBag.Patients ?? Array.Empty<object>());
-    var patientRoomsJson = JsonSerializer.Serialize(ViewBag.PatientRooms ?? Array.Empty<object>());
 }
 
 <div class="page-header" data-animate>
@@ -23,12 +18,11 @@
             <i class="fas fa-file-export"></i>
             Export CSV
         </button>
-        <button class="btn btn-primary btn-icon" type="button" data-bs-toggle="modal" data-bs-target="#addPatientModal" onclick="openAddPatientModal()">
+        <button class="btn btn-primary btn-icon" type="button" data-bs-toggle="modal" data-bs-target="#addPatientModal">
             <i class="fas fa-plus"></i>
             Add New Patient
         </button>
     </div>
-    @* Data: buttons should trigger export and modal actions *@
 </div>
 
 <div class="row g-3 filter-card-grid delay-1" data-animate>
@@ -38,7 +32,7 @@
                 <span>All Patients</span>
                 <small>Overview</small>
             </div>
-            <span class="filter-card-count" id="allCount">0</span>
+            <span class="filter-card-count" id="allCount">@((ViewBag.Patients as IEnumerable<dynamic>)?.Count() ?? 0)</span>
         </button>
     </div>
     <div class="col-xxl-2 col-md-3 col-sm-6">
@@ -47,7 +41,7 @@
                 <span>Critical</span>
                 <small>Needs attention</small>
             </div>
-            <span class="filter-card-count" id="criticalCount">0</span>
+            <span class="filter-card-count" id="criticalCount">@((ViewBag.Patients as IEnumerable<dynamic>)?.Count(p => p.Condition?.ToString().Equals("Critical", StringComparison.OrdinalIgnoreCase) == true) ?? 0)</span>
         </button>
     </div>
     <div class="col-xxl-2 col-md-3 col-sm-6">
@@ -56,7 +50,7 @@
                 <span>Stable</span>
                 <small>Tracking well</small>
             </div>
-            <span class="filter-card-count" id="stableCount">0</span>
+            <span class="filter-card-count" id="stableCount">@((ViewBag.Patients as IEnumerable<dynamic>)?.Count(p => p.Condition?.ToString().Equals("Stable", StringComparison.OrdinalIgnoreCase) == true) ?? 0)</span>
         </button>
     </div>
     <div class="col-xxl-2 col-md-3 col-sm-6">
@@ -65,7 +59,7 @@
                 <span>Moderate</span>
                 <small>Under observation</small>
             </div>
-            <span class="filter-card-count" id="moderateCount">0</span>
+            <span class="filter-card-count" id="moderateCount">@((ViewBag.Patients as IEnumerable<dynamic>)?.Count(p => p.Condition?.ToString().Equals("Moderate", StringComparison.OrdinalIgnoreCase) == true) ?? 0)</span>
         </button>
     </div>
 </div>
@@ -76,12 +70,13 @@
             <table class="table table-hover align-middle">
                 <thead>
                     <tr>
-                        <th>Patient</th>
-                        <th>Patient ID</th>
-                        <th>Status</th>
-                        <th>Room</th>
-                        <th>Admission Date</th>
-                        <th>Actions</th>
+                        <th scope="col">Patient</th>
+                        <th scope="col">Patient ID</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Room</th>
+                        <th scope="col">Admission Date</th>
+                        <th scope="col">Days in ICU</th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="patientsTableBody">
@@ -105,7 +100,7 @@
                                      alt="@patient.Name" class="rounded-circle me-2">
                                 <div>
                                     <strong>@patient.Name</strong>
-                                    <div class="text-muted small">@patient.Age years, @patient.Gender</div>
+                                    <div class="text-muted small">@patient.Age years, @(patient.Gender?.ToString() ?? "N/A")</div>
                                 </div>
                             </div>
                         </td>
@@ -121,12 +116,15 @@
                                 <a class="btn btn-sm btn-outline-primary" href="@Url.Action("Details", "Patients", new { id = patient.ID })">
                                     <i class="fas fa-eye"></i> View
                                 </a>
-                                <button class="btn btn-sm btn-outline-secondary" onclick="editPatient(@patient.ID)" data-tooltip="Edit Patient">
+                                <a class="btn btn-sm btn-outline-secondary" href="@Url.Action("Edit", "Patients", new { id = patient.ID })">
                                     <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deletePatient(@patient.ID)" data-tooltip="Delete Patient">
-                                    <i class="fas fa-trash"></i>
-                                </button>
+                                </a>
+                                <form method="post" action="@Url.Action("Delete", "Patients", new { id = patient.ID })" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this patient?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
                             </div>
                         </td>
                     </tr>
@@ -156,46 +154,46 @@
                     <h5 class="modal-title" id="patientModalTitle">Add New Patient</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
-                    @* Data: form should be bound to Patient view model *@
-                    <form id="addPatientForm">
-                        <input type="hidden" id="editPatientId" />
-                        <input type="hidden" id="editPatientOldRoom" />
-
+                <form method="post" action="@Url.Action("Add", "Patients")">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Full Name *</label>
-                                <input type="text" class="form-control" id="patientName" required />
+                                <label class="form-label" for="Name">Full Name *</label>
+                                <input type="text" class="form-control" id="Name" name="Name" required />
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Age *</label>
-                                <input type="number" class="form-control" id="patientAge" min="0" max="120" required />
+                                <label class="form-label" for="Age">Age *</label>
+                                <input type="number" class="form-control" id="Age" name="Age" min="0" max="120" required />
                             </div>
                             <div class="col-md-3 mb-3">
-                                <label class="form-label">Gender *</label>
-                                <select class="form-select" id="patientGender" required>
+                                <label class="form-label" for="Gender">Gender *</label>
+                                <select class="form-select" id="Gender" name="Gender" required>
                                     <option value="">Select</option>
-                                    <option value="1">Male</option>
-                                    <option value="2">Female</option>
-                                    <option value="3">Other</option>
+                                    <option value="0">Male</option>
+                                    <option value="1">Female</option>
+                                    <option value="2">Other</option>
                                 </select>
                             </div>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Room *</label>
-                                <select class="form-select" id="patientRoom" required>
+                                <label class="form-label" for="RoomId">Room</label>
+                                <select class="form-select" id="RoomId" name="RoomId">
                                     <option value="">Select Room</option>
-                                        @foreach (var room in ViewBag.PatientRooms)
+                                    @if (ViewBag.PatientRooms != null)
+                                    {
+                                        foreach (var room in ViewBag.PatientRooms)
                                         {
-                                           <option value="@room.ID">@room.Number</option>
+                                            <option value="@room.ID">@room.Number</option>
                                         }
+                                    }
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Condition *</label>
-                                <select class="form-select" id="patientCondition" required>
+                                <label class="form-label" for="Condition">Condition *</label>
+                                <select class="form-select" id="Condition" name="Condition" required>
                                     <option value="">Select Condition</option>
                                     <option value="Stable">Stable</option>
                                     <option value="Moderate">Moderate</option>
@@ -206,51 +204,47 @@
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Admission Date</label>
-                                <input type="date" class="form-control" id="patientAdmissionDate" />
+                                <label class="form-label" for="AdmissionDate">Admission Date</label>
+                                <input type="date" class="form-control" id="AdmissionDate" name="AdmissionDate" />
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Emergency Contact</label>
-                                <input type="text" class="form-control" id="emergencyContact" placeholder="Name - Phone Number" />
+                                <label class="form-label" for="EmergencyContact">Emergency Contact</label>
+                                <input type="text" class="form-control" id="EmergencyContact" name="EmergencyContact" placeholder="Name - Phone Number" />
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Chief Complaint</label>
-                            <textarea class="form-control" id="patientComplaint" rows="2"></textarea>
+                            <label class="form-label" for="Complaint">Chief Complaint</label>
+                            <textarea class="form-control" id="Complaint" name="Complaint" rows="2"></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Medical History</label>
-                            <textarea class="form-control" id="patientHistory" rows="3"></textarea>
+                            <label class="form-label" for="MedicalHistory">Medical History</label>
+                            <textarea class="form-control" id="MedicalHistory" name="MedicalHistory" rows="3"></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Diagnosis</label>
-                            <textarea class="form-control" id="patientDiagnosis" rows="2"></textarea>
+                            <label class="form-label" for="Diagnosis">Diagnosis</label>
+                            <textarea class="form-control" id="Diagnosis" name="Diagnosis" rows="2"></textarea>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Treatment Plan</label>
-                            <textarea class="form-control" id="patientTreatment" rows="2"></textarea>
+                            <label class="form-label" for="Treatment">Treatment Plan</label>
+                            <textarea class="form-control" id="Treatment" name="Treatment" rows="2"></textarea>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="savePatientBtn" onclick="savePatient()">Save Patient</button>
-                    @* Data: submit should post to Patients endpoint *@
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Patient
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 }
 
 @section Scripts {
-    <script>
-        window.patientsData = @Html.Raw(patientsJson);
-        window.patientRoomsData = @Html.Raw(patientRoomsJson);
-    </script>
     <script src="~/js/patients.js" asp-append-version="true"></script>
 }
-

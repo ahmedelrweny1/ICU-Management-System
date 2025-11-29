@@ -29,12 +29,6 @@
             @Html.Raw(topbarExtras)
         }
 
-        <div class="notification-icon" id="notificationIcon" data-tooltip="Notifications">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge" id="notificationBadge" style="display: none;"></span>
-            @* Data: notification count from backend *@
-        </div>
-
         <a class="user-profile" asp-controller="Profile" asp-action="Index" title="My Profile">
             <img src="https://ui-avatars.com/api/?name=User&background=6366F1&color=fff" alt="User">
             <span id="currentUserName">User</span>

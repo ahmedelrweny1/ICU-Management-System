@@ -17,7 +17,6 @@ namespace Shefaa_ICU.Data
         public DbSet<Schedule> Schedules { get; set; }
         public DbSet<Staff> Staff { get; set; }
         public DbSet<Vitals> Vitals { get; set; }
-        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -124,17 +123,6 @@ namespace Shefaa_ICU.Data
                 entity.HasIndex(e => new { e.Date, e.ShiftType, e.StaffID });
             });
 
-            modelBuilder.Entity<Notification>(entity =>
-            {
-                entity.HasKey(e => e.ID);
-
-                entity.HasOne(n => n.Staff)
-                    .WithMany(s => s.Notifications)
-                    .HasForeignKey(n => n.StaffID)
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                entity.HasIndex(e => new { e.StaffID, e.IsRead, e.CreatedAt });
-            });
         }
     }
 }

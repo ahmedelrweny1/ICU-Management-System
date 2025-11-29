@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shefaa_ICU.Data;
 using Shefaa_ICU.Models;
-using Shefaa_ICU.Services;
 using Shefaa_ICU.ViewModels;
 using System.Security.Claims;
 
@@ -13,12 +12,10 @@ namespace Shefaa_ICU.Controllers
     public class VitalsController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly NotificationService _notificationService;
 
-        public VitalsController(AppDbContext context, NotificationService notificationService)
+        public VitalsController(AppDbContext context)
         {
             _context = context;
-            _notificationService = notificationService;
         }
 
         public async Task<IActionResult> Index()
@@ -98,28 +95,7 @@ namespace Shefaa_ICU.Controllers
             _context.Vitals.Add(entry);
             await _context.SaveChangesAsync();
 
-            // Send notification - all actions to admins, main actions to everyone
-            await _notificationService.NotifyAdminsAsync(
-                "Vitals Recorded",
-                $"Vitals recorded for patient {patient.Name} (Room {patient.Room?.Number ?? "N/A"})",
-                NotificationType.Info,
-                "fa-heartbeat",
-                "Patient",
-                patient.ID
-            );
-
-            // Main action: Critical vitals - notify everyone
-            if (IsCriticalVitals(entry))
-            {
-                await _notificationService.NotifyMainActionAsync(
-                    "Critical Patient Alert",
-                    $"Patient {patient.Name} (Room {patient.Room?.Number ?? "N/A"}) has critical vitals",
-                    NotificationType.Danger,
-                    "fa-exclamation-circle",
-                    "Patient",
-                    patient.ID
-                );
-            }
+            // Vitals recorded successfully
 
             TempData["Success"] = "Vitals recorded successfully.";
             return RedirectToAction(nameof(Index));

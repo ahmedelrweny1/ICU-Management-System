@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shefaa_ICU.Data;
 using Shefaa_ICU.Models;
-using Shefaa_ICU.Services;
 using Shefaa_ICU.ViewModels;
 
 namespace Shefaa_ICU.Controllers
@@ -12,12 +11,10 @@ namespace Shefaa_ICU.Controllers
     public class MedicationsController : Controller
     {
         private readonly AppDbContext _context;
-        private readonly NotificationService _notificationService;
 
-        public MedicationsController(AppDbContext context, NotificationService notificationService)
+        public MedicationsController(AppDbContext context)
         {
             _context = context;
-            _notificationService = notificationService;
         }
 
         public async Task<IActionResult> Index()
@@ -131,15 +128,7 @@ namespace Shefaa_ICU.Controllers
             _context.Medications.Add(medication);
             await _context.SaveChangesAsync();
 
-            // Notify admins about new medication order
-            await _notificationService.NotifyAdminsAsync(
-                "New Medication Order",
-                $"Medication {medication.Name} ordered for patient {patient.Name}",
-                NotificationType.Info,
-                "fa-pills",
-                "Medication",
-                medication.Id
-            );
+            // Medication created successfully
 
             TempData["Success"] = "Medication order created successfully.";
             return RedirectToAction(nameof(Index));
@@ -174,15 +163,7 @@ namespace Shefaa_ICU.Controllers
 
             var patient = await _context.Patients.FindAsync(medication.PatientID);
             
-            // Main action: Notify everyone when medication is given
-            await _notificationService.NotifyMainActionAsync(
-                "Medication Administered",
-                $"Medication {medication.Name} given to patient {patient?.Name ?? "Unknown"}",
-                NotificationType.Success,
-                "fa-check-circle",
-                "Medication",
-                medication.Id
-            );
+            // Medication administered successfully
 
             TempData["Success"] = "Medication marked as given.";
             return RedirectToAction(nameof(Index));
@@ -207,15 +188,7 @@ namespace Shefaa_ICU.Controllers
 
             var patient = await _context.Patients.FindAsync(medication.PatientID);
             
-            // Notify admins about cancellation
-            await _notificationService.NotifyAdminsAsync(
-                "Medication Cancelled",
-                $"Medication {medication.Name} cancelled for patient {patient?.Name ?? "Unknown"}",
-                NotificationType.Warning,
-                "fa-times-circle",
-                "Medication",
-                medication.Id
-            );
+            // Medication cancelled successfully
 
             TempData["Success"] = "Medication cancelled.";
             return RedirectToAction(nameof(Index));

@@ -1,14 +1,16 @@
-@using System
-@using System.Text.Json
-
+@using Shefaa_ICU.Models
 @{
     ViewData["Title"] = "Staff Management";
     ViewData["PageTitle"] = "Staff Management";
     ViewData["ActivePage"] = "Staff";
     ViewData["SearchInputId"] = "staffSearch";
     ViewData["SearchPlaceholder"] = "Search by name or ID...";
-
-    var staffJson = JsonSerializer.Serialize(ViewBag.Staff ?? Array.Empty<object>());
+    
+    var staff = ViewBag.Staff as IEnumerable<dynamic> ?? new List<dynamic>();
+    var totalCount = staff.Count();
+    var doctorCount = staff.Count(s => s.Role?.ToString() == "Doctor");
+    var nurseCount = staff.Count(s => s.Role?.ToString() == "Nurse");
+    var technicianCount = staff.Count(s => s.Role?.ToString() == "Technician");
 }
 
 <div class="page-header" data-animate>
@@ -30,29 +32,28 @@
 </div>
 
 <div class="row mb-4 g-3 delay-1" data-animate>
-    @* Data: aggregated counts by role/status from Staff table *@
     <div class="col-md-3">
         <div class="stat-card bg-primary">
-            <h3 id="totalStaffCount">0</h3>
+            <h3>@totalCount</h3>
             <p>Total Staff</p>
         </div>
     </div>
     <div class="col-md-3">
         <div class="stat-card bg-info">
-            <h3 id="doctorsCount">0</h3>
+            <h3>@doctorCount</h3>
             <p>Doctors</p>
         </div>
     </div>
     <div class="col-md-3">
         <div class="stat-card bg-success">
-            <h3 id="nursesCount">0</h3>
+            <h3>@nurseCount</h3>
             <p>Nurses</p>
         </div>
     </div>
     <div class="col-md-3">
         <div class="stat-card bg-warning">
-            <h3 id="onDutyCount">0</h3>
-            <p>On Duty</p>
+            <h3>@technicianCount</h3>
+            <p>Technicians</p>
         </div>
     </div>
 </div>
@@ -64,6 +65,7 @@
                 <span>All Staff</span>
                 <small>Entire roster</small>
             </div>
+            <span class="filter-card-count" id="allStaffCount">@totalCount</span>
         </button>
     </div>
     <div class="col-xl-2 col-md-3 col-sm-6">
@@ -72,6 +74,7 @@
                 <span>Doctors</span>
                 <small>Consultants</small>
             </div>
+            <span class="filter-card-count" id="doctorCount">@doctorCount</span>
         </button>
     </div>
     <div class="col-xl-2 col-md-3 col-sm-6">
@@ -80,6 +83,7 @@
                 <span>Nurses</span>
                 <small>Bedside care</small>
             </div>
+            <span class="filter-card-count" id="nurseCount">@nurseCount</span>
         </button>
     </div>
     <div class="col-xl-2 col-md-3 col-sm-6">
@@ -88,6 +92,7 @@
                 <span>Technicians</span>
                 <small>Support</small>
             </div>
+            <span class="filter-card-count" id="technicianCount">@technicianCount</span>
         </button>
     </div>
 </div>
@@ -98,15 +103,69 @@
             <table class="table table-hover">
                 <thead>
                     <tr>
-                        <th>Name</th>
-                        <th>Role</th>
-                        <th>Contact</th>
-                        <th>Shift Status</th>
-                        <th>Actions</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Role</th>
+                        <th scope="col">Contact</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Actions</th>
                     </tr>
                 </thead>
                 <tbody id="staffTableBody">
-                    @* Data: staff list with contact info and attendance *@
+                    @if (staff.Any())
+                    {
+                        @foreach (var member in staff)
+                        {
+                            <tr data-role="@member.Role">
+                                <td>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="@(member.ProfilePhotoPath ?? $"https://ui-avatars.com/api/?name={member.Name}&background=random")"
+                                             style="width: 40px; height: 40px; border-radius: 50%;" alt="@member.Name">
+                                        <div>
+                                            <strong>@member.Name</strong>
+                                            @if (!string.IsNullOrEmpty(member.Specialty?.ToString()))
+                                            {
+                                                <div class="text-muted small">@member.Specialty</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@(member.Role?.ToString() == "Doctor" ? "primary" : member.Role?.ToString() == "Nurse" ? "success" : "info")">
+                                        @member.Role
+                                    </span>
+                                </td>
+                                <td>
+                                    <div>@(member.Email ?? "N/A")</div>
+                                    <div class="text-muted small">@(member.PhoneNumber ?? "N/A")</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@(member.Status?.ToString() == "Active" ? "success" : "secondary")">
+                                        @member.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="editStaff(@member.ID)" data-tooltip="Edit Staff">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary" onclick="registerAttendance(@member.ID)" data-tooltip="Register Attendance">
+                                            <i class="fas fa-clock"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <br>
+                                No staff found
+                            </td>
+                        </tr>
+                    }
                 </tbody>
             </table>
         </div>
@@ -122,125 +181,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="addStaffForm">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Full Name *</label>
-                                <input type="text" class="form-control" id="staffName" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Role *</label>
-                                <select class="form-select" id="staffRole" required>
-                                    <option value="">Select Role</option>
-                                    <option value="Doctor">Doctor</option>
-                                    <option value="Nurse">Nurse</option>
-                                    <option value="Technician">Technician</option>
-                                    <option value="Admin">Admin</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Specialty</label>
-                                <input type="text" class="form-control" id="staffSpecialty" placeholder="e.g., Cardiologist">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Phone *</label>
-                                <input type="tel" class="form-control" id="staffPhone" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="staffEmail" required>
-                        </div>
-                    </form>
+                    <p class="text-muted">Staff management functionality is not yet implemented.</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveStaff()">Save Staff</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="editStaffModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Edit Staff Member</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="editStaffForm">
-                        <input type="hidden" id="editStaffId" />
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Full Name *</label>
-                                <input type="text" class="form-control" id="editStaffName" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Role *</label>
-                                <select class="form-select" id="editStaffRole" required>
-                                    <option value="">Select Role</option>
-                                    <option value="Doctor">Doctor</option>
-                                    <option value="Nurse">Nurse</option>
-                                    <option value="Technician">Technician</option>
-                                    <option value="Admin">Admin</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Specialty</label>
-                                <input type="text" class="form-control" id="editStaffSpecialty">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Phone *</label>
-                                <input type="tel" class="form-control" id="editStaffPhone" required>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Email *</label>
-                            <input type="email" class="form-control" id="editStaffEmail" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="updateStaff()">Save Changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="attendanceModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="attendanceModalTitle">Register Attendance</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="hidden" id="attendanceStaffId">
-                    <div class="mb-3">
-                        <label class="form-label">Time</label>
-                        <input type="time" class="form-control" id="attendanceTime">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Action</label>
-                        <select class="form-select" id="attendanceAction">
-                            <option value="check-in">Check In (On Duty)</option>
-                            <option value="check-out">Check Out (Off Duty)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveAttendance()">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -248,9 +192,5 @@
 }
 
 @section Scripts {
-    <script>
-        window.staffData = @Html.Raw(staffJson);
-    </script>
     <script src="~/js/staff.js" asp-append-version="true"></script>
 }
-

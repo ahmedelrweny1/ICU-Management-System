@@ -1,9 +1,12 @@
+@using Shefaa_ICU.Models
 @{
     ViewData["Title"] = "Patient Details";
     ViewData["PageTitle"] = "Patient Details";
     ViewData["ActivePage"] = "Patients";
     ViewData["HideSearch"] = true;
-    ViewData["TopbarExtras"] = "<button class=\"btn btn-sm btn-outline-primary me-3\" onclick=\"window.print()\" data-tooltip=\"Print Patient Record\"><i class=\"fas fa-print\"></i></button>";
+    
+    var patient = ViewBag.PatientDetail as Patient;
+    var patientId = ViewData["PatientId"] as int?;
 }
 
 <div class="page-header" data-animate>
@@ -12,7 +15,7 @@
             <i class="fas fa-arrow-left"></i> Back to Patients
         </a>
         <p class="page-eyebrow">Patient Overview</p>
-        <h2 id="patientName">Patient Details</h2>
+        <h2>@(patient?.Name ?? "Patient Details")</h2>
         <p class="page-subtitle">Unified timeline of vitals, medications, and bedside notes for this admission.</p>
     </div>
     <div class="page-actions">
@@ -27,26 +30,44 @@
     </div>
 </div>
 
+@if (patient == null)
+{
+    <div class="alert alert-danger">
+        <h4>Patient Not Found</h4>
+        <p>The patient you are looking for does not exist or has been removed.</p>
+        <a href="@Url.Action("Index", "Patients")" class="btn btn-primary">Back to Patients List</a>
+    </div>
+}
+else
+{
+    var daysInICU = (DateTime.Now - patient.AdmissionDate).Days;
+    var badgeClass = patient.Condition?.ToLower() switch
+    {
+        "critical" => "bg-danger",
+        "moderate" => "bg-warning",
+        "stable" => "bg-success",
+        _ => "bg-secondary"
+    };
+
 <div class="card patient-header mb-4" data-animate>
     <div class="card-body">
         <div class="d-flex align-items-center">
-            <img src="https://ui-avatars.com/api/?name=Patient&background=random&size=100"
-                 alt="Patient" class="patient-avatar" id="patientAvatar">
+            <img src="https://ui-avatars.com/api/?name=@patient.Name&background=random&size=100"
+                 alt="@patient.Name" class="patient-avatar">
             <div class="ms-4 flex-grow-1">
-                <h3 id="patientHeaderName">Patient Name</h3>
+                <h3>@patient.Name</h3>
                 <div class="patient-meta">
-                    <span><strong>ID:</strong> <span id="patientId">P12345</span></span>
-                    <span><strong>Age:</strong> <span id="patientAge">0</span> years</span>
-                    <span><strong>Gender:</strong> <span id="patientGender">-</span></span>
-                    <span><strong>Room:</strong> <span id="patientRoom">-</span></span>
-                    <span><strong>Days in ICU:</strong> <span id="daysInICU">0</span></span>
+                    <span><strong>ID:</strong> @patient.Code</span>
+                    <span><strong>Age:</strong> @(patient.Age?.ToString() ?? "N/A") years</span>
+                    <span><strong>Gender:</strong> @(patient.Gender?.ToString() ?? "N/A")</span>
+                    <span><strong>Room:</strong> @(patient.Room?.Number ?? "N/A")</span>
+                    <span><strong>Days in ICU:</strong> @daysInICU</span>
                 </div>
                 <div class="mt-2">
-                    <span class="badge" id="conditionBadge">Stable</span>
+                    <span class="badge @badgeClass">@patient.Condition</span>
                 </div>
             </div>
         </div>
-        @* Data: bind summary from Patient entity and related Room *@
     </div>
 </div>
 
@@ -75,79 +96,58 @@
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="fw-bold">Full Name</label>
-                        <p id="fullName">-</p>
+                        <p>@patient.Name</p>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <label class="fw-bold">Date of Birth</label>
-                        <p id="dateOfBirth">-</p>
+                        <label class="fw-bold">Age</label>
+                        <p>@(patient.Age?.ToString() ?? "N/A")</p>
                     </div>
                     <div class="col-md-3 mb-3">
                         <label class="fw-bold">Patient ID</label>
-                        <p id="patientIdInfo">-</p>
+                        <p>@patient.Code</p>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="fw-bold">Room Number</label>
-                        <p id="roomNumber">-</p>
+                        <p>@(patient.Room?.Number ?? "N/A")</p>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="fw-bold">Status</label>
-                        <p><span class="badge" id="statusBadge">-</span></p>
+                        <p><span class="badge @badgeClass">@patient.Condition</span></p>
                     </div>
                     <div class="col-md-6 mb-3">
                         <label class="fw-bold">Admission Date</label>
-                        <p id="admissionDate">-</p>
+                        <p>@patient.AdmissionDate.ToString("MMM dd, yyyy")</p>
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="fw-bold">Assigned Physician</label>
-                        <p id="assignedPhysician">-</p>
-                    </div>
-                    <div class="col-md-12 mb-3">
                         <label class="fw-bold">Emergency Contact</label>
-                        <p id="emergencyContact">-</p>
+                        <p>@(patient.EmergencyContact ?? "N/A")</p>
                     </div>
                 </div>
             </div>
-            @* Data: populate from Patient + Staff *@
         </div>
     </div>
 
     <div class="tab-pane fade" id="medicalHistory">
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5>Chief Complaint</h5>
-            </div>
-            <div class="card-body">
-                <p id="chiefComplaint">-</p>
-            </div>
-        </div>
-
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5>Medical History</h5>
-            </div>
-            <div class="card-body">
-                <p id="medicalHistoryText">-</p>
-            </div>
-        </div>
-
-        <div class="card mb-3">
-            <div class="card-header">
-                <h5>Current Diagnosis</h5>
-            </div>
-            <div class="card-body">
-                <p id="currentDiagnosis">-</p>
-            </div>
-        </div>
-
         <div class="card">
-            <div class="card-header">
-                <h5>Treatment Plan</h5>
-            </div>
             <div class="card-body">
-                <p id="treatmentPlan">-</p>
+                <div class="mb-3">
+                    <label class="fw-bold">Chief Complaint</label>
+                    <p>@(patient.Complaint ?? "N/A")</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Medical History</label>
+                    <p>@(patient.MedicalHistory ?? "N/A")</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Diagnosis</label>
+                    <p>@(patient.Diagnosis ?? "N/A")</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Treatment Plan</label>
+                    <p>@(patient.Treatment ?? "N/A")</p>
+                </div>
             </div>
         </div>
-        @* Data: clinical notes fields from Patient entity *@
     </div>
 
     <div class="tab-pane fade" id="vitals">
@@ -155,53 +155,44 @@
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Vital Signs</h5>
                 <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#updateVitalsModal">
-                    <i class="fas fa-edit"></i> Update Vitals
+                    <i class="fas fa-plus"></i> Record Vitals
                 </button>
             </div>
             <div class="card-body">
-                <div class="vitals-grid">
-                    <div class="vital-card">
-                        <div class="vital-icon bg-danger">
-                            <i class="fas fa-heartbeat"></i>
-                        </div>
-                        <div class="vital-info">
-                            <h6>Blood Pressure</h6>
-                            <h3 id="bpValue">-/-</h3>
-                            <small>mmHg</small>
-                        </div>
+                @if (patient.Vitals != null && patient.Vitals.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Time</th>
+                                    <th scope="col">BP</th>
+                                    <th scope="col">Temperature</th>
+                                    <th scope="col">Pulse</th>
+                                    <th scope="col">SpO2</th>
+                                    <th scope="col">Respiratory Rate</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var vital in patient.Vitals.OrderByDescending(v => v.RecordedAt).Take(20))
+                                {
+                                    <tr>
+                                        <td>@vital.RecordedAt.ToString("MMM dd, HH:mm")</td>
+                                        <td>@(vital.BP ?? $"{vital.BloodPressureSystolic}/{vital.BloodPressureDiastolic}")</td>
+                                        <td>@(vital.Temperature?.ToString("F1") ?? "N/A")°F</td>
+                                        <td>@(vital.Pulse?.ToString() ?? "N/A") bpm</td>
+                                        <td>@(vital.SpO2?.ToString() ?? "N/A")%</td>
+                                        <td>@(vital.RespiratoryRate?.ToString() ?? "N/A")</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="vital-card">
-                        <div class="vital-icon bg-warning">
-                            <i class="fas fa-thermometer-half"></i>
-                        </div>
-                        <div class="vital-info">
-                            <h6>Temperature</h6>
-                            <h3 id="tempValue">-</h3>
-                            <small>°F</small>
-                        </div>
-                    </div>
-                    <div class="vital-card">
-                        <div class="vital-icon bg-info">
-                            <i class="fas fa-heart"></i>
-                        </div>
-                        <div class="vital-info">
-                            <h6>Pulse Rate</h6>
-                            <h3 id="pulseValue">-</h3>
-                            <small>bpm</small>
-                        </div>
-                    </div>
-                    <div class="vital-card">
-                        <div class="vital-icon bg-success">
-                            <i class="fas fa-lungs"></i>
-                        </div>
-                        <div class="vital-info">
-                            <h6>SpO2</h6>
-                            <h3 id="spo2Value">-</h3>
-                            <small>%</small>
-                        </div>
-                    </div>
-                </div>
-                @* Data: latest Vitals entries *@
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4">No vital signs recorded yet</p>
+                }
             </div>
         </div>
     </div>
@@ -209,29 +200,58 @@
     <div class="tab-pane fade" id="medications">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">Medication Schedule</h5>
+                <h5 class="mb-0">Medications</h5>
                 <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addMedicationModal">
                     <i class="fas fa-plus"></i> Add Medication
                 </button>
             </div>
             <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Medication</th>
-                                <th>Dose</th>
-                                <th>Frequency</th>
-                                <th>Time</th>
-                                <th>Status</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="medicationsTable">
-                            @* Data: medication list with Staff reference *@
-                        </tbody>
-                    </table>
-                </div>
+                @if (patient.Medications != null && patient.Medications.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Medication</th>
+                                    <th scope="col">Dose</th>
+                                    <th scope="col">Frequency</th>
+                                    <th scope="col">Scheduled Time</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Administered By</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var med in patient.Medications.OrderByDescending(m => m.ScheduledTime ?? DateTime.MinValue))
+                                {
+                                    <tr>
+                                        <td>@med.Name</td>
+                                        <td>@(med.Dose ?? "N/A")</td>
+                                        <td>@(med.Frequency ?? "N/A")</td>
+                                        <td>@(med.ScheduledTime?.ToString("MMM dd, HH:mm") ?? "Not set")</td>
+                                        <td><span class="badge bg-@(med.Status.ToString() == "Given" ? "success" : med.Status.ToString() == "Cancelled" ? "danger" : "warning")">@med.Status</span></td>
+                                        <td>@(med.Staff?.Name ?? "N/A")</td>
+                                        <td>
+                                            @if (med.Status != MedicationStatus.Given && med.Status != MedicationStatus.Cancelled)
+                                            {
+                                                <form method="post" action="@Url.Action("MarkGiven", "Medications", new { id = med.Id })" style="display:inline;">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-check"></i> Mark Given
+                                                    </button>
+                                                </form>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4">No medications assigned</p>
+                }
             </div>
         </div>
     </div>
@@ -245,15 +265,36 @@
                 </button>
             </div>
             <div class="card-body">
-                <div class="notes-timeline" id="notesTimeline">
-                    @* Data: chronological list from ClinicalNotes *@
-                </div>
+                @if (patient.ClinicalNotes != null && patient.ClinicalNotes.Any())
+                {
+                    <div class="notes-timeline">
+                        @foreach (var note in patient.ClinicalNotes.OrderByDescending(n => n.Timestamp))
+                        {
+                            <div class="note-item">
+                                <div class="note-header">
+                                    <strong>@(note.Staff?.Name ?? "Staff")</strong>
+                                    <span class="text-muted">@note.Timestamp.ToString("MMM dd, yyyy HH:mm")</span>
+                                </div>
+                                <div class="note-content">
+                                    @note.Text
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <p class="text-muted text-center py-4">No clinical notes yet</p>
+                }
             </div>
         </div>
     </div>
 </div>
+}
 
 @section Modals {
+@if (patient != null)
+{
     <div class="modal fade" id="updateVitalsModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -261,30 +302,36 @@
                     <h5 class="modal-title">Update Vital Signs</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="updateVitalsForm">
+                <form method="post" action="@Url.Action("UpdateVitals", "Patients")">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="PatientID" value="@patient.ID" />
+                    <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label">Blood Pressure</label>
-                            <input type="text" class="form-control" id="bpInput" placeholder="120/80">
+                            <label class="form-label" for="BP">Blood Pressure</label>
+                            <input type="text" class="form-control" id="BP" name="BP" placeholder="120/80">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Temperature (°F)</label>
-                            <input type="text" class="form-control" id="tempInput" placeholder="98.6">
+                            <label class="form-label" for="Temperature">Temperature (°F)</label>
+                            <input type="number" step="0.1" class="form-control" id="Temperature" name="Temperature" placeholder="98.6">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Pulse Rate (bpm)</label>
-                            <input type="text" class="form-control" id="pulseInput" placeholder="72">
+                            <label class="form-label" for="Pulse">Pulse Rate (bpm)</label>
+                            <input type="number" class="form-control" id="Pulse" name="Pulse" placeholder="72">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">SpO2 (%)</label>
-                            <input type="text" class="form-control" id="spo2Input" placeholder="98">
+                            <label class="form-label" for="SpO2">SpO2 (%)</label>
+                            <input type="number" class="form-control" id="SpO2" name="SpO2" placeholder="98">
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveVitals()">Update</button>
-                </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="RespiratoryRate">Respiratory Rate</label>
+                            <input type="number" class="form-control" id="RespiratoryRate" name="RespiratoryRate" placeholder="16">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -296,30 +343,32 @@
                     <h5 class="modal-title">Add Medication</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="addMedicationForm">
+                <form method="post" action="@Url.Action("Create", "Medications")">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="PatientId" value="@patient.ID" />
+                    <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label">Medication Name</label>
-                            <input type="text" class="form-control" id="medName" required>
+                            <label class="form-label" for="Name">Medication Name *</label>
+                            <input type="text" class="form-control" id="Name" name="Name" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Dose</label>
-                            <input type="text" class="form-control" id="medDose" required>
+                            <label class="form-label" for="Dose">Dose</label>
+                            <input type="text" class="form-control" id="Dose" name="Dose">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Frequency</label>
-                            <input type="text" class="form-control" id="medFrequency" required>
+                            <label class="form-label" for="Frequency">Frequency</label>
+                            <input type="text" class="form-control" id="Frequency" name="Frequency">
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Time</label>
-                            <input type="time" class="form-control" id="medTime" required>
+                            <label class="form-label" for="ScheduledTime">Scheduled Time</label>
+                            <input type="datetime-local" class="form-control" id="ScheduledTime" name="ScheduledTime">
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveMedication()">Add Medication</button>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Medication</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -331,24 +380,26 @@
                     <h5 class="modal-title">Add Clinical Note</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
-                    <form id="addNoteForm">
+                <form method="post" action="@Url.Action("AddNote", "Patients")">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="PatientID" value="@patient.ID" />
+                    <div class="modal-body">
                         <div class="mb-3">
-                            <label class="form-label">Note</label>
-                            <textarea class="form-control" id="noteText" rows="5" required></textarea>
+                            <label class="form-label" for="Text">Note *</label>
+                            <textarea class="form-control" id="Text" name="Text" rows="5" required></textarea>
                         </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" onclick="saveNote()">Add Note</button>
-                </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Note</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+}
 }
 
 @section Scripts {
     <script src="~/js/patient-detail.js" asp-append-version="true"></script>
 }
-

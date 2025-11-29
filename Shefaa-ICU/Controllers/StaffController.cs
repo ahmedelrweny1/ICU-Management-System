@@ -1,6 +1,8 @@
 using System;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Shefaa_ICU.Data;
 using Shefaa_ICU.Models;
 
 namespace Shefaa_ICU.Controllers
@@ -8,38 +10,37 @@ namespace Shefaa_ICU.Controllers
     [Authorize]
     public class StaffController : Controller
     {
-        public IActionResult Index()
+        private readonly AppDbContext _context;
+
+        public StaffController(AppDbContext context)
         {
-            ViewBag.Staff = Array.Empty<object>();
-            return View();
+            _context = context;
         }
 
-        [HttpGet]
-        public IActionResult GetStaff() => Placeholder(nameof(GetStaff));
-
-        [HttpGet]
-        public IActionResult GetStaffMember(int id) => Placeholder(nameof(GetStaffMember));
-
-        [HttpPost]
-        public IActionResult AddStaff([FromBody] Staff staff) => Placeholder(nameof(AddStaff));
-
-        [HttpPost]
-        public IActionResult UpdateStaff([FromBody] Staff staff) => Placeholder(nameof(UpdateStaff));
-
-        [HttpPost]
-        public IActionResult DeleteStaff(int id) => Placeholder(nameof(DeleteStaff));
-
-        [HttpPost]
-        public IActionResult RegisterAttendance([FromBody] object request) => Placeholder(nameof(RegisterAttendance));
-
-        private JsonResult Placeholder(string actionName)
+        public async Task<IActionResult> Index()
         {
-            return Json(new
-            {
-                success = false,
-                message = $"{actionName} is not implemented yet."
-            });
+            var staff = await _context.Staff
+                .OrderBy(s => s.Name)
+                .Select(s => new
+                {
+                    s.ID,
+                    s.Name,
+                    s.Role,
+                    s.Specialty,
+                    s.Email,
+                    s.PhoneNumber,
+                    s.Status,
+                    s.ProfilePhotoPath,
+                    s.CreatedAt
+                })
+                .ToListAsync();
+
+            ViewBag.Staff = staff;
+            ViewData["Title"] = "Staff Management";
+            ViewData["PageTitle"] = "Staff Management";
+            ViewData["ActivePage"] = "Staff";
+
+            return View();
         }
     }
 }
-

@@ -3,6 +3,7 @@
     ViewData["Title"] = "Dashboard";
     ViewData["PageTitle"] = "Dashboard";
     ViewData["ActivePage"] = "Dashboard";
+    ViewData["HideSearch"] = true;
 }
 
 <div class="page-header" data-animate>
@@ -26,7 +27,7 @@
                 <i class="fas fa-bed"></i>
             </div>
             <div class="stat-details">
-                <h3 id="totalRooms">0</h3>
+                <h3 id="totalRooms">@Model.TotalRooms</h3>
                 <p>Total Rooms</p>
             </div>
         </div>
@@ -38,7 +39,7 @@
                 <i class="fas fa-user-injured"></i>
             </div>
             <div class="stat-details">
-                <h3 id="totalPatients">0</h3>
+                <h3 id="totalPatients">@Model.TotalPatients</h3>
                 <p>Current Patients</p>
             </div>
         </div>
@@ -50,8 +51,8 @@
                 <i class="fas fa-user-md"></i>
             </div>
             <div class="stat-details">
-                <h3 id="totalStaff">0</h3>
-                <p>Medical Staff</p>
+                <h3 id="totalStaff">@Model.TotalStaff</h3>
+                <p>Total Staff</p>
             </div>
         </div>
     </div>
@@ -62,7 +63,7 @@
                 <i class="fas fa-exclamation-triangle"></i>
             </div>
             <div class="stat-details">
-                <h3 id="criticalCases">0</h3>
+                <h3 id="criticalCases">@Model.CriticalCases</h3>
                 <p>Critical Cases</p>
             </div>
         </div>
@@ -74,81 +75,82 @@
                 <i class="fas fa-door-open"></i>
             </div>
             <div class="stat-details">
-                <h3 id="availableRooms">0</h3>
+                <h3 id="availableRooms">@Model.AvailableRooms</h3>
                 <p>Available Rooms</p>
             </div>
         </div>
     </div>
-
-    <div class="col-xxl-2 col-lg-4 col-sm-6">
-        <div class="stat-card bg-success h-100">
-            <div class="stat-icon">
-                <i class="fas fa-user-check"></i>
-            </div>
-            <div class="stat-details">
-                <h3 id="staffOnDuty">0</h3>
-                <p>Staff On Duty</p>
-            </div>
-        </div>
-    </div>
 </div>
 
-<div class="row mt-4 delay-1" data-animate>
+<div class="row g-3 delay-1" data-animate>
     <div class="col-lg-8">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-header">
-                <h5><i class="fas fa-chart-line"></i> Weekly Occupancy Rate</h5>
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Weekly Occupancy</h5>
             </div>
             <div class="card-body">
-                <canvas id="occupancyChart"></canvas>
+                <canvas id="occupancyChart" style="max-height: 300px;"></canvas>
             </div>
         </div>
     </div>
 
     <div class="col-lg-4">
-        <div class="card">
+        <div class="card h-100">
             <div class="card-header">
-                <h5><i class="fas fa-chart-pie"></i> Room Status</h5>
+                <h5 class="mb-0"><i class="fas fa-bed me-2"></i>Room Status</h5>
             </div>
             <div class="card-body">
-                <canvas id="roomStatusChart"></canvas>
+                <canvas id="roomStatusChart" style="max-height: 300px;"></canvas>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-4 delay-1" data-animate>
-    <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-heartbeat"></i> Vitals Trend</h5>
-            </div>
-            <div class="card-body">
-                <canvas id="vitalsChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-exclamation-circle"></i> Critical Vitals</h5>
-            </div>
-            <div class="card-body">
-                <div class="list-group" id="vitalsAlertsList"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-4 delay-2" data-animate>
+<div class="row g-3 delay-2" data-animate>
     <div class="col-lg-6">
         <div class="card">
-            <div class="card-header">
-                <h5><i class="fas fa-history"></i> Recent Activities</h5>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent Activities</h5>
+                <div class="activity-pagination-controls">
+                    <button class="btn btn-sm btn-outline-secondary" id="prevActivities" disabled>
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <span class="mx-2" id="activityPageInfo">Page 1</span>
+                    <button class="btn btn-sm btn-outline-secondary" id="nextActivities">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
             </div>
             <div class="card-body">
-                <div class="activity-feed" id="activityFeed">
+                <div id="activityFeed">
+                    @if (Model.RecentActivities != null && Model.RecentActivities.Any())
+                    {
+                        var allActivities = Model.RecentActivities.ToList();
+                        
+                        @foreach (var activity in allActivities)
+                        {
+                            var icon = activity.Type?.ToLower() switch
+                            {
+                                "patient" => "fa-user",
+                                "medication" => "fa-pills",
+                                "staff" => "fa-user-md",
+                                _ => "fa-circle"
+                            };
+                            <div class="activity-item" style="opacity: 1; display: none;">
+                                <div class="activity-icon">
+                                    <i class="fas @icon"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <p class="activity-text">@activity.Text</p>
+                                    <span class="activity-time">@activity.Time</span>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-3">No recent activities</p>
+                    }
                 </div>
             </div>
         </div>
@@ -157,33 +159,101 @@
     <div class="col-lg-6">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-users"></i> Staff On Duty</h5>
+                <h5 class="mb-0"><i class="fas fa-user-md me-2"></i>Staff On Duty</h5>
             </div>
             <div class="card-body">
-                <div class="staff-list" id="staffOnDutyList">
+                <div id="staffOnDuty">
+                    @if (Model.StaffOnDutyList != null && Model.StaffOnDutyList.Any())
+                    {
+                        @foreach (var member in Model.StaffOnDutyList)
+                        {
+                            var photo = member.ProfilePhotoPath ?? $"https://ui-avatars.com/api/?name={member.Name}&background=6366F1&color=fff&size=40";
+                            <div class="staff-item" style="opacity: 1;">
+                                <img src="@photo" alt="@member.Name" class="staff-avatar">
+                                <div class="staff-info">
+                                    <strong>@member.Name</strong>
+                                    <small>@member.Role</small>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-3">No staff currently on duty</p>
+                    }
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<div class="row mt-4 delay-3" data-animate>
+<div class="row g-3 delay-3" data-animate>
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-heartbeat me-2"></i>Vitals Trend</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="vitalsChart" style="max-height: 250px;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Vital Alerts</h5>
+                <span class="badge bg-danger">@(Model.VitalAlerts?.Count ?? 0)</span>
+            </div>
+            <div class="card-body">
+                <div id="vitalAlerts">
+                    @if (Model.VitalAlerts != null && Model.VitalAlerts.Any())
+                    {
+                        @foreach (var alert in Model.VitalAlerts)
+                        {
+                            var severityClass = alert.Severity?.ToLower() == "danger" ? "bg-danger" : "bg-warning";
+                            <div class="alert-item">
+                                <div class="alert-icon @severityClass">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="alert-content">
+                                    <strong>@alert.PatientName</strong>
+                                    <p>@alert.Metric: @alert.Value</p>
+                                    <small>@alert.RecordedAt</small>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center py-3">No vital alerts</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 delay-4" data-animate>
     <div class="col-12">
         <div class="card">
             <div class="card-header">
-                <h5><i class="fas fa-clock"></i> Current Shift Information</h5>
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Current Shift</h5>
             </div>
             <div class="card-body">
-                <div class="shift-info" id="currentShiftInfo">
-                    <div class="shift-detail">
-                        <strong>Shift:</strong> <span id="currentShift">Morning</span>
-                    </div>
-                    <div class="shift-detail">
-                        <strong>Time:</strong> <span id="shiftTime">08:00 AM - 04:00 PM</span>
-                    </div>
-                    <div class="shift-detail">
-                        <strong>Staff Count:</strong> <span id="shiftStaffCount">0</span>
-                    </div>
+                <div id="currentShift">
+                    @if (Model.CurrentShift != null)
+                    {
+                        <div class="shift-info">
+                            <h5>@Model.CurrentShift.ShiftName</h5>
+                            <p>@Model.CurrentShift.ShiftTime</p>
+                            <span class="badge bg-primary">@Model.CurrentShift.StaffCount Staff</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No shift information available</p>
+                    }
                 </div>
             </div>
         </div>
@@ -192,192 +262,93 @@
 
 @section Scripts {
     <script>
-        // Debug data before passing to JavaScript
-        console.log("Raw Model Data:", @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model)));
-        
-        // Display model values directly in console for debugging
-        console.log("TotalRooms:", @Model.TotalRooms);
-        console.log("TotalPatients:", @Model.TotalPatients);
-        console.log("TotalStaff:", @Model.TotalStaff);
-        console.log("CriticalCases:", @Model.CriticalCases);
-        console.log("AvailableRooms:", @Model.AvailableRooms);
-        console.log("OccupiedRooms:", @Model.OccupiedRooms);
-        console.log("CleaningRooms:", @Model.CleaningRooms);
-        console.log("StaffOnDuty:", @Model.StaffOnDuty);
-        console.log("WeeklyOccupancy count:", @Model.WeeklyOccupancy.Count);
-        console.log("RecentActivities count:", @Model.RecentActivities.Count);
-        console.log("StaffOnDutyList count:", @Model.StaffOnDutyList.Count);
-        
-        // Database connection info
-        console.log("DB Connection String:", "@ViewBag.DbConnectionString");
-        console.log("DB Provider:", "@ViewBag.DbProviderName");
-        
-        // Hardcoded values for testing
-        const hardcodedData = {
-            totalRooms: 25,
-            totalPatients: 18,
-            totalStaff: 32,
-            criticalCases: 7,
-            availableRooms: 12,
-            occupiedRooms: 10,
-            cleaningRooms: 3,
-            staffOnDuty: 15,
-            weeklyOccupancy: [
-                { day: "Mon", occupancyRate: 65.5 },
-                { day: "Tue", occupancyRate: 70.2 },
-                { day: "Wed", occupancyRate: 68.0 },
-                { day: "Thu", occupancyRate: 75.5 },
-                { day: "Fri", occupancyRate: 82.3 },
-                { day: "Sat", occupancyRate: 60.8 },
-                { day: "Sun", occupancyRate: 55.0 }
-            ],
-            recentActivities: [
-                { time: "08:30", text: "Dr. Smith added a note for Patient Ahmed", type: "patient" },
-                { time: "09:15", text: "Medication given to Patient Fatima", type: "medication" },
-                { time: "10:00", text: "Dr. Wilson checked in", type: "staff" },
-                { time: "11:30", text: "Medication given to Patient Omar", type: "medication" },
-                { time: "12:45", text: "Dr. Brown added a note for Patient Sara", type: "patient" }
-            ],
-            staffOnDutyList: [
-                { id: 1, name: "Dr. Sarah Johnson", role: "Doctor", specialty: "Cardiology" },
-                { id: 2, name: "Nurse Michael Brown", role: "Nurse", specialty: "Critical Care" },
-                { id: 3, name: "Dr. Ahmed Hassan", role: "Doctor", specialty: "Pulmonology" },
-                { id: 4, name: "Nurse Emily Wilson", role: "Nurse", specialty: "Emergency" }
-            ],
-            currentShift: {
-                shiftName: "Morning Shift",
-                shiftTime: "08:00 AM - 04:00 PM",
-                staffCount: 12
-            },
-            vitalsTrend: [
-                { label: "08:00", pulse: 72, spO2: 98 },
-                { label: "09:00", pulse: 75, spO2: 97 },
-                { label: "10:00", pulse: 78, spO2: 96 },
-                { label: "11:00", pulse: 80, spO2: 95 },
-                { label: "12:00", pulse: 76, spO2: 96 },
-                { label: "13:00", pulse: 74, spO2: 97 }
-            ],
-            vitalAlerts: [
-                { patientName: "Ahmed Mohamed", metric: "SpO₂", value: "88%", severity: "danger", recordedAt: "10:15" },
-                { patientName: "Sara Ali", metric: "Pulse", value: "115 bpm", severity: "warning", recordedAt: "11:30" }
-            ]
-        };
-        
-        // Get the actual model data with camelCase naming
-        const modelData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model, new System.Text.Json.JsonSerializerOptions { 
+        // Pass dashboard data to JavaScript for charts only
+        window.dashboardData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model, new System.Text.Json.JsonSerializerOptions { 
             PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase 
         }));
         
-        // Helper function to get property value (handles both PascalCase and camelCase)
-        function getProp(obj, camelKey, pascalKey) {
-            return obj[camelKey] ?? obj[pascalKey] ?? null;
-        }
-        
-        // Create a data object that uses actual database values
-        // Handle both PascalCase (from default serializer) and camelCase
-        const dashboardData = {
-            // Use actual database values for counts - handle both naming conventions
-            totalRooms: getProp(modelData, 'totalRooms', 'TotalRooms') ?? 0,
-            totalPatients: getProp(modelData, 'totalPatients', 'TotalPatients') ?? 0,
-            totalStaff: getProp(modelData, 'totalStaff', 'TotalStaff') ?? 0,
-            criticalCases: getProp(modelData, 'criticalCases', 'CriticalCases') ?? 0,
-            availableRooms: getProp(modelData, 'availableRooms', 'AvailableRooms') ?? 0,
-            occupiedRooms: getProp(modelData, 'occupiedRooms', 'OccupiedRooms') ?? 0,
-            cleaningRooms: getProp(modelData, 'cleaningRooms', 'CleaningRooms') ?? 0,
-            staffOnDuty: getProp(modelData, 'staffOnDuty', 'StaffOnDuty') ?? 0,
+        // Activity pagination - 5 records per page
+        (function() {
+            const itemsPerPage = 5;
+            let currentPage = 1;
             
-            // Use model data for all sections - handle both naming conventions
-            weeklyOccupancy: getProp(modelData, 'weeklyOccupancy', 'WeeklyOccupancy') ?? [],
-            recentActivities: getProp(modelData, 'recentActivities', 'RecentActivities') ?? [],
-            staffOnDutyList: getProp(modelData, 'staffOnDutyList', 'StaffOnDutyList') ?? [],
-            currentShift: (() => {
-                const shift = getProp(modelData, 'currentShift', 'CurrentShift');
-                if (!shift) return { shiftName: "", shiftTime: "", staffCount: 0 };
-                return {
-                    shiftName: shift.shiftName || shift.ShiftName || "",
-                    shiftTime: shift.shiftTime || shift.ShiftTime || "",
-                    staffCount: shift.staffCount ?? shift.StaffCount ?? 0
-                };
-            })(),
-            vitalsTrend: getProp(modelData, 'vitalsTrend', 'VitalsTrend') ?? [],
-            vitalAlerts: getProp(modelData, 'vitalAlerts', 'VitalAlerts') ?? []
-        };
-        
-        // Ensure arrays are always arrays (not null/undefined)
-        if (!Array.isArray(dashboardData.recentActivities)) {
-            dashboardData.recentActivities = [];
-        }
-        if (!Array.isArray(dashboardData.staffOnDutyList)) {
-            dashboardData.staffOnDutyList = [];
-        }
-        if (!Array.isArray(dashboardData.weeklyOccupancy)) {
-            dashboardData.weeklyOccupancy = [];
-        }
-        if (!Array.isArray(dashboardData.vitalsTrend)) {
-            dashboardData.vitalsTrend = [];
-        }
-        if (!Array.isArray(dashboardData.vitalAlerts)) {
-            dashboardData.vitalAlerts = [];
-        }
-        
-        // Use dashboard data directly from the model
-        window.dashboardData = dashboardData;
-        
-        // Keep original data for debugging
-        window.modelData = modelData;
-        window.hardcodedData = hardcodedData;
-        
-        // Log final dashboard data structure
-        console.log("Final dashboardData structure:", {
-            recentActivities: dashboardData.recentActivities,
-            staffOnDutyList: dashboardData.staffOnDutyList,
-            recentActivitiesIsArray: Array.isArray(dashboardData.recentActivities),
-            staffOnDutyListIsArray: Array.isArray(dashboardData.staffOnDutyList)
-        });
-        
-        // Log detailed data for debugging
-        console.log("Model data keys:", Object.keys(modelData));
-        console.log("Actual database counts:", {
-            totalRooms: dashboardData.totalRooms,
-            totalPatients: dashboardData.totalPatients,
-            totalStaff: dashboardData.totalStaff
-        });
-        
-        // Log activities and staff data specifically
-        console.log("Recent Activities from database:", dashboardData.recentActivities);
-        console.log("Staff on duty from database:", dashboardData.staffOnDutyList);
-        
-        // Use database data if available, otherwise use hardcoded fallback
-        // Check if arrays are empty (length === 0) or undefined/null
-        if (!Array.isArray(dashboardData.recentActivities) || dashboardData.recentActivities.length === 0) {
-            console.log("No activities in database, using fallback data");
-            dashboardData.recentActivities = hardcodedData.recentActivities || [];
-        }
-        
-        if (!Array.isArray(dashboardData.staffOnDutyList) || dashboardData.staffOnDutyList.length === 0) {
-            console.log("No staff on duty in database, using fallback data");
-            dashboardData.staffOnDutyList = hardcodedData.staffOnDutyList || [];
-        }
-        
-        if (!dashboardData.weeklyOccupancy || dashboardData.weeklyOccupancy.length === 0) {
-            dashboardData.weeklyOccupancy = hardcodedData.weeklyOccupancy;
-        }
-        
-        if (!dashboardData.vitalsTrend || dashboardData.vitalsTrend.length === 0) {
-            dashboardData.vitalsTrend = hardcodedData.vitalsTrend;
-        }
-        
-        if (!dashboardData.vitalAlerts || dashboardData.vitalAlerts.length === 0) {
-            dashboardData.vitalAlerts = hardcodedData.vitalAlerts;
-        }
-        
-        // Make sure room status data is available
-        if (!dashboardData.occupiedRooms && !dashboardData.availableRooms && !dashboardData.cleaningRooms) {
-            dashboardData.occupiedRooms = 7;
-            dashboardData.availableRooms = 2;
-            dashboardData.cleaningRooms = 1;
-        }
+            function initPagination() {
+                const allActivities = document.querySelectorAll('#activityFeed .activity-item');
+                const prevBtn = document.getElementById('prevActivities');
+                const nextBtn = document.getElementById('nextActivities');
+                const pageInfo = document.getElementById('activityPageInfo');
+                const paginationControls = document.querySelector('.activity-pagination-controls');
+                
+                if (!allActivities || allActivities.length === 0) {
+                    if (paginationControls) paginationControls.style.display = 'none';
+                    return;
+                }
+                
+                const totalPages = Math.ceil(allActivities.length / itemsPerPage);
+                
+                function updatePagination() {
+                    // Hide all activities first
+                    Array.from(allActivities).forEach(item => {
+                        item.style.display = 'none';
+                    });
+                    
+                    // Show only 5 activities for current page
+                    const start = (currentPage - 1) * itemsPerPage;
+                    const end = Math.min(start + itemsPerPage, allActivities.length);
+                    
+                    for (let i = start; i < end; i++) {
+                        if (allActivities[i]) {
+                            allActivities[i].style.display = 'flex';
+                        }
+                    }
+                    
+                    // Update buttons
+                    if (prevBtn) prevBtn.disabled = currentPage === 1;
+                    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+                    
+                    // Update page info
+                    if (pageInfo) pageInfo.textContent = `Page ${currentPage} of ${totalPages}`;
+                }
+                
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (currentPage > 1) {
+                            currentPage--;
+                            updatePagination();
+                        }
+                    });
+                }
+                
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        if (currentPage < totalPages) {
+                            currentPage++;
+                            updatePagination();
+                        }
+                    });
+                }
+                
+                // Always initialize pagination (even if only 1 page)
+                updatePagination();
+                
+                // Hide pagination controls if only 1 page or less
+                if (totalPages <= 1) {
+                    if (paginationControls) paginationControls.style.display = 'none';
+                }
+            }
+            
+            // Initialize immediately and also on DOM ready
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initPagination);
+            } else {
+                initPagination();
+            }
+            
+            // Also try after a short delay to ensure everything is loaded
+            setTimeout(initPagination, 200);
+        })();
     </script>
     <script src="~/js/dashboard.js" asp-append-version="true"></script>
 }
-

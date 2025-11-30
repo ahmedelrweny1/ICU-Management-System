@@ -1,159 +1,38 @@
-# Shefaa ICU Management System
+# Shefaa (ICU Management System)
 
-A comprehensive web-based Intensive Care Unit (ICU) management system designed to streamline patient care, room management, medication tracking, and staff scheduling in critical care environments.
+This repository hosts the Shefaa ICU Management experience in two layers:
 
-## Overview
+- **`Shefaa-ICU/`** – ASP.NET Core 8 MVC project with Entity Framework Core models, migrations, and Razor views mirroring the original UI.
+- **`Docs/`** – Software requirements, SRS assets, and design references supplied by the client.
 
-Shefaa is a full-featured ICU management platform that enables healthcare facilities to efficiently manage patient records, monitor vital signs, track medications, assign rooms, and coordinate staff schedules. The system implements role-based access control to ensure appropriate permissions for different staff members.
+## Front-end Template in Razor
 
-## Features
+The UI previously delivered as static HTML/CSS/JS has been recreated as Razor views and partials so you can plug in real data later:
 
-### Patient Management
-- Complete patient records with admission/discharge tracking
-- Real-time condition monitoring (Critical, Moderate, Stable)
-- Medical history, diagnosis, and treatment plan documentation
-- Room assignment and tracking
+- Shared layouts for auth screens and the main application shell.
+- Reusable sidebar and top navigation partials.
+- Views for dashboard, patients (list + detail), rooms, staff, schedules, reports, and user profile.
+- Auth pages (`Home/Index`, `Home/Signup`) reuse the same markup as the original login/register screens.
+- Each dynamic region includes Razor comments describing which backend data/services should power it.
 
-### Room Management
-- Room status tracking (Available, Occupied, Cleaning)
-- Patient-room assignment system
-- Room availability monitoring
-- Occupancy reports
+All static assets (CSS, JS, fonts) live under `Shefaa-ICU/wwwroot` and match the eye-comfortable palette plus UX tweaks that were approved earlier.
 
-### Clinical Operations
-- **Vitals Monitoring**: Track patient vital signs (Pulse, SpO2, Temperature, Blood Pressure)
-- **Medication Management**: Prescription and administration tracking
-- **Clinical Notes**: Timestamped notes with staff attribution
+## Getting Started
 
-### Staff & Scheduling
-- Staff management with role assignments
-- Attendance logging (Check-in/Check-out)
-- Weekly shift scheduling (Morning, Evening, Night)
-- Staff on-duty tracking
-
-### Analytics & Reporting
-- Real-time dashboard with key metrics
-- Weekly occupancy trends
-- Patient statistics and demographics
-- Staff utilization reports
-
-## Tech Stack
-
-- **Framework**: ASP.NET Core MVC 8.0
-- **Database**: SQL Server with Entity Framework Core 9.0
-- **Authentication**: Cookie-based authentication with role-based authorization
-- **Frontend**: Bootstrap 5.3, Font Awesome 6.4
-- **Architecture**: MVC pattern with Repository pattern
-
-## Prerequisites
-
-- .NET 8.0 SDK or later
-- SQL Server 2019 or later (or SQL Server Express)
-- Visual Studio 2022 or VS Code (recommended)
-
-## Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd Shefaa-ICU
-   ```
-
-2. **Configure the database connection**
-   - Update `appsettings.json` with your SQL Server connection string:
-   ```json
-   "ConnectionStrings": {
-     "DefaultConnection": "Server=YOUR_SERVER;Database=ShefaaICU;Trusted_Connection=True;TrustServerCertificate=True;"
-   }
-   ```
-
-3. **Run database migrations**
-   ```bash
-   dotnet ef database update
-   ```
-
-4. **Build and run the application**
-   ```bash
-   dotnet build
-   dotnet run
-   ```
-
-5. **Access the application**
-   - Navigate to `https://localhost:5001` or `http://localhost:5000`
-   - Register a new account (first user should be Admin role)
-
-## Role-Based Access Control
-
-The system implements three user roles with distinct permissions:
-
-### Admin
-- Full system access
-- Staff management (CRUD)
-- Patient management (CRUD)
-- Room management (CRUD)
-- Schedule management (CRUD)
-- Reports and analytics
-
-### Doctor
-- View and edit patient records
-- Prescribe medications
-- Add/edit clinical notes
-- View schedules (read-only)
-- View rooms (read-only)
-
-### Nurse
-- View patient records
-- Record vitals
-- Administer medications
-- Add clinical notes
-- Mark rooms as cleaning/available
-- View schedules (read-only)
-
-## Project Structure
-
-```
-Shefaa-ICU/
-├── Controllers/          # MVC Controllers
-├── Models/              # Data models and entities
-├── Views/               # Razor views
-├── Data/                # DbContext and data access
-├── Services/            # Business logic services
-├── ViewModels/          # View models
-├── wwwroot/             # Static files (CSS, JS, images)
-└── Program.cs           # Application entry point
+```bash
+cd Shefaa-ICU
+dotnet restore
+dotnet ef database update   # optional, if SQL Server LocalDB is available
+dotnet run
 ```
 
-## Configuration
+The project currently runs with placeholder data (localStorage stubs) until the backend endpoints are implemented. Use the Razor annotations as a guide when wiring controllers, services, and EF Core queries.
 
-### Email Settings (Optional)
-Configure SMTP settings in `appsettings.json` for email notifications:
-```json
-"EmailSettings": {
-  "SmtpServer": "smtp.example.com",
-  "Port": 587,
-  "Username": "your-email@example.com",
-  "Password": "your-password"
-}
-```
+## Next Steps
 
-## Security
+1. Implement controllers for Patients, Rooms, Staff, Schedules, Reports, and Dashboard summaries.
+2. Replace localStorage mocks with database reads/writes via `AppDbContext`.
+3. Plug in real authentication (ASP.NET Identity) and authorization for staff roles.
+4. Populate the notification center, charts, and export actions with real data pipelines.
 
-- Cookie-based authentication
-- CSRF protection with anti-forgery tokens
-- Password hashing using ASP.NET Core Identity
-- Role-based authorization policies
-- Secure session management
-
-## License
-
-This project is proprietary software. All rights reserved.
-
-## Support
-
-For issues, questions, or contributions, please contact the development team.
-
----
-
-**Version**: 1.0.0  
-**Last Updated**: 2025
-
+Feel free to open an issue or reach out if you need help connecting any module to the backend.***

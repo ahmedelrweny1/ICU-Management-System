@@ -27,10 +27,13 @@
             <i class="fas fa-file-code"></i>
             Export HTML
         </button>
-        <button class="btn btn-primary btn-icon" type="button" data-bs-toggle="modal" data-bs-target="#addShiftModal">
-            <i class="fas fa-plus"></i>
-            Add Shift
-        </button>
+        @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+        {
+            <button class="btn btn-primary btn-icon" type="button" data-bs-toggle="modal" data-bs-target="#addShiftModal">
+                <i class="fas fa-plus"></i>
+                Add Shift
+            </button>
+        }
     </div>
 </div>
 
@@ -135,14 +138,17 @@
                                             {
                                                 <span class="staff-badge">@(sched.Staff?.Name ?? "Unknown")</span>
                                             }
-                                            <form method="post" action="@Url.Action("DeleteSchedule", "Schedules")" style="display:inline;" onsubmit="return confirm('Delete this shift?');">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="date" value="@date.ToString("yyyy-MM-dd")" />
-                                                <input type="hidden" name="shiftType" value="Morning" />
-                                                <button type="submit" class="btn btn-sm btn-outline-danger ms-2">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </form>
+                                            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                                            {
+                                                <form method="post" action="@Url.Action("DeleteSchedule", "Schedules")" style="display:inline;" onsubmit="return confirm('Delete this shift?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="date" value="@date.ToString("yyyy-MM-dd")" />
+                                                    <input type="hidden" name="shiftType" value="Morning" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger ms-2">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            }
                                         </div>
                                     }
                                     else
@@ -160,14 +166,17 @@
                                             {
                                                 <span class="staff-badge">@(sched.Staff?.Name ?? "Unknown")</span>
                                             }
-                                            <form method="post" action="@Url.Action("DeleteSchedule", "Schedules")" style="display:inline;" onsubmit="return confirm('Delete this shift?');">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="date" value="@date.ToString("yyyy-MM-dd")" />
-                                                <input type="hidden" name="shiftType" value="Evening" />
-                                                <button type="submit" class="btn btn-sm btn-outline-danger ms-2">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </form>
+                                            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                                            {
+                                                <form method="post" action="@Url.Action("DeleteSchedule", "Schedules")" style="display:inline;" onsubmit="return confirm('Delete this shift?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="date" value="@date.ToString("yyyy-MM-dd")" />
+                                                    <input type="hidden" name="shiftType" value="Evening" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger ms-2">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            }
                                         </div>
                                     }
                                     else
@@ -185,14 +194,17 @@
                                             {
                                                 <span class="staff-badge">@(sched.Staff?.Name ?? "Unknown")</span>
                                             }
-                                            <form method="post" action="@Url.Action("DeleteSchedule", "Schedules")" style="display:inline;" onsubmit="return confirm('Delete this shift?');">
-                                                @Html.AntiForgeryToken()
-                                                <input type="hidden" name="date" value="@date.ToString("yyyy-MM-dd")" />
-                                                <input type="hidden" name="shiftType" value="Night" />
-                                                <button type="submit" class="btn btn-sm btn-outline-danger ms-2">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </form>
+                                            @if (User.IsInRole("Admin") || User.IsInRole("Doctor"))
+                                            {
+                                                <form method="post" action="@Url.Action("DeleteSchedule", "Schedules")" style="display:inline;" onsubmit="return confirm('Delete this shift?');">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="date" value="@date.ToString("yyyy-MM-dd")" />
+                                                    <input type="hidden" name="shiftType" value="Night" />
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger ms-2">
+                                                        <i class="fas fa-times"></i>
+                                                    </button>
+                                                </form>
+                                            }
                                         </div>
                                     }
                                     else

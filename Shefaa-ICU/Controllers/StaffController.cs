@@ -8,7 +8,7 @@ using Shefaa_ICU.Models;
 
 namespace Shefaa_ICU.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class StaffController : Controller
     {
         private readonly AppDbContext _context;

@@ -47,6 +47,7 @@ namespace Shefaa_ICU.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -62,6 +63,7 @@ namespace Shefaa_ICU.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(Room room)
@@ -100,6 +102,7 @@ namespace Shefaa_ICU.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(int id, Room room)
@@ -195,6 +198,7 @@ namespace Shefaa_ICU.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
@@ -231,6 +235,7 @@ namespace Shefaa_ICU.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignPatient(int roomId, int patientId)
@@ -279,6 +284,7 @@ namespace Shefaa_ICU.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Nurse")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EvacuateRoom(int id)
@@ -322,6 +328,7 @@ namespace Shefaa_ICU.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Nurse")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkAvailable(int id)

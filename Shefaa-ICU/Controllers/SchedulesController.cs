@@ -78,6 +78,7 @@ namespace Shefaa_ICU.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Admin,Doctor")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SaveSchedule(string date, string shiftType, string notes, int[] staffIds)
@@ -182,6 +183,7 @@ namespace Shefaa_ICU.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin,Doctor")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteSchedule(string date, string shiftType)

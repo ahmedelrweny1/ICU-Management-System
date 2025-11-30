@@ -32,10 +32,15 @@ namespace Shefaa_ICU
                 {
                     options.LoginPath = "/";
                     options.LogoutPath = "/Account/Logout";
-                    options.AccessDeniedPath = "/";
+                    options.AccessDeniedPath = "/Home/AccessDenied";
                 });
 
-            builder.Services.AddAuthorization();
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("DoctorOrAdmin", policy => policy.RequireRole("Doctor", "Admin"));
+                options.AddPolicy("NurseOrAbove", policy => policy.RequireRole("Nurse", "Doctor", "Admin"));
+            });
 
             var app = builder.Build();
 

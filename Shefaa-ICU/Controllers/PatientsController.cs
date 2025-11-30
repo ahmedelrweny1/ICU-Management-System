@@ -85,6 +85,7 @@ namespace Shefaa_ICU.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Add(Patient patient)
@@ -149,6 +150,7 @@ namespace Shefaa_ICU.Controllers
             }
         }
 
+        [Authorize(Roles = "Doctor,Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Update(int id, Patient patient)
@@ -246,6 +248,7 @@ namespace Shefaa_ICU.Controllers
             }
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)

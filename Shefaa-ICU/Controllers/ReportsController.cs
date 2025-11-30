@@ -6,7 +6,7 @@ using Shefaa_ICU.Models;
 
 namespace Shefaa_ICU.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin")]
     public class ReportsController : Controller
     {
         private readonly AppDbContext _context;

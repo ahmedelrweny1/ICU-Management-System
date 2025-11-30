@@ -74,6 +74,7 @@ namespace Shefaa_ICU.Controllers
             return View(viewModel);
         }
 
+        [Authorize(Roles = "Doctor,Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(MedicationFormViewModel model)
